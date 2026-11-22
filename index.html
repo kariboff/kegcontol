@@ -102,6 +102,10 @@ button:active{transform:scale(0.985)}
 .point-menu-item.del{color:var(--red)}
 .point-menu-item.del:hover{background:var(--red-soft)}
 
+.point-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;width:100%}
+.point-row-left{flex:1 1 auto;min-width:0}
+.point-row-right{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;text-align:right}
+
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .metric{background:#101c17;border:1px solid var(--line);border-radius:13px;padding:11px 12px;position:relative;overflow:hidden}
 .metric.m-kegs{background:#0f1c29;border-color:#203a54;border-left:4px solid var(--blue)}
@@ -243,13 +247,20 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
  body>*:not(#printArea){display:none!important}
  #printArea{display:block!important;width:52mm;margin:0 auto;padding:0;color:#000}
  #printArea.wide{width:72mm}
+ #printArea.report{width:100%;max-width:190mm;margin:0 auto;padding:4mm 0;font:12px Arial,sans-serif!important}
  #printArea h2{font-size:16px;text-align:center;margin:0 0 5px}
+ #printArea.report h2{font-size:18px;text-align:left;margin:0 0 6px}
  #printArea .center{text-align:center}
  #printArea .rule{border-top:1px dashed #000;margin:6px 0}
  #printArea .line{display:flex;justify-content:space-between;gap:5px;margin:3px 0}
  #printArea .subline{font-size:11px;padding-left:6px;margin:1px 0 4px}
  #printArea .big{font-size:15px;font-weight:bold}
- #printArea .mutedPrint{font-size:10px}
+ #printArea .mutedPrint{font-size:10px;color:#333}
+ #printArea.report table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}
+ #printArea.report th,#printArea.report td{border:1px solid #444;padding:5px 7px;text-align:left}
+ #printArea.report th{background:#eee}
+ #printArea.report .rep-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}
+ #printArea.report .rep-box{border:1px solid #666;border-radius:4px;padding:6px 8px}
 }
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -322,14 +333,14 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 <div class="metric debt-metric" style="margin-top:10px;cursor:pointer" onclick="go('debts')">
 <div class="row"><div><small>Общий долг точек</small><strong id="mDebt">0 ₸</strong></div><span class="pill debt">Открыть долги →</span></div>
 </div>
-<div class="card accent-blue"><h2>Тара на складе</h2><div id="homeKegs"></div></div>
-<div class="card accent-teal"><h2>Последние операции</h2><div id="recent" class="empty">Операций пока нет.</div></div>
+<div class="card accent-blue" data-card-id="home_kegs"><h2>Тара на складе</h2><div id="homeKegs"></div></div>
+<div class="card accent-teal" data-card-id="home_recent"><h2>Последние операции</h2><div id="recent" class="empty">Операций пока нет.</div></div>
 <div class="notice" id="roleNotice"></div>
 </section>
 
 <!-- ПЛАНИРОВКА И МАРШРУТЫ ДОСТАВКИ -->
 <section id="plan" class="hidden">
-<div class="card accent-blue">
+<div class="card accent-blue" data-card-id="plan_main">
  <div class="row card-hdr-bar" style="flex-wrap:wrap">
   <h2 style="margin:0">🚚 Маршрутный лист и заявки</h2>
   <div style="display:flex;gap:6px;flex-wrap:wrap">
@@ -366,7 +377,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 
 <!-- ПРОДАЖА / ВОЗВРАТ КЕГ -->
 <section id="sale" class="hidden">
-<div class="card"><h2>Отгрузка пива и возврат кег</h2>
+<div class="card" data-card-id="sale_main"><h2>Отгрузка пива и возврат кег</h2>
 <div id="fromPlanBanner" class="notice info hidden"></div>
 <label>Торговая точка</label><select id="salePoint"></select>
 
@@ -398,7 +409,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 
 <!-- ДОЛГИ -->
 <section id="debts" class="hidden">
-<div class="card accent-red">
+<div class="card accent-red" data-card-id="debts_list">
 <h2>Долги торговых точек</h2>
 <div class="metric debt-metric" style="margin-bottom:12px">
 <small>Итого задолженность по всем точкам</small>
@@ -407,7 +418,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 <div id="debtsByPointList" class="empty">Долгов нет. Все точки рассчитались!</div>
 </div>
 
-<div class="card accent-amber">
+<div class="card accent-amber" data-card-id="debts_pay">
 <h2>Внести оплату долга</h2>
 <label>Торговая точка</label><select id="debtPayPoint"></select>
 <div class="muted" id="debtPointCurrentInfo" style="margin-top:5px"></div>
@@ -420,7 +431,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 <button class="primary" id="saveDebtPayment">Записать погашение долга</button>
 </div>
 
-<div class="card accent-blue">
+<div class="card accent-blue" data-card-id="debts_history">
 <h2>История долгов и погашений</h2>
 <div id="debtHistoryList" class="empty">Записей по долгам пока нет.</div>
 </div>
@@ -428,7 +439,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 
 <!-- СКЛАД -->
 <section id="stock" class="hidden">
-<div class="card accent-amber">
+<div class="card accent-amber" data-card-id="stock_brew">
 <h2>🍺 Сварить пиво (из рецепта сырья)</h2>
 <div class="twocol">
  <div>
@@ -454,7 +465,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 <div class="notice info">При варке указанное сырьё автоматически списывается со склада, а готовые литры добавляются на остаток выбранного сорта пива (если сорта ещё нет — он создаётся автоматически).</div>
 </div>
 
-<div class="card accent-blue"><h2>Учёт кег по объёму</h2>
+<div class="card accent-blue" data-card-id="stock_kegs"><h2>Учёт кег по объёму</h2>
 <div class="twocol">
 <div><label>30-литровые на складе, шт.</label><input id="stock30" type="number" min="0" step="1"></div>
 <div><label>50-литровые на складе, шт.</label><input id="stock50" type="number" min="0" step="1"></div>
@@ -463,7 +474,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 <div id="kegStockSummary"></div>
 </div>
 
-<div class="card">
+<div class="card" data-card-id="stock_products">
 <h2>Пиво на складе и прайс-лист</h2>
 <div class="twocol">
  <div><label>Название сорта</label><input id="newProduct" placeholder="Например, Немецкое"></div>
@@ -475,13 +486,13 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 <div id="productsList" style="margin-top:8px"></div>
 </div>
 
-<div class="card accent-teal"><h2>Сырьё и материалы</h2><label>Название</label><input id="newRaw" placeholder="Например, солод Pilsner"><div class="twocol"><div><label>Единица</label><select id="rawUnit"><option>кг</option><option>шт.</option><option>л</option><option>уп.</option></select></div><div><label>Начальный остаток</label><input id="newRawQty" type="number" min="0" step="0.01"></div></div><button class="secondary" id="addRaw" style="width:100%;margin-top:9px">Добавить сырьё</button><div id="rawList"></div></div>
-<div class="card accent-purple"><h2>Приход / расход пива и сырья</h2><label>Операция</label><select id="otherType"><option value="beer_in">Приход пива (л)</option><option value="beer_out">Списание пива (л)</option><option value="raw_in">Приход сырья</option><option value="raw_out">Расход сырья</option></select><div id="otherBeer"><label>Сорт</label><select id="otherProduct"></select><label>Литров</label><input id="otherBeerQty" type="number" min="0.1" step="0.1"></div><div id="otherRaw" class="hidden"><label>Сырьё</label><select id="otherRawSelect"></select><label>Количество</label><input id="otherRawQty" type="number" min="0.01" step="0.01"></div><button class="secondary" id="saveOther" style="width:100%;margin-top:10px">Сохранить</button></div>
+<div class="card accent-teal" data-card-id="stock_raw"><h2>Сырьё и материалы</h2><label>Название</label><input id="newRaw" placeholder="Например, солод Pilsner"><div class="twocol"><div><label>Единица</label><select id="rawUnit"><option>кг</option><option>шт.</option><option>л</option><option>уп.</option></select></div><div><label>Начальный остаток</label><input id="newRawQty" type="number" min="0" step="0.01"></div></div><button class="secondary" id="addRaw" style="width:100%;margin-top:9px">Добавить сырьё</button><div id="rawList"></div></div>
+<div class="card accent-purple" data-card-id="stock_other"><h2>Приход / расход пива и сырья</h2><label>Операция</label><select id="otherType"><option value="beer_in">Приход пива (л)</option><option value="beer_out">Списание пива (л)</option><option value="raw_in">Приход сырья</option><option value="raw_out">Расход сырья</option></select><div id="otherBeer"><label>Сорт</label><select id="otherProduct"></select><label>Литров</label><input id="otherBeerQty" type="number" min="0.1" step="0.1"></div><div id="otherRaw" class="hidden"><label>Сырьё</label><select id="otherRawSelect"></select><label>Количество</label><input id="otherRawQty" type="number" min="0.01" step="0.01"></div><button class="secondary" id="saveOther" style="width:100%;margin-top:10px">Сохранить</button></div>
 </section>
 
 <!-- ТОЧКИ -->
 <section id="points" class="hidden">
-<div class="card accent-purple">
+<div class="card accent-purple" data-card-id="points_main">
 <div class="row card-hdr-bar">
  <h2 style="margin:0">Торговые точки</h2>
  <div class="sort-menu-wrap" id="pointsSortWrap">
@@ -510,8 +521,11 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 
 <!-- ИСТОРИЯ + СТАТИСТИКА -->
 <section id="history" class="hidden">
-<div class="card accent-teal">
- <h2>📊 Статистика продаж</h2>
+<div class="card accent-teal" data-card-id="history_stats">
+ <div class="row card-hdr-bar" style="flex-wrap:wrap">
+  <h2 style="margin:0">📊 Статистика продаж</h2>
+  <button type="button" class="blue-btn sm-btn" id="downloadReportPdfBtn">📄 Скачать PDF</button>
+ </div>
  <div class="period-btns" id="statPeriodBtns">
   <button type="button" class="period-btn active" data-period="day">За день</button>
   <button type="button" class="period-btn" data-period="week">За 7 дней</button>
@@ -533,7 +547,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
  <div id="statByProductBox"></div>
 </div>
 
-<div class="card">
+<div class="card" data-card-id="history_journal">
  <div class="row card-hdr-bar">
   <h2 style="margin:0">Журнал операций</h2>
   <select id="histTypeFilter" style="width:auto;padding:6px 9px;font-size:13px">
@@ -550,7 +564,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 
 <!-- НАСТРОЙКИ И ОБЛАКО -->
 <section id="settings" class="hidden">
-<div class="card accent-blue" id="driveCard">
+<div class="card accent-blue" id="driveCard" data-card-id="settings_drive">
  <h2>☁️ Облачная синхронизация Google Drive</h2>
  <div class="notice info">
   Подключите один и тот же аккаунт Google на вашем телефоне и на телефоне водителя. Приложение сохранит общую базу <code>kegcontrol_shared_db.json</code> на Google Диске и будет синхронизировать продажи, заявки, остатки, пользователей и долги. При открытии приложения оно тихо проверяет сеанс без всплывающих окон, а при нажатии на облако или кнопку синхронизации открывает окно входа для вашего сохранённого аккаунта.
@@ -568,7 +582,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
  </div>
 </div>
 
-<div class="card" id="bioCard">
+<div class="card" id="bioCard" data-card-id="settings_bio">
  <h2>👆 Вход по отпечатку / биометрии</h2>
  <div class="notice info" style="margin-top:0">
   Вы вошли как <b id="bioCurrentUserLabel">admin1</b>. Здесь можно привязать сканер отпечатка пальца или Face ID этого телефона к вашему аккаунту, чтобы входить в 1 касание.
@@ -580,7 +594,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
  </div>
 </div>
 
-<div class="card accent-purple" id="usersCard">
+<div class="card accent-purple" id="usersCard" data-card-id="settings_users">
  <h2>👥 Пользователи и пароли</h2>
  <div class="notice info" style="margin-top:0">
   Здесь вы можете сменить свой пароль, поменять пароль водителя (или любого другого сотрудника), добавить новых пользователей и назначить им роли.
@@ -620,7 +634,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
  <div id="usersListBox"></div>
 </div>
 
-<div class="card accent-amber" id="rolesCard">
+<div class="card accent-amber" id="rolesCard" data-card-id="settings_roles">
  <h2>🛡️ Роли и права доступа</h2>
  <div class="notice info" style="margin-top:0">
   Выберите роль, чтобы изменить её название, доступные вкладки и разрешённые действия, либо создайте новую роль.
@@ -649,7 +663,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
  <button type="button" class="danger hidden" id="deleteRoleBtn" style="width:100%;margin-top:8px">Удалить выбранную роль</button>
 </div>
 
-<div class="card" id="backupCard">
+<div class="card" id="backupCard" data-card-id="settings_backup">
  <h2>📦 Резервная копия (файл JSON)</h2>
  <div class="twocol">
   <button type="button" class="secondary" id="exportJsonBtn">Скачать резервную копию</button>
@@ -765,6 +779,7 @@ const SESSION_KEY='kegcontrol_session_user';
 const CLIENT_ID_KEY='kegcontrol_google_client_id';
 const DRIVE_META_KEY='kegcontrol_drive_meta_v1';
 const BIO_CREDS_KEY='kegcontrol_bio_creds_v1';
+const COLLAPSED_CARDS_KEY='kegcontrol_collapsed_cards_v1';
 const DRIVE_FILE_NAME='kegcontrol_shared_db.json';
 const DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email';
 
@@ -923,22 +938,47 @@ const fmtDateRu=(iso)=>{
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>Date.now()+Math.floor(Math.random()*10000);
 
-/* ==================== СВОРАЧИВАНИЕ КАРТОЧЕК ==================== */
+/* ==================== СВОРАЧИВАНИЕ КАРТОЧЕК (С СОХРАНЕНИЕМ СОСТОЯНИЯ) ==================== */
+function loadCollapsedCards(){
+ try{
+  const arr=JSON.parse(localStorage.getItem(COLLAPSED_CARDS_KEY)||'[]');
+  return Array.isArray(arr)?arr:[];
+ }catch(e){
+  return [];
+ }
+}
+function saveCollapsedCards(list){
+ localStorage.setItem(COLLAPSED_CARDS_KEY,JSON.stringify(Array.from(new Set(list))));
+}
+function getCardKey(card,idx){
+ return card.dataset.cardId||(card.id?`id_${card.id}`:`idx_${idx}`);
+}
+
 function initCardCollapseButtons(){
- document.querySelectorAll('.card').forEach(card=>{
-  if(card.querySelector('.card-collapse-btn')) return;
-  const btn=document.createElement('button');
-  btn.type='button';
-  btn.className='card-collapse-btn';
-  btn.title='Свернуть / развернуть карточку';
-  btn.textContent='▾';
-  btn.onclick=e=>{
-   e.stopPropagation();
-   const isCollapsed=card.classList.toggle('collapsed');
-   btn.textContent=isCollapsed?'▸':'▾';
-   btn.title=isCollapsed?'Развернуть карточку':'Свернуть карточку';
-  };
-  card.appendChild(btn);
+ const collapsedSet=new Set(loadCollapsedCards());
+ document.querySelectorAll('.card').forEach((card,idx)=>{
+  const key=getCardKey(card,idx);
+  let btn=card.querySelector('.card-collapse-btn');
+  if(!btn){
+   btn=document.createElement('button');
+   btn.type='button';
+   btn.className='card-collapse-btn';
+   btn.onclick=e=>{
+    e.stopPropagation();
+    const isCollapsed=card.classList.toggle('collapsed');
+    btn.textContent=isCollapsed?'▸':'▾';
+    btn.title=isCollapsed?'Развернуть карточку':'Свернуть карточку';
+    const cur=new Set(loadCollapsedCards());
+    if(isCollapsed) cur.add(key);
+    else cur.delete(key);
+    saveCollapsedCards(Array.from(cur));
+   };
+   card.appendChild(btn);
+  }
+  const shouldCollapse=collapsedSet.has(key);
+  card.classList.toggle('collapsed',shouldCollapse);
+  btn.textContent=shouldCollapse?'▸':'▾';
+  btn.title=shouldCollapse?'Развернуть карточку':'Свернуть карточку';
  });
 }
 initCardCollapseButtons();
@@ -1628,7 +1668,6 @@ window.deletePoint=id=>{
 };
 
 function renderPointsList(kmap=kegsByPoint(),dmap=debtsByPoint(),smap=salesByPoint()){
- const canEditPts=hasAction('edit_points_plans');
  const list=[...db.points];
 
  list.sort((a,b)=>{
@@ -1659,8 +1698,8 @@ function renderPointsList(kmap=kegsByPoint(),dmap=debtsByPoint(),smap=salesByPoi
   const menuHidden=openPointMenuId===p.id?'':'hidden';
   return `
    <div class="item">
-    <div class="row">
-     <div>
+    <div class="point-row">
+     <div class="point-row-left">
       <div class="point-menu-wrap">
        <button type="button" class="point-name-btn" onclick="togglePointMenu(${p.id},event)">${esc(p.name)}</button>
        ${p.zone?`<span class="pill zone">${esc(p.zone)}</span>`:''}
@@ -1672,7 +1711,7 @@ function renderPointsList(kmap=kegsByPoint(),dmap=debtsByPoint(),smap=salesByPoi
       ${p.addr||p.phone?`<div class="muted">${p.addr?'📍 '+esc(p.addr)+' ':''}${p.phone?'📞 '+esc(p.phone):''}</div>`:''}
       <div class="muted">Продано: <b>${fmt(sl)} л</b></div>
      </div>
-     <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+     <div class="point-row-right">
       ${d>0?`<span class="pill debt">Долг: ${money(d)}</span>`:''}
       <span class="pill">30л: ${Math.max(0,Number(k.k30||0))} · 50л: ${Math.max(0,Number(k.k50||0))}</span>
      </div>
@@ -2327,7 +2366,7 @@ $('saveSale').onclick=()=>{
  }
 };
 
-/* ==================== ЧЕК С ИМЕНЕМ ФАЙЛА (ТОЧКА + ДАТА) ==================== */
+/* ==================== ЧЕК И PDF-ОТЧЁТ ==================== */
 function makePdfFilename(op){
  const safePoint=(op.pointName||'Точка').replace(/[\\/:*?"<>|]+/g,'_').trim();
  const d=new Date();
@@ -2401,6 +2440,130 @@ window.reprintOp=id=>{
  const op=db.ops.find(x=>x.id===id);
  if(op) printReceipt(op);
 };
+
+function getFilteredSalesStatsData(){
+ const t=todayIso();
+ let fromDate='0000-01-01';
+ let toDate='9999-12-31';
+ let periodLabel='За всё время';
+
+ if(statPeriod==='day'){
+  fromDate=t; toDate=t; periodLabel=`За день (${fmtDateRu(t)})`;
+ }else if(statPeriod==='week'){
+  fromDate=addDaysIso(-6); toDate=t; periodLabel=`За 7 дней (${fmtDateRu(fromDate)} – ${fmtDateRu(toDate)})`;
+ }else if(statPeriod==='month'){
+  fromDate=addDaysIso(-29); toDate=t; periodLabel=`За 30 дней (${fmtDateRu(fromDate)} – ${fmtDateRu(toDate)})`;
+ }else if(statPeriod==='custom'){
+  fromDate=$('statDateFrom').value||t;
+  toDate=$('statDateTo').value||t;
+  periodLabel=`За период (${fmtDateRu(fromDate)} – ${fmtDateRu(toDate)})`;
+ }
+
+ const ptFilter=$('statPointFilter').value||'all';
+ const ptObj=ptFilter!=='all'?db.points.find(p=>String(p.id)===String(ptFilter)):null;
+ const pointLabel=ptObj?ptObj.name:'Все торговые точки';
+
+ const sales=db.ops.filter(o=>{
+  if(o.type!=='sale_return') return false;
+  if(ptFilter!=='all'&&String(o.pointId)!==String(ptFilter)) return false;
+  const d=parseOpIsoDate(o);
+  return d>=fromDate&&d<=toDate;
+ });
+
+ let totalLiters=0,totalAmount=0,totalPaid=0,totalDebt=0,totalKegs=0,totalRet=0;
+ let cashPaid=0,transferPaid=0;
+ const byProd={};
+
+ sales.forEach(o=>{
+  totalLiters+=Number(o.totalLiters||0);
+  totalAmount+=Number(o.totalAmount||0);
+  const paid=Number(o.paidAmount||0);
+  totalPaid+=paid;
+  if(o.payMethod==='Перевод') transferPaid+=paid;
+  else cashPaid+=paid;
+  totalDebt+=Number(o.debtAdded||0);
+  totalKegs+=getOpKegs30(o)+getOpKegs50(o);
+  totalRet+=Number(o.ret30||0)+Number(o.ret50||0);
+
+  (o.items||[]).forEach(it=>{
+   const key=it.productName||'Сорт';
+   if(!byProd[key]) byProd[key]={liters:0,amount:0,kegs:0};
+   byProd[key].liters+=Number(it.liters||0);
+   byProd[key].amount+=Number(it.subtotal||0);
+   byProd[key].kegs+=Number(it.k30||0)+Number(it.k50||0);
+  });
+ });
+
+ return {
+  periodLabel,pointLabel,sales,
+  totalLiters,totalAmount,totalPaid,totalDebt,totalKegs,totalRet,
+  cashPaid,transferPaid,byProd
+ };
+}
+
+function downloadStatsPdfReport(){
+ const st=getFilteredSalesStatsData();
+ const p=$('printArea');
+ p.className='report';
+ const prodEntries=Object.entries(st.byProd).sort((a,b)=>b[1].liters-a[1].liters);
+ const rowsHtml=prodEntries.length
+  ?prodEntries.map(([name,item])=>`
+    <tr>
+     <td><b>${esc(name)}</b></td>
+     <td>${item.kegs} шт.</td>
+     <td>${fmt(item.liters)} л</td>
+     <td><b>${money(item.amount)}</b></td>
+    </tr>
+   `).join('')
+  :'<tr><td colspan="4">За выбранный период продаж пива не было.</td></tr>';
+
+ const opsRowsHtml=st.sales.length
+  ?st.sales.map(o=>{
+    const sorts=(o.items||[]).map(i=>`${esc(i.productName)} (${fmt(i.liters)} л)`).join(', ')||'Возврат тары';
+    return `
+     <tr>
+      <td>${esc(o.date)}</td>
+      <td><b>${esc(o.pointName)}</b></td>
+      <td>${sorts}</td>
+      <td>${fmt(o.totalLiters||0)} л</td>
+      <td>${money(o.totalAmount||0)}</td>
+      <td>${esc(o.payMethod||'')}${Number(o.debtAdded||0)>0?' (долг '+money(o.debtAdded)+')':''}</td>
+     </tr>
+    `;
+   }).join('')
+  :'<tr><td colspan="6">Операций отгрузки за выбранный период нет.</td></tr>';
+
+ p.innerHTML=`
+  <h2>ОТЧЁТ ПО ПРОДАЖАМ — KEGCONTROL</h2>
+  <div class="mutedPrint">Сформирован: ${esc(new Date().toLocaleString('ru-RU'))} · Пользователь: ${esc(currentUser?.username||'')}</div>
+  <div class="line" style="margin-top:6px"><span>Период: <b>${esc(st.periodLabel)}</b></span><span>Точка: <b>${esc(st.pointLabel)}</b></span></div>
+  <div class="rep-grid">
+   <div class="rep-box"><div class="mutedPrint">Отгрузок</div><b>${st.sales.length} шт.</b></div>
+   <div class="rep-box"><div class="mutedPrint">Продано пива</div><b>${fmt(st.totalLiters)} л</b></div>
+   <div class="rep-box"><div class="mutedPrint">Выручка</div><b>${money(st.totalAmount)}</b></div>
+   <div class="rep-box"><div class="mutedPrint">Оплачено</div><b>${money(st.totalPaid)}</b><div class="mutedPrint">Нал: ${money(st.cashPaid)} · Пер.: ${money(st.transferPaid)}</div></div>
+   <div class="rep-box"><div class="mutedPrint">Ушло в долг</div><b>${money(st.totalDebt)}</b></div>
+   <div class="rep-box"><div class="mutedPrint">Кег отгр. / возвр.</div><b>${st.totalKegs} / ${st.totalRet} шт.</b></div>
+  </div>
+  <h3 style="margin:10px 0 4px;font-size:14px">Продажи по сортам пива</h3>
+  <table>
+   <thead><tr><th>Сорт</th><th>Кег</th><th>Литров</th><th>Сумма</th></tr></thead>
+   <tbody>${rowsHtml}</tbody>
+  </table>
+  <h3 style="margin:12px 0 4px;font-size:14px">Детализация отгрузок</h3>
+  <table>
+   <thead><tr><th>Дата</th><th>Точка</th><th>Позиции</th><th>Объём</th><th>Сумма</th><th>Оплата</th></tr></thead>
+   <tbody>${opsRowsHtml}</tbody>
+  </table>
+ `;
+
+ const safePt=st.pointLabel.replace(/[\\/:*?"<>|]+/g,'_').trim();
+ const prevTitle=document.title;
+ document.title=`Отчёт_${safePt}_${todayIso()}`;
+ window.print();
+ setTimeout(()=>{document.title=prevTitle;},1500);
+}
+$('downloadReportPdfBtn').onclick=downloadStatsPdfReport;
 
 /* ==================== ДОЛГИ И ПОГАШЕНИЕ ==================== */
 function updateDebtPointInfo(){
@@ -2911,74 +3074,28 @@ $('statPointFilter').onchange=renderSalesStats;
 $('histTypeFilter').onchange=renderHistoryList;
 
 function renderSalesStats(){
- const t=todayIso();
- let fromDate='0000-01-01';
- let toDate='9999-12-31';
-
- if(statPeriod==='day'){
-  fromDate=t; toDate=t;
- }else if(statPeriod==='week'){
-  fromDate=addDaysIso(-6); toDate=t;
- }else if(statPeriod==='month'){
-  fromDate=addDaysIso(-29); toDate=t;
- }else if(statPeriod==='custom'){
-  fromDate=$('statDateFrom').value||t;
-  toDate=$('statDateTo').value||t;
- }
-
- const ptFilter=$('statPointFilter').value||'all';
-
- const sales=db.ops.filter(o=>{
-  if(o.type!=='sale_return') return false;
-  if(ptFilter!=='all'&&String(o.pointId)!==String(ptFilter)) return false;
-  const d=parseOpIsoDate(o);
-  return d>=fromDate&&d<=toDate;
- });
-
- let totalLiters=0,totalAmount=0,totalPaid=0,totalDebt=0,totalKegs=0,totalRet=0;
- let cashPaid=0,transferPaid=0;
- const byProd={};
-
- sales.forEach(o=>{
-  totalLiters+=Number(o.totalLiters||0);
-  totalAmount+=Number(o.totalAmount||0);
-  const paid=Number(o.paidAmount||0);
-  totalPaid+=paid;
-  if(o.payMethod==='Перевод') transferPaid+=paid;
-  else cashPaid+=paid;
-  totalDebt+=Number(o.debtAdded||0);
-  totalKegs+=getOpKegs30(o)+getOpKegs50(o);
-  totalRet+=Number(o.ret30||0)+Number(o.ret50||0);
-
-  (o.items||[]).forEach(it=>{
-   const key=it.productName||'Сорт';
-   if(!byProd[key]) byProd[key]={liters:0,amount:0,kegs:0};
-   byProd[key].liters+=Number(it.liters||0);
-   byProd[key].amount+=Number(it.subtotal||0);
-   byProd[key].kegs+=Number(it.k30||0)+Number(it.k50||0);
-  });
- });
+ const st=getFilteredSalesStatsData();
 
  $('statSummaryStrip').innerHTML=`
-  <div class="sum-box"><small>Отгрузок / накладных</small><b>${sales.length} шт.</b></div>
-  <div class="sum-box"><small>Продано пива</small><b>${fmt(totalLiters)} л</b></div>
-  <div class="sum-box"><small>Выручка (сумма)</small><b>${money(totalAmount)}</b></div>
-  <div class="sum-box"><small>Оплачено (Нал / Перевод)</small><b style="color:#6be0a9">${money(totalPaid)}</b><span class="muted">Нал: ${money(cashPaid)} · Пер.: ${money(transferPaid)}</span></div>
-  <div class="sum-box"><small>Ушло в долг</small><b style="color:var(--red)">${money(totalDebt)}</b></div>
-  <div class="sum-box"><small>Кег отгружено / возврат</small><b>${totalKegs} / ${totalRet} шт.</b></div>
+  <div class="sum-box"><small>Отгрузок / накладных</small><b>${st.sales.length} шт.</b></div>
+  <div class="sum-box"><small>Продано пива</small><b>${fmt(st.totalLiters)} л</b></div>
+  <div class="sum-box"><small>Выручка (сумма)</small><b>${money(st.totalAmount)}</b></div>
+  <div class="sum-box"><small>Оплачено (Нал / Перевод)</small><b style="color:#6be0a9">${money(st.totalPaid)}</b><span class="muted">Нал: ${money(st.cashPaid)} · Пер.: ${money(st.transferPaid)}</span></div>
+  <div class="sum-box"><small>Ушло в долг</small><b style="color:var(--red)">${money(st.totalDebt)}</b></div>
+  <div class="sum-box"><small>Кег отгружено / возврат</small><b>${st.totalKegs} / ${st.totalRet} шт.</b></div>
  `;
 
- const prodEntries=Object.entries(byProd).sort((a,b)=>b[1].liters-a[1].liters);
+ const prodEntries=Object.entries(st.byProd).sort((a,b)=>b[1].liters-a[1].liters);
  $('statByProductBox').innerHTML=prodEntries.length?`
   <table class="prod-sales-table">
    <thead><tr><th>Сорт пива</th><th>Кег</th><th>Литров</th><th>Сумма</th></tr></thead>
    <tbody>
-    ${prodEntries.map(([name,st])=>`
+    ${prodEntries.map(([name,item])=>`
      <tr>
       <td><b>${esc(name)}</b></td>
-      <td>${st.kegs} шт.</td>
-      <td>${fmt(st.liters)} л</td>
-      <td><b>${money(st.amount)}</b></td>
+      <td>${item.kegs} шт.</td>
+      <td>${fmt(item.liters)} л</td>
+      <td><b>${money(item.amount)}</b></td>
      </tr>
     `).join('')}
    </tbody>
