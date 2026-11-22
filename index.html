@@ -410,7 +410,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 <div><label>50-литровые, шт.</label><input id="ret50" type="number" min="0" step="1" value="0"></div>
 </div>
 
-<label>Ширина термочека / квитанции</label><select id="receiptWidth"><option value="58">58 мм</option><option value="80">80 мм</option></select>
+<label>Ширина термочека / квитанции</label><select id="receiptWidth"><option value="58">58 мм</option><option value="80" selected>80 мм</option></select>
 <label>Комментарий / накладная</label><input id="saleNote" placeholder="Необязательно">
 <button class="primary" id="saveSale">Оформить и перейти к оплате →</button>
 <div class="notice info">При нажатии на кнопку откроется <b>окно оплаты</b> (наличные, перевод или в долг). При сохранении PDF имя файла формируется автоматически с названием точки и датой.</div>
@@ -558,7 +558,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 
 <!-- НАСТРОЙКИ И ОБЛАКО -->
 <section id="settings" class="hidden">
-<div class="card accent-blue">
+<div class="card accent-blue" id="driveCard">
  <h2>☁️ Облачная синхронизация Google Drive</h2>
  <div class="notice info">
   Подключите один и тот же аккаунт Google на вашем телефоне и на телефоне водителя. Приложение сохранит общую базу <code>kegcontrol_shared_db.json</code> на Google Диске и будет синхронизировать продажи, заявки, остатки, пользователей и долги. При открытии приложения оно тихо проверяет сеанс без всплывающих окон, а при нажатии на облако или кнопку синхронизации открывает окно входа для вашего сохранённого аккаунта.
@@ -576,7 +576,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
  </div>
 </div>
 
-<div class="card">
+<div class="card" id="bioCard">
  <h2>👆 Вход по отпечатку / биометрии</h2>
  <div class="notice info" style="margin-top:0">
   Вы вошли как <b id="bioCurrentUserLabel">admin1</b>. Здесь можно привязать сканер отпечатка пальца или Face ID этого телефона к вашему аккаунту, чтобы входить в 1 касание.
@@ -657,7 +657,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
  <button type="button" class="danger hidden" id="deleteRoleBtn" style="width:100%;margin-top:8px">Удалить выбранную роль</button>
 </div>
 
-<div class="card">
+<div class="card" id="backupCard">
  <h2>📦 Резервная копия (файл JSON)</h2>
  <div class="twocol">
   <button type="button" class="secondary" id="exportJsonBtn">Скачать резервную копию</button>
@@ -752,7 +752,7 @@ const DEFAULT_ROLES={
  driver:{
   id:'driver',
   title:'Водитель',
-  tabs:['home','plan','sale','debts','points'],
+  tabs:['home','plan','sale','debts','points','settings'],
   actions:[]
  }
 };
@@ -805,6 +805,10 @@ function loadLocal(){
   }
   if(!merged.roles.driver){
    merged.roles.driver=JSON.parse(JSON.stringify(DEFAULT_ROLES.driver));
+  }else if(!Array.isArray(merged.roles.driver.tabs)){
+   merged.roles.driver.tabs=['home','plan','sale','debts','points','settings'];
+  }else if(!merged.roles.driver.tabs.includes('settings')){
+   merged.roles.driver.tabs.push('settings');
   }
   merged.users=merged.users.map(u=>({
    username:String(u.username||'').trim(),
@@ -869,12 +873,30 @@ function getUserRoleObj(user=currentUser){
 function hasTabAccess(tabId,user=currentUser){
  const role=getUserRoleObj(user);
  if(user&&user.role==='owner'&&tabId==='settings') return true;
+ if(user&&user.role==='driver'&&tabId==='settings') return true;
  return Array.isArray(role.tabs)&&role.tabs.includes(tabId);
 }
 function hasAction(actionId,user=currentUser){
  const role=getUserRoleObj(user);
  if(user&&user.role==='owner'&&actionId==='manage_users_roles') return true;
  return Array.isArray(role.actions)&&role.actions.includes(actionId);
+}
+
+function applySettingsVisibilityForUser(){
+ if(!currentUser) return;
+ const isDriver=currentUser.role==='driver';
+ if(isDriver){
+  $('driveCard').classList.remove('hidden');
+  $('bioCard').classList.remove('hidden');
+  $('usersCard').classList.add('hidden');
+  $('rolesCard').classList.add('hidden');
+  $('backupCard').classList.add('hidden');
+ }else{
+  $('driveCard').classList.remove('hidden');
+  $('bioCard').classList.remove('hidden');
+  $('backupCard').classList.remove('hidden');
+  renderUsersAndRolesSettings();
+ }
 }
 
 function hasValidDriveToken(){
@@ -1342,6 +1364,7 @@ function applyAuth(user){
  $('roleNotice').innerHTML=`Вы вошли как <b>${esc(user.username)}</b> (роль: <b>${esc(roleObj.title)}</b>). Доступные разделы: ${esc(allowedTabs||'нет')}.`;
 
  $('googleClientIdInput').value=getClientId();
+ applySettingsVisibilityForUser();
  render();
  updateBioUi();
  refreshDriveStatusUi();
@@ -1383,6 +1406,7 @@ function go(page){
  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.page===page));
  document.querySelectorAll('main section').forEach(s=>s.classList.toggle('hidden',s.id!==page));
  if(page==='settings'){
+  applySettingsVisibilityForUser();
   updateBioUi();
   renderUsersAndRolesSettings();
   refreshDriveStatusUi();
@@ -2049,6 +2073,23 @@ function makePdfFilename(op){
  return `${safePoint}_${datePart}`;
 }
 
+function getPointKegBalanceAfterOp(op){
+ const kmap=kegsByPoint();
+ let rem30=0;
+ let rem50=0;
+ if(op.pointId&&kmap[op.pointId]){
+  rem30=Math.max(0,Number(kmap[op.pointId].k30||0));
+  rem50=Math.max(0,Number(kmap[op.pointId].k50||0));
+ }else if(op.pointName){
+  const match=Object.values(kmap).find(x=>x.name===op.pointName);
+  if(match){
+   rem30=Math.max(0,Number(match.k30||0));
+   rem50=Math.max(0,Number(match.k50||0));
+  }
+ }
+ return {rem30,rem50};
+}
+
 function printReceipt(op){
  const p=$('printArea');
  p.className=op.width==='80'?'wide':'';
@@ -2067,6 +2108,8 @@ function printReceipt(op){
   ${op.debtAdded>0?`<div class="line"><span><b>В ДОЛГ ПО ЧЕКУ:</b></span><span><b>${money(op.debtAdded)}</b></span></div>`:''}
  `:'';
 
+ const {rem30,rem50}=getPointKegBalanceAfterOp(op);
+
  p.innerHTML=`
   <h2>НАКЛАДНАЯ / КВИТАНЦИЯ</h2>
   <div class="center mutedPrint">${esc(op.date)}</div>
@@ -2081,6 +2124,9 @@ function printReceipt(op){
   <div class="line"><span>Возврат пустых 30 л:</span><span><b>${op.ret30} шт.</b></span></div>
   <div class="line"><span>Возврат пустых 50 л:</span><span><b>${op.ret50} шт.</b></span></div>
   ${op.note?`<div class="rule"></div><div>Комментарий: ${esc(op.note)}</div>`:''}
+  <div class="rule"></div>
+  <div class="line"><span><b>Остаток кег на точке:</b></span><span><b>${rem30+rem50} шт.</b></span></div>
+  <div class="line"><span>30 л / 50 л на точке:</span><span><b>${rem30} шт. / ${rem50} шт.</b></span></div>
   <div class="rule"></div>
   <div class="line"><span>Сдал: _________</span><span>Принял: _________</span></div>
  `;
@@ -2576,6 +2622,11 @@ function renderSalesStats(){
 /* ==================== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ И РОЛЯМИ ==================== */
 function renderUsersAndRolesSettings(){
  if(!currentUser) return;
+ if(currentUser.role==='driver'){
+  $('usersCard').classList.add('hidden');
+  $('rolesCard').classList.add('hidden');
+  return;
+ }
  const canManage=hasAction('manage_users_roles');
  $('usersCard').classList.toggle('hidden',!canManage);
  $('rolesCard').classList.toggle('hidden',!canManage);
@@ -2729,6 +2780,7 @@ $('saveRolePermBtn').onclick=()=>{
  const tabs=[];
  document.querySelectorAll('.role-tab-cb:checked').forEach(cb=>tabs.push(cb.value));
  if(rid==='owner'&&!tabs.includes('settings')) tabs.push('settings');
+ if(rid==='driver'&&!tabs.includes('settings')) tabs.push('settings');
  if(!tabs.length) return alert('Для роли должна быть выбрана хотя бы одна вкладка.');
 
  const actions=[];
