@@ -1,937 +1,945 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1410">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="manifest" id="pwaManifest">
-<title>KegControl 1.4 Cloud</title>
-<script>
-(()=>{
- const svgIcon=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#0b1410"/><rect x="24" y="24" width="464" height="464" rx="92" fill="none" stroke="#229963" stroke-width="18"/><text x="256" y="325" font-size="250" text-anchor="middle">🍺</text></svg>`;
- const iconUrl='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svgIcon);
- const baseUrl=new URL('./',location.href).href;
- const manifest={
-  name:'KegControl 1.4 Cloud',
-  short_name:'KegControl',
-  start_url:baseUrl,
-  scope:baseUrl,
-  display:'standalone',
-  background_color:'#0b130f',
-  theme_color:'#0b1410',
-  icons:[
-   {src:iconUrl,sizes:'192x192',type:'image/svg+xml',purpose:'any'},
-   {src:iconUrl,sizes:'512x512',type:'image/svg+xml',purpose:'any'}
-  ]
- };
- const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
- document.getElementById('pwaManifest').href=URL.createObjectURL(blob);
-})();
-</script>
-<style>
-:root{
- --bg:#0b130f;
- --card:#13201a;
- --ink:#eaf3ed;
- --muted:#93aba0;
- --green:#229963;
- --green-soft:#143626;
- --line:#23382e;
- --red:#ff6b6b;
- --red-soft:#38181b;
- --amber:#ffb03b;
- --amber-soft:#382810;
- --blue:#58a6ff;
- --blue-soft:#132942;
- --purple:#b48eff;
- --purple-soft:#261a3d;
- --teal:#38d1c9;
- --teal-soft:#113231;
-}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.38;overflow-x:hidden}
-
-header{background:linear-gradient(90deg,#09120e 0%,#10241b 100%);color:var(--ink);padding:8px 12px;position:sticky;top:0;z-index:3;display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:48px;border-bottom:1px solid var(--line)}
-.hdr-brand{display:flex;align-items:center;gap:7px;min-width:0}
-.hdr-title{font-size:16px;font-weight:800;white-space:nowrap;line-height:1.1;letter-spacing:-0.01em;color:var(--ink)}
-.user-chip{display:flex;align-items:center;gap:6px;background:#162820;padding:4px 8px;border-radius:10px;border:1px solid #284437;flex-shrink:0}
-.user-chip b{font-size:12px;color:var(--ink);white-space:nowrap}
-.user-chip .role-tag{font-size:10px;padding:2px 6px;border-radius:6px;background:#1a7a4e;color:#eafff4;white-space:nowrap;font-weight:600}
-.user-chip .role-tag.driver{background:#1f4e73;color:#e4f2ff}
-.sync-pill{font-size:10px;padding:2px 7px;border-radius:99px;background:var(--green-soft);color:#8be3b8;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;font-weight:600;border:1px solid #22543c;cursor:pointer}
-.sync-pill.err{background:var(--red-soft);color:#ffa8a8;border-color:#61282d}
-.sync-pill.busy{background:var(--amber-soft);color:#ffd280;border-color:#664819}
-
-main{max-width:780px;margin:auto;padding:10px 12px 92px;touch-action:pan-y;overflow-x:clip}
-main section{will-change:transform,opacity}
-main section.anim-from-right{animation:tabSlideFromRight .26s cubic-bezier(0.22,1,0.36,1) both}
-main section.anim-from-left{animation:tabSlideFromLeft .26s cubic-bezier(0.22,1,0.36,1) both}
-@keyframes tabSlideFromRight{
- from{opacity:.25;transform:translateX(38px)}
- to{opacity:1;transform:translateX(0)}
-}
-@keyframes tabSlideFromLeft{
- from{opacity:.25;transform:translateX(-38px)}
- to{opacity:1;transform:translateX(0)}
-}
-
-.tabs{display:flex;gap:6px;overflow:auto;padding:8px 0;position:sticky;top:48px;background:var(--bg);z-index:2;scrollbar-width:none;border-bottom:1px solid var(--line)}
-.tabs::-webkit-scrollbar{display:none}
-button{border:0;border-radius:11px;padding:10px 12px;font:inherit;cursor:pointer;transition:transform .08s ease,opacity .15s ease,background-color .15s ease}
-button:active{transform:scale(0.985)}
-.tab{background:#14211b;color:var(--muted);white-space:nowrap;padding:8px 12px;font-size:14px;font-weight:600;border:1px solid var(--line)}
-.tab:hover{color:var(--ink);border-color:#325042}
-.tab.active{background:var(--green);color:#f3fbf7;border-color:#2db375;box-shadow:0 2px 10px rgba(34,153,99,0.28)}
-
-.card{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--green);border-radius:16px;padding:14px;margin:12px 0;box-shadow:0 4px 16px rgba(0,0,0,0.28);position:relative}
-.card.accent-blue{border-top-color:var(--blue)}
-.card.accent-amber{border-top-color:var(--amber)}
-.card.accent-teal{border-top-color:var(--teal)}
-.card.accent-purple{border-top-color:var(--purple)}
-.card.accent-red{border-top-color:var(--red)}
-
-.card-collapse-btn{position:absolute;top:10px;right:10px;width:28px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;background:#182921;color:var(--muted);border:1px solid #2a4438;font-size:13px;line-height:1;z-index:1}
-.card-collapse-btn:hover{color:var(--ink);background:#20362c;border-color:#38594a}
-.card.collapsed{padding-bottom:12px}
-.card.collapsed>:not(h2):not(.card-collapse-btn):not(.card-hdr-bar){display:none!important}
-.card.collapsed>h2,.card.collapsed>.card-hdr-bar{margin-bottom:0!important}
-.card>h2,.card>.card-hdr-bar{padding-right:36px}
-
-.sort-menu-wrap{position:relative;display:inline-block}
-.sort-popover{position:absolute;right:0;top:calc(100% + 6px);min-width:215px;background:#15241d;border:1px solid #2e4b3d;border-radius:12px;padding:5px;box-shadow:0 12px 30px rgba(0,0,0,0.55);z-index:15}
-.sort-option{width:100%;text-align:left;background:transparent;color:var(--ink);padding:8px 10px;border-radius:8px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.sort-option:hover{background:#1d3228}
-.sort-option.active{background:var(--green-soft);color:#6be0a9}
-
-.point-menu-wrap{position:relative;display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
-.point-name-btn{background:transparent;color:var(--ink);padding:2px 4px;margin:-2px -4px;border-radius:7px;font-weight:750;font-size:15px;display:inline-flex;align-items:center;gap:4px;text-align:left}
-.point-name-btn:hover{background:#1b2e25;color:#78ebb5}
-.point-popover{position:absolute;left:0;top:calc(100% + 4px);min-width:168px;background:#15241d;border:1px solid #2e4b3d;border-radius:11px;padding:5px;box-shadow:0 12px 28px rgba(0,0,0,0.6);z-index:16}
-.point-menu-item{width:100%;text-align:left;background:transparent;color:var(--ink);padding:8px 10px;border-radius:8px;font-size:13px;font-weight:650;display:flex;align-items:center;gap:7px}
-.point-menu-item:hover{background:#1e342a}
-.point-menu-item.del{color:var(--red)}
-.point-menu-item.del:hover{background:var(--red-soft)}
-
-.point-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;width:100%}
-.point-row-left{flex:1 1 auto;min-width:0}
-.point-row-right{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;text-align:right}
-.keg-cnt-num{font-weight:900;font-size:12px;font-variant-numeric:tabular-nums}
-
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.metric{background:#101c17;border:1px solid var(--line);border-radius:13px;padding:11px 12px;position:relative;overflow:hidden}
-.metric.m-kegs{background:#0f1c29;border-color:#203a54;border-left:4px solid var(--blue)}
-.metric.m-wh{background:#0f2119;border-color:#1e4231;border-left:4px solid var(--green)}
-.metric.m-cl{background:#1a1428;border-color:#352754;border-left:4px solid var(--purple)}
-.metric.m-beer{background:#0e2121;border-color:#1c4240;border-left:4px solid var(--teal)}
-.metric small{color:var(--muted);font-weight:600;font-size:12px}
-.metric strong{display:block;font-size:24px;margin-top:3px;color:var(--ink)}
-.metric-sub{margin-top:5px;font-size:12px;color:#b8d6c7;font-variant-numeric:tabular-nums}
-.metric-sub b{font-weight:800;color:var(--ink)}
-.metric.debt-metric{background:var(--red-soft);border:1px solid #572529;border-left:4px solid var(--red)}
-.metric.debt-metric strong{color:var(--red)}
-
-h2{font-size:18px;margin:2px 0 12px;color:var(--ink);letter-spacing:-0.01em}
-h3{font-size:15px;margin:14px 0 7px;color:#cfe0d7}
-label{display:block;color:var(--muted);font-size:12px;margin:10px 0 5px;font-weight:600}
-input,select,textarea{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:#0e1914;color:var(--ink);font:inherit}
-input::placeholder,textarea::placeholder{color:#667d72}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);background:#101e18;box-shadow:0 0 0 3px rgba(34,153,99,0.2)}
-
-.stepper-box{display:flex;align-items:stretch;gap:5px}
-.stepper-box input{flex:1 1 auto;min-width:0;text-align:center;font-weight:750;font-variant-numeric:tabular-nums;padding:9px 6px}
-.step-btn{flex:0 0 36px;padding:0;border-radius:10px;background:#182921;color:var(--ink);border:1px solid #2b4539;font-size:17px;font-weight:800;line-height:1;display:inline-flex;align-items:center;justify-content:center}
-.step-btn:hover{background:#213a2e;border-color:#3a5e4e;color:#78ebb5}
-
-.primary{background:var(--green);color:#f3fbf7;width:100%;margin-top:13px;font-weight:700;box-shadow:0 4px 12px rgba(34,153,99,0.25);border:1px solid #2db375}
-.primary:hover{background:#27ab6f}
-.secondary{background:#182921;color:#d6e8de;font-weight:600;border:1px solid #2b4539}
-.secondary:hover{background:#1e3329}
-.wa-btn{background:#123827;color:#6ef0b2;font-weight:700;border:1px solid #22734e;display:inline-flex;align-items:center;gap:5px}
-.wa-btn:hover{background:#174731;color:#9cf7cb}
-.wa-icon{width:16px;height:16px;flex-shrink:0;display:block}
-.danger{background:var(--red-soft);color:var(--red);font-weight:650;border:1px solid #5c272c}
-.danger:hover{background:#451c20}
-.warn{background:var(--amber-soft);color:var(--amber);font-weight:650;border:1px solid #634618}
-.warn:hover{background:#453112}
-.blue-btn{background:var(--blue-soft);color:var(--blue);font-weight:700;border:1px solid #23476e}
-.blue-btn:hover{background:#183454}
-.sm-btn{padding:6px 10px;font-size:13px;border-radius:9px}
-
-.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.muted{color:var(--muted);font-size:12px}
-code{background:#0e1914;color:#a7e3c5;padding:1px 5px;border-radius:5px;border:1px solid var(--line)}
-a{color:var(--blue)}
-
-.pill{font-size:11px;background:var(--green-soft);color:#6be0a9;padding:4px 8px;border-radius:99px;white-space:nowrap;font-weight:650;border:1px solid #21523b}
-.pill.keg-zero{background:#14211b;color:#7e968b;font-weight:600;border-color:#263b31}
-.pill.keg-active{background:#12382c;color:#52f2b4;font-weight:850;border-color:#23855e;box-shadow:0 0 0 1px rgba(82,242,180,0.12)}
-.pill.debt{background:var(--red-soft);color:var(--red);font-weight:750;border-color:#5e282d}
-.pill.ret{background:var(--blue-soft);color:var(--blue);font-weight:750;border-color:#23476e}
-.pill.zone{background:var(--purple-soft);color:var(--purple);font-weight:700;border-color:#442f6e}
-.pill.plan-due{background:var(--amber-soft);color:var(--amber);font-weight:750;border-color:#664819}
-.pill.plan-over{background:var(--red-soft);color:var(--red);font-weight:750;border-color:#5e282d}
-.pill.pay-method{background:var(--teal-soft);color:var(--teal);font-weight:700;border-color:#1d5451}
-
-.item{padding:11px 0;border-bottom:1px solid var(--line);width:100%}
-.item:last-child{border:0}
-.empty{color:var(--muted);padding:16px;text-align:center;background:#0e1914;border-radius:12px;border:1px dashed #283f34;width:100%}
-.hidden{display:none!important}
-
-.notice{background:var(--amber-soft);border:1px solid #5c4116;border-left:4px solid var(--amber);border-radius:11px;padding:10px 12px;font-size:12px;color:#ffd896;margin:10px 0}
-.notice.info{background:var(--blue-soft);border-color:#214369;border-left-color:var(--blue);color:#b7d9ff}
-.notice.alert-banner{background:#3b290e;border:1px solid #755017;border-left:4px solid var(--amber);color:#ffe0a3;cursor:pointer}
-
-.twocol{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.threecol{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-@media(max-width:600px){
- .threecol{grid-template-columns:1fr}
-}
-.calc{background:#10241b;border:1px solid #224d39;border-left:4px solid var(--green);border-radius:12px;padding:12px;margin-top:10px}
-.calc strong{font-size:20px;color:#5ce0a3}
-.calc.debt-box{background:#2b1417;border:1px solid #5c272d;border-left:4px solid var(--red)}
-.calc.debt-box strong{color:var(--red)}
-.calc.paid-box{background:#10241b;border:1px solid #224d39;border-left:4px solid var(--green)}
-
-footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:8px 12px calc(8px + env(safe-area-inset-bottom));text-align:center;color:var(--muted);font-size:11px}
-
-.route-group{border:1px solid #263d32;border-left:4px solid var(--purple);border-radius:14px;padding:11px 12px;margin:12px 0;background:#0f1a15}
-.route-group-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-bottom:8px;margin-bottom:9px;border-bottom:1px solid var(--line)}
-.route-group-title{font-weight:800;font-size:15px;color:#cfb5ff}
-.order-card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:12px;padding:10px 12px;margin-bottom:9px;box-shadow:0 2px 8px rgba(0,0,0,0.22)}
-.order-card:last-child{margin-bottom:0}
-.order-card.overdue{border-left:4px solid var(--red);background:#1c1113;border-color:#4d2328}
-.order-card.today{border-left:4px solid var(--amber);background:#1c180f;border-color:#4d3b17}
-.order-card.done{opacity:0.72;background:#101b16;border-left-color:#52695e}
-.quick-days{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-.quick-days button{padding:5px 10px;font-size:12px;background:#172720;color:#cbe0d5;border-radius:8px;font-weight:600;border:1px solid #294237}
-.quick-days button:hover{background:#1e332a}
-
-.period-btns{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
-.period-btn{padding:6px 11px;font-size:12px;border-radius:9px;background:#16251e;color:#b8cfc4;font-weight:650;border:1px solid var(--line)}
-.period-btn:hover{color:var(--ink);border-color:#325042}
-.period-btn.active{background:var(--green);color:#f3fbf7;border-color:#2db375}
-.summary-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px;margin:10px 0}
-.sum-box{background:#0f1b16;border:1px solid var(--line);border-top:3px solid var(--teal);border-radius:11px;padding:9px 10px}
-.sum-box small{color:var(--muted);font-size:11px;display:block;font-weight:600}
-.sum-box b{font-size:15px;margin-top:2px;display:block;color:var(--ink)}
-.prod-sales-table{width:100%;border-collapse:collapse;margin-top:6px;font-size:13px}
-.prod-sales-table th,.prod-sales-table td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left;color:var(--ink)}
-.prod-sales-table th{color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;background:#0e1914}
-
-.recipe-row{background:#0f1b16;border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:11px;padding:9px 10px;margin-bottom:8px}
-
-#authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(circle at top,#173326 0%,#080e0b 100%)}
-.auth-card{background:var(--card);width:100%;max-width:420px;border-radius:20px;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,0.65);border:1px solid #253c31}
-.auth-logo{font-size:26px;font-weight:800;color:var(--ink);text-align:center}
-.auth-sub{text-align:center;color:var(--muted);font-size:13px;margin:4px 0 16px}
-
-.beer-row{background:#0f1b16;border:1px solid var(--line);border-left:3px solid var(--green);border-radius:12px;padding:11px;margin-bottom:10px;position:relative}
-.beer-row-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.beer-row-title{font-weight:750;font-size:13px;color:#4fd194}
-.remove-row{background:var(--red-soft);color:var(--red);padding:4px 9px;font-size:12px;border-radius:8px;font-weight:650;border:1px solid #5e282d}
-.row-subtotal{margin-top:8px;padding-top:7px;border-top:1px dashed #263d32;display:flex;justify-content:space-between;font-size:13px;color:#c3d8ce}
-
-.keg-number{font-weight:850;font-size:16px;color:var(--ink)}
-.keg-line{display:flex;justify-content:space-between;gap:8px;padding:5px 0}
-.op-lines{margin-top:8px;display:grid;gap:5px}
-.op-line{font-size:13px;padding:6px 9px;background:#0e1914;border-radius:8px;border-left:3px solid #3c594b;color:#dcebe3}
-.op-line b{font-weight:800;color:var(--ink)}
-.op-line.debt-line{background:#291316;color:#ff9e9e;border-left-color:var(--red)}
-.op-line.debt-line b{color:#ffc2c2}
-.op-line.ret-line{background:#102236;color:#9ccaff;border-left-color:var(--blue)}
-.op-line.ret-line b{color:#cce4ff}
-.op-line.brew-line{background:#0f261b;color:#82e6b8;border-left-color:var(--green)}
-.op-line.brew-line b{color:#b8f5d8}
-.op-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.price-input{font-variant-numeric:tabular-nums}
-.quick-pay-btns{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
-.quick-pay-btns button{padding:7px 11px;font-size:13px;background:#172720;color:#cfe4da;border-radius:9px;font-weight:650;border:1px solid #294237}
-.quick-pay-btns button:hover{background:#1e332a}
-
-.pay-methods-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
-.pay-method-btn{padding:11px 8px;border:2px solid var(--line);background:#0e1914;color:var(--muted);border-radius:12px;font-weight:750;font-size:13px;text-align:center}
-.pay-method-btn:hover{color:var(--ink);border-color:#345445}
-.pay-method-btn.active{border-color:var(--green);background:var(--green-soft);color:#6be0a9}
-.pay-method-btn.active.debt-mode{border-color:var(--red);background:var(--red-soft);color:var(--red)}
-
-.bio-btn{width:100%;margin-top:10px;background:linear-gradient(135deg,#143828 0%,#1c4a35 100%);color:#78ebb5;font-weight:750;border:1px solid #2b694d;box-shadow:0 4px 14px rgba(20,92,58,0.28);display:flex;align-items:center;justify-content:center;gap:8px}
-.bio-btn:hover{background:linear-gradient(135deg,#184431 0%,#225940 100%);color:#9cf5cb}
-
-.perm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:7px;margin-top:8px}
-.perm-check{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#0e1914;border:1px solid var(--line);border-radius:10px;margin:0;cursor:pointer;color:var(--ink);font-size:13px}
-.perm-check input{width:auto;margin:0}
-
-.modal-backdrop{position:fixed;inset:0;background:rgba(4,9,7,0.78);backdrop-filter:blur(3px);z-index:20;display:flex;align-items:flex-end;justify-content:center;padding:10px}
-@media(min-width:600px){.modal-backdrop{align-items:center}}
-.modal-box{background:var(--card);color:var(--ink);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:18px;padding:16px;box-shadow:0 18px 45px rgba(0,0,0,0.65);border:1px solid var(--line);border-top:4px solid var(--green)}
-.modal-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:10px}
-
-#printArea{display:none}
-@media print{
- @page{margin:3mm;size:auto}
- body{background:#fff!important;color:#000!important;font:12px Arial,sans-serif!important}
- body>*:not(#printArea){display:none!important}
- #printArea{display:block!important;width:52mm;margin:0 auto;padding:0;color:#000}
- #printArea.wide{width:72mm}
- #printArea.report{width:100%;max-width:190mm;margin:0 auto;padding:4mm 0;font:12px Arial,sans-serif!important}
- #printArea h2{font-size:16px;text-align:center;margin:0 0 5px}
- #printArea.report h2{font-size:18px;text-align:left;margin:0 0 6px}
- #printArea .center{text-align:center}
- #printArea .rule{border-top:1px dashed #000;margin:6px 0}
- #printArea .line{display:flex;justify-content:space-between;gap:5px;margin:3px 0}
- #printArea .subline{font-size:11px;padding-left:6px;margin:1px 0 4px}
- #printArea .big{font-size:15px;font-weight:bold}
- #printArea .mutedPrint{font-size:10px;color:#333}
- #printArea.report table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}
- #printArea.report th,#printArea.report td{border:1px solid #444;padding:5px 7px;text-align:left}
- #printArea.report th{background:#eee}
- #printArea.report .rep-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}
- #printArea.report .rep-box{border:1px solid #666;border-radius:4px;padding:6px 8px}
-}
-</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KegControl — Учёт кег, пива и точек</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+ :root{
+  --bg:#0f1720;--card:#182430;--card2:#1e2d3b;--text:#eef3f8;--muted:#9fb0c2;
+  --accent:#28a76b;--accent2:#1e8454;--blue:#2d7dd2;--red:#e05260;--amber:#e5a93c;--teal:#22a6b3;
+  --line:#2b3d4f;
+ }
+ *{box-sizing:border-box}
+ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text)}
+ header{position:sticky;top:0;z-index:20;background:rgba(15,23,32,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 14px}
+ .top{max-width:980px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+ .brand-wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+ h1{margin:0;font-size:17px}
+ .role-tag{font-size:11px;padding:3px 8px;border-radius:999px;background:#17344a;color:#7cc4fa;border:1px solid #29567a;font-weight:600}
+ .role-tag.driver{background:#3a2e14;color:#ffd27d;border-color:#6b5322}
+ .sync-pill{font-size:11px;padding:4px 9px;border-radius:999px;background:#16293a;border:1px solid #2b4c68;color:#9fd3ff;cursor:pointer;font-weight:600}
+ .sync-pill.busy{color:var(--amber);border-color:#78581e;background:#332610}
+ .sync-pill.err{color:#ff8a95;border-color:#7c2b35;background:#381419}
+ .user-bar{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+ .mini-btn{padding:5px 9px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--text);font-size:12px;cursor:pointer;width:auto;margin-top:0}
+ .mini-btn:hover{border-color:#496580}
+
+ .tabs{max-width:980px;margin:8px auto 0;display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
+ .tab{background:var(--card);color:var(--muted);border:1px solid var(--line);padding:8px 12px;border-radius:10px;cursor:pointer;font-size:13px;white-space:nowrap;flex:0 0 auto}
+ .tab.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+
+ .swipe-viewport{max-width:980px;margin:0 auto;overflow-x:clip;position:relative}
+ main{padding:14px;min-height:60vh}
+ main section{will-change:transform,opacity}
+ @keyframes tabSlideFromRight{
+  from{opacity:.35;transform:translateX(34px)}
+  to{opacity:1;transform:translateX(0)}
+ }
+ @keyframes tabSlideFromLeft{
+  from{opacity:.35;transform:translateX(-34px)}
+  to{opacity:1;transform:translateX(0)}
+ }
+ main section.anim-from-right{animation:tabSlideFromRight .24s cubic-bezier(0.22,1,0.36,1)}
+ main section.anim-from-left{animation:tabSlideFromLeft .24s cubic-bezier(0.22,1,0.36,1)}
+
+ .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;margin-bottom:14px}
+ .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px;position:relative}
+ .card-collapse-btn{
+  position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:8px;
+  border:1px solid var(--line);background:var(--card2);color:var(--muted);
+  display:inline-flex;align-items:center;justify-content:center;font-size:13px;line-height:1;
+  cursor:pointer;padding:0;margin-top:0;z-index:3
+ }
+ .card-collapse-btn:hover{color:var(--text);border-color:#4c6a87}
+ .card.collapsed > :not(h2):not(h3):not(.card-collapse-btn){display:none!important}
+ .card.collapsed > h2,.card.collapsed > h3{margin-bottom:0;padding-right:34px}
+ .card > h2,.card > h3{padding-right:34px}
+
+ .metric.clickable{cursor:pointer;transition:transform .12s ease,border-color .12s ease}
+ .metric.clickable:hover{transform:translateY(-1px);border-color:#4a6b8a}
+ .metric small{color:var(--muted);display:block;font-size:12px}
+ .metric b{font-size:21px;display:block;margin-top:4px}
+ .metric .sub-split{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.35}
+ .metric .sub-split b{display:inline;font-size:11.5px;margin-top:0;color:var(--text)}
+
+ h2{margin:0 0 10px;font-size:15px}
+ h3{margin:14px 0 8px;font-size:13.5px;color:var(--muted)}
+ label{display:block;font-size:12px;color:var(--muted);margin-top:8px}
+ input,select,button,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--text);font-size:14px;font-family:inherit}
+ input[type="checkbox"]{width:auto;padding:0;margin:0}
+ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue)}
+ button.primary{background:var(--accent);border:none;font-weight:600;cursor:pointer;margin-top:12px}
+ button.primary:hover{background:var(--accent2)}
+ button.secondary{background:var(--blue);border:none;font-weight:600;cursor:pointer}
+ button.warn{background:#7c5816;border:1px solid #b58324;color:#fff;font-weight:600;cursor:pointer}
+ button.danger{background:#591d24;border:1px solid #96323e;color:#ffb8c0;cursor:pointer}
+ button.ghost{background:transparent;border:1px dashed #3d556e;color:var(--muted);cursor:pointer;margin-top:8px}
+ button.ghost:hover{color:var(--text);border-color:#5f82a6}
+
+ .twocol{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .threecol{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+ .item{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px}
+ .row{display:flex;justify-content:space-between;gap:8px;align-items:center}
+ .muted{color:var(--muted);font-size:12px}
+ .pill{font-size:11px;padding:3px 8px;border-radius:999px;background:#263849;color:#b8cde0;white-space:nowrap}
+ .pill.debt{background:#471d24;color:#ff9aa5}
+ .pill.ret{background:#183847;color:#7fd4ff}
+ .pill.zone{background:#1d3b32;color:#7be0b8}
+ .pill.pay-method{background:#243247;color:#9cc5ff}
+ .pill.plan-due{background:#473514;color:#ffd27d}
+ .pill.plan-over{background:#4d1b22;color:#ff9aa5}
+ .pill.keg-active{background:#183a2d;color:#6be0a9;border:1px solid #29664e}
+ .pill.keg-zero{background:#253342;color:#98abc0;border:1px solid #35495e}
+ .keg-cnt-num{font-weight:700;font-size:12px}
+
+ .point-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+ .point-row-left{flex:1 1 auto;min-width:0}
+ .point-row-right{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0}
+ .point-line-addr{margin-top:4px;font-size:12.5px;color:#c9d8e6;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+ .point-line-contact{margin-top:4px;font-size:12.5px;color:#dce8f2;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+ .phone-call-link{
+  display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;
+  background:#173529;border:1px solid #2b6b51;color:#78ebb5;text-decoration:none;
+  font-size:12px;font-weight:600;transition:background .15s ease
+ }
+ .phone-call-link:hover{background:#1f4837}
+ .gis-mini-link{
+  display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;
+  background:#172d44;border:1px solid #2b547d;color:#8cc8ff;text-decoration:none;
+  font-size:11.5px;font-weight:600
+ }
+ .gis-mini-link:hover{background:#1e3c5b}
+
+ .points-head-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+ .points-head-row h2{margin:0;padding-right:0}
+ .sort-wrap{position:relative;margin-right:34px}
+ .sort-btn{
+  display:inline-flex;align-items:center;gap:6px;width:auto;margin-top:0;
+  padding:6px 10px;border-radius:9px;border:1px solid var(--line);
+  background:var(--card2);color:var(--text);font-size:12px;font-weight:600;cursor:pointer
+ }
+ .sort-btn:hover{border-color:#4b6987}
+ .sort-menu{
+  position:absolute;right:0;top:calc(100% + 6px);min-width:175px;
+  background:var(--card);border:1px solid #3c546e;border-radius:11px;
+  padding:5px;box-shadow:0 12px 28px rgba(0,0,0,.45);z-index:35
+ }
+ .sort-option{
+  display:flex;align-items:center;justify-content:space-between;width:100%;
+  text-align:left;background:transparent;border:none;border-radius:8px;
+  padding:8px 10px;font-size:12.5px;color:var(--text);cursor:pointer;margin-top:0
+ }
+ .sort-option:hover{background:var(--card2)}
+ .sort-option.active{background:#19382b;color:#6be0a9;font-weight:700}
+
+ .point-menu-wrap{position:relative;display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+ .point-name-btn{
+  background:transparent;border:none;padding:0;margin:0;width:auto;
+  color:var(--text);font-size:14px;font-weight:700;cursor:pointer;text-align:left
+ }
+ .point-name-btn:hover{color:#7cc4fa;text-decoration:underline;text-underline-offset:3px}
+ .point-popover{
+  position:absolute;left:0;top:calc(100% + 6px);min-width:160px;
+  background:var(--card);border:1px solid #3f5975;border-radius:10px;
+  padding:5px;box-shadow:0 12px 26px rgba(0,0,0,.48);z-index:30
+ }
+ .point-menu-item{
+  display:flex;align-items:center;gap:7px;width:100%;text-align:left;
+  background:transparent;border:none;border-radius:7px;padding:7px 9px;
+  font-size:12.5px;color:var(--text);cursor:pointer;margin-top:0
+ }
+ .point-menu-item:hover{background:var(--card2)}
+ .point-menu-item.del{color:#ff9aa5}
+ .point-menu-item.del:hover{background:#3b181e}
+
+ .calc{background:#132230;border:1px solid #28445e;border-radius:10px;padding:10px;margin-top:10px}
+ .calc strong{color:#6be0a9;font-size:16px}
+ .calc.debt-box{background:#2b161b;border-color:#6e2932}
+ .calc.debt-box strong{color:#ff8a95}
+ .calc.paid-box{background:#132b21;border-color:#256347}
+ .calc.paid-box strong{color:#6be0a9}
+
+ .beer-row,.recipe-row{background:#14202c;border:1px solid #293c4f;border-radius:12px;padding:10px;margin-top:8px}
+ .beer-row-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
+ .beer-row-title{font-size:12px;font-weight:700;color:#8cc8ff}
+ .stepper-box{display:flex;align-items:center;gap:6px;margin-top:4px}
+ .stepper-box input{text-align:center;padding:8px 4px;font-weight:700;font-size:15px;min-width:0}
+ .step-btn{
+  width:38px;height:38px;flex:0 0 38px;padding:0;margin-top:0;border-radius:10px;
+  border:1px solid #3a536e;background:#223446;color:#eef3f8;
+  font-size:18px;font-weight:700;line-height:1;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center
+ }
+ .step-btn:hover{background:#2d455d;border-color:#587a9e}
+ .step-btn:active{transform:scale(0.96)}
+ .row-subtotal{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:7px;border-top:1px dashed #293c4f;font-size:12.5px;color:#b8cde0}
+ .row-subtotal b{color:#eef3f8}
+
+ .remove-row{background:#3b191e;border:1px solid #782c36;color:#ff9aa5;padding:5px 9px;border-radius:8px;font-size:12px;cursor:pointer;width:auto;margin-top:0}
+ .op-lines{margin-top:6px;font-size:13px;line-height:1.45}
+ .op-line{padding:2px 0}
+ .ret-line{color:#7fd4ff}
+ .debt-line{color:#ff9aa5}
+ .brew-line{color:#7be0b8}
+ .op-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center}
+ .sm-btn{padding:6px 10px;font-size:12px;border-radius:8px;width:auto;margin-top:0;display:inline-flex;align-items:center;gap:5px}
+ .wa-btn{background:#128c7e;border:1px solid #1aa898;color:#fff;font-weight:600;cursor:pointer}
+ .wa-btn:hover{background:#0f766a}
+ .wa-btn svg{width:14px;height:14px;fill:currentColor;flex-shrink:0}
+ .empty{color:var(--muted);text-align:center;padding:18px;font-size:13px}
+ .hidden{display:none!important}
+
+ .period-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+ .period-btn{width:auto;padding:7px 12px;font-size:12px;border-radius:9px;background:var(--card2);border:1px solid var(--line);color:var(--muted);cursor:pointer;margin-top:0}
+ .period-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+ .summary-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:8px}
+ .sum-box{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px}
+ .sum-box small{display:block;color:var(--muted);font-size:11px}
+ .sum-box b{display:block;font-size:16px;margin-top:3px}
+ .sum-box span.muted{display:block;margin-top:3px;font-size:11px}
+
+ .prod-sales-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+ .prod-sales-table th,.prod-sales-table td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left}
+ .prod-sales-table th{color:var(--muted);font-size:12px;font-weight:600}
+
+ .order-card{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:12px;padding:11px;margin-top:8px}
+ .order-card.today{border-left-color:var(--amber)}
+ .order-card.overdue{border-left-color:var(--red)}
+ .order-card.done{border-left-color:var(--accent);opacity:.78}
+ .route-group{margin-top:12px}
+ .route-group-head{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:#13202c;border:1px solid var(--line);border-radius:9px}
+ .route-group-title{font-size:13px;font-weight:700;color:#8cc8ff}
+
+ .reminder-banner{background:#2d220e;border:1px solid #8a6319;color:#ffe09e;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:13px;cursor:pointer}
+ .from-plan-banner{background:#122b38;border:1px solid #276382;color:#9be0ff;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:12.5px}
+
+ .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+ .auth-card{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+ .auth-card h2{font-size:18px;margin-bottom:4px}
+ .err-text{color:#ff8a95;font-size:12px;margin-top:8px;min-height:16px}
+ .bio-btn{
+  margin-top:10px;background:#153447;border:1px solid #2b6488;color:#8ed4ff;
+  font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px
+ }
+ .bio-btn:hover{background:#1c445c;border-color:#3c82ad}
+
+ .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:14px;z-index:50}
+ .modal-card{width:100%;max-width:500px;max-height:90vh;overflow-y:auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+ .pay-methods-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+ .pay-method-btn{padding:11px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;margin-top:0}
+ .pay-method-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+ .pay-method-btn.active.debt-mode{background:#7d222c;border-color:#b83543;color:#fff}
+ .quick-amt-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+ .quick-amt-btn{width:auto;padding:6px 10px;font-size:12px;border-radius:8px;background:#132230;border:1px solid #2b4863;color:#9fd3ff;cursor:pointer;margin-top:0}
+
+ .perm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:6px;margin-top:6px}
+ .perm-check{
+  display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);
+  border-radius:9px;padding:8px 10px;margin-top:0;font-size:12.5px;color:var(--text);cursor:pointer
+ }
+
+ footer{max-width:980px;margin:0 auto 24px;padding:0 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:12px}
+
+ #printArea{display:none}
+ @media print{
+  body *{visibility:hidden}
+  #printArea,#printArea *{visibility:visible}
+  #printArea{display:block;position:fixed;left:0;top:0;width:58mm;padding:4mm;font-family:monospace;font-size:12px;color:#000;background:#fff}
+  #printArea.wide{width:80mm}
+  #printArea.report{width:auto;max-width:100%;padding:8mm;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:12px}
+  #printArea h2{text-align:center;font-size:14px;margin:0 0 6px;color:#000}
+  #printArea.report h2{text-align:left;font-size:18px;margin:0 0 6px}
+  #printArea .center{text-align:center}
+  #printArea .mutedPrint{color:#444;font-size:11px}
+  #printArea .rule{border-top:1px dashed #000;margin:6px 0}
+  #printArea .line{display:flex;justify-content:space-between;gap:6px;margin:3px 0}
+  #printArea .subline{font-size:11px;color:#222;margin-bottom:4px}
+  #printArea .big{font-size:14px;font-weight:bold}
+  #printArea table{width:100%;border-collapse:collapse;margin-top:8px;font-size:11.5px}
+  #printArea th,#printArea td{border:1px solid #666;padding:5px 6px;text-align:left}
+  #printArea th{background:#eee}
+  #printArea .rep-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+  #printArea .rep-box{border:1px solid #888;padding:6px 8px;border-radius:4px}
+ }
+ @media(max-width:560px){
+  .twocol,.threecol,.pay-methods-grid{grid-template-columns:1fr}
+ }
+</style>
 </head>
 <body>
 
-<!-- ЭКРАН АВТОРИЗАЦИИ -->
-<div id="authScreen">
+<div id="authScreen" class="auth-wrap">
  <div class="auth-card">
-  <div class="auth-logo">🍺 KegControl Cloud</div>
-  <div class="auth-sub">Учёт пивоварни, заявок, кег и расчётов · v1.4</div>
-
-  <div id="loginBox">
-   <label>Логин</label>
-   <input id="loginUser" placeholder="Введите логин" autocomplete="username">
-   <label>Пароль</label>
-   <input id="loginPass" type="password" placeholder="Введите пароль" autocomplete="current-password">
-   <button class="primary" id="doLoginBtn">Войти в систему</button>
-   <button type="button" class="bio-btn hidden" id="bioLoginBtn">👆 Войти по отпечатку</button>
-   <div id="loginError" class="muted" style="color:var(--red);margin-top:8px;text-align:center"></div>
-
-   <div class="notice info" id="bioAuthHint" style="margin-top:12px">
-    <b>👆 Вход по отпечатку / биометрии:</b> работает через встроенный сканер устройства (Touch ID, Face ID, отпечаток Android / Windows Hello) и привязывается к конкретному аккаунту на этом устройстве. Вход по логину и паролю остаётся основным запасным способом и нужен для первичной привязки отпечатка.
-   </div>
-
-   <div style="margin-top:12px;border-top:1px solid var(--line);padding-top:10px">
-    <button type="button" class="blue-btn" style="width:100%" id="loginDrivePullBtn">☁️ Загрузить базу из Google Drive перед входом</button>
-    <div class="muted" style="margin-top:5px;text-align:center">Если вы входите с нового телефона, сначала подтяните общую базу из Google Drive.</div>
-   </div>
-  </div>
+  <h2>🍺 KegControl</h2>
+  <div class="muted">Вход в систему учёта (локально + Google Drive)</div>
+  <label>Логин</label>
+  <input id="loginUser" autocomplete="username" placeholder="Введите логин">
+  <label>Пароль</label>
+  <input id="loginPass" type="password" autocomplete="current-password" placeholder="Введите пароль">
+  <div id="loginError" class="err-text"></div>
+  <button type="button" class="primary" id="doLoginBtn">Войти</button>
+  <button type="button" class="bio-btn hidden" id="bioLoginBtn">👆 Войти по отпечатку</button>
+  <button type="button" class="ghost" id="loginDrivePullBtn">☁️ Войти и загрузить базу из Google Drive</button>
  </div>
 </div>
 
-<!-- ОСНОВНОЙ ИНТЕРФЕЙС ПРИЛОЖЕНИЯ -->
 <div id="appShell" class="hidden">
-<header>
- <div class="hdr-brand">
-  <span class="hdr-title">🍺 KegControl</span>
-  <span id="syncStatusPill" class="sync-pill" title="Нажмите для подключения или синхронизации Google Drive">Локально</span>
- </div>
- <div class="user-chip">
-  <b id="hdrUserName">admin1</b>
-  <span id="hdrUserRole" class="role-tag">Владелец</span>
-  <button type="button" class="secondary sm-btn" style="padding:4px 7px;font-size:11px;line-height:1" id="syncNowBtn" title="Синхронизировать с Google Drive">🔄</button>
-  <button type="button" class="danger sm-btn" style="padding:4px 7px;font-size:11px;line-height:1" id="logoutBtn" title="Выйти">Выход</button>
- </div>
-</header>
-<main id="mainSwipeArea">
-<nav class="tabs" id="tabs">
-<button class="tab active" data-page="home">Обзор</button>
-<button class="tab" data-page="plan">Планировка <span id="planBadge"></span></button>
-<button class="tab" data-page="sale">Продажа / Возврат</button>
-<button class="tab" data-page="debts">Долги <span id="debtBadge"></span></button>
-<button class="tab" data-page="stock">Склад</button>
-<button class="tab" data-page="points">Точки</button>
-<button class="tab" data-page="history">История</button>
-<button class="tab" data-page="settings">Настройки & Облако</button>
-</nav>
-
-<!-- ОБЗОР -->
-<section id="home">
-<div id="homePlanBanner" class="notice alert-banner hidden" onclick="go('plan')"></div>
-
-<div class="grid">
-<div class="metric m-kegs"><small>Всего кег</small><strong id="mTotal">0</strong><div class="metric-sub" id="mTotalSplit">30л: <b>0</b> · 50л: <b>0</b></div></div>
-<div class="metric m-wh"><small>На складе</small><strong id="mWarehouse">0</strong><div class="metric-sub" id="mWarehouseSplit">30л: <b>0</b> · 50л: <b>0</b></div></div>
-<div class="metric m-cl" style="cursor:pointer" id="clientsKegsCard" title="Нажмите, чтобы посмотреть кеги по точкам"><small>У клиентов</small><strong id="mClients">0</strong><div class="metric-sub" id="mClientsSplit">30л: <b>0</b> · 50л: <b>0</b></div></div>
-<div class="metric m-beer" style="cursor:pointer" id="beerStockCard" title="Нажмите, чтобы посмотреть остатки по сортам"><small>Пиво на складе</small><strong id="mBeer">0 л</strong></div>
-</div>
-<div class="metric debt-metric" style="margin-top:10px;cursor:pointer" onclick="go('debts')">
-<div class="row"><div><small>Общий долг точек</small><strong id="mDebt">0 ₸</strong></div><span class="pill debt">Открыть долги →</span></div>
-</div>
-<div class="card accent-teal" data-card-id="home_recent"><h2>Последние операции</h2><div id="recent" class="empty">Операций пока нет.</div></div>
-</section>
-
-<!-- ПЛАНИРОВКА И МАРШРУТЫ ДОСТАВКИ -->
-<section id="plan" class="hidden">
-<div class="card accent-blue" data-card-id="plan_main">
- <div class="row card-hdr-bar" style="flex-wrap:wrap">
-  <h2 style="margin:0">🚚 Маршрутный лист и заявки</h2>
-  <div style="display:flex;gap:6px;flex-wrap:wrap">
-   <button type="button" class="primary sm-btn" style="margin-top:0;width:auto" id="openNewPlanModalBtn">➕ Новая заявка</button>
-   <button type="button" class="blue-btn sm-btn" id="enableNotifBtn" title="Включить системные уведомления браузера">🔔 Напоминания</button>
+ <header>
+  <div class="top">
+   <div class="brand-wrap">
+    <h1>🍺 KegControl</h1>
+    <span id="hdrUserRole" class="role-tag"></span>
+    <button type="button" id="syncStatusPill" class="sync-pill" title="Нажмите для синхронизации с Google Drive">Локально</button>
+   </div>
+   <div class="user-bar">
+    <span id="hdrUserName"></span>
+    <button type="button" class="mini-btn" id="logoutBtn">Выйти</button>
+   </div>
   </div>
- </div>
-
- <div class="period-btns" id="planFilterBtns">
-  <button type="button" class="period-btn active" data-pfilter="today">Сегодня + просроч.</button>
-  <button type="button" class="period-btn" data-pfilter="tomorrow">Завтра</button>
-  <button type="button" class="period-btn" data-pfilter="upcoming">Все активные</button>
-  <button type="button" class="period-btn" data-pfilter="date">Выбрать дату</button>
-  <button type="button" class="period-btn" data-pfilter="done">Выполненные</button>
- </div>
-
- <div id="planPickDateWrap" class="twocol hidden" style="margin-bottom:8px">
-  <div><label style="margin-top:4px">Дата маршрута</label><input type="date" id="planFilterDate"></div>
-  <div>
-   <label style="margin-top:4px">Район / маршрут</label>
-   <select id="planFilterZone"><option value="all">Все районы</option></select>
+  <div class="tabs" id="tabs">
+   <button type="button" class="tab active" data-page="home">Главная</button>
+   <button type="button" class="tab" data-page="plan">План <span id="planBadge"></span></button>
+   <button type="button" class="tab" data-page="sale">Продажа / Возврат</button>
+   <button type="button" class="tab" data-page="debts">Долги <span id="debtBadge"></span></button>
+   <button type="button" class="tab" data-page="brew">Варка</button>
+   <button type="button" class="tab" data-page="stock">Склад</button>
+   <button type="button" class="tab" data-page="points">Точки</button>
+   <button type="button" class="tab" data-page="stats">Статистика</button>
+   <button type="button" class="tab" data-page="history">История</button>
+   <button type="button" class="tab" data-page="settings">Настройки</button>
   </div>
+ </header>
+
+ <div class="swipe-viewport" id="mainSwipeArea">
+  <main>
+   <section id="home">
+    <div id="homePlanBanner" class="reminder-banner hidden" onclick="go('plan')"></div>
+    <div class="grid">
+     <div class="card metric">
+      <small>Всего кег в обороте</small>
+      <b id="mTotal">0</b>
+      <div class="sub-split" id="mTotalSplit">30л: <b>0</b> · 50л: <b>0</b></div>
+     </div>
+     <div class="card metric"><small>Свободных кег на складе</small><b id="mWarehouse">0</b><div class="sub-split" id="mWarehouseSplit">30л: <b>0</b> · 50л: <b>0</b></div></div>
+     <div class="card metric clickable" id="clientsKegsCard" title="Нажмите, чтобы посмотреть кеги по точкам"><small>Кег у клиентов</small><b id="mClients">0</b><div class="sub-split" id="mClientsSplit">30л: <b>0</b> · 50л: <b>0</b></div></div>
+     <div class="card metric clickable" id="beerStockCard" title="Нажмите, чтобы посмотреть остатки пива по сортам"><small>Пиво на складе</small><b id="mBeer">0 л</b></div>
+     <div class="card metric clickable" onclick="go('debts')"><small>Общий долг точек</small><b id="mDebt">0 ₸</b></div>
+    </div>
+    <div class="card" data-card-id="home_recent">
+     <h2>Последние операции</h2>
+     <div id="recent"></div>
+    </div>
+   </section>
+
+   <section id="plan" class="hidden">
+    <div class="card" data-card-id="plan_list">
+     <div class="row" style="margin-bottom:8px;flex-wrap:wrap">
+      <h2 style="margin:0;padding-right:34px">🚚 План доставок и заявок</h2>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-right:34px">
+       <button type="button" class="primary sm-btn" id="openNewPlanModalBtn">+ Новая заявка</button>
+       <button type="button" class="mini-btn" id="enableNotifBtn">🔔 Напоминания</button>
+      </div>
+     </div>
+
+     <div class="period-btns" id="planFilterBtns">
+      <button type="button" class="period-btn active" data-pfilter="today">На сегодня / просроч.</button>
+      <button type="button" class="period-btn" data-pfilter="tomorrow">На завтра</button>
+      <button type="button" class="period-btn" data-pfilter="upcoming">Все активные</button>
+      <button type="button" class="period-btn" data-pfilter="date">По дате</button>
+      <button type="button" class="period-btn" data-pfilter="done">Выполненные</button>
+      <button type="button" class="period-btn" data-pfilter="all">Все</button>
+     </div>
+
+     <div class="twocol hidden" id="planPickDateWrap" style="margin-bottom:10px">
+      <div><label style="margin-top:0">Выберите дату</label><input type="date" id="planFilterDate"></div>
+      <div><label style="margin-top:0">Район / маршрут</label><select id="planFilterZone"><option value="all">Все районы</option></select></div>
+     </div>
+
+     <div id="planZoneFilterSingle" style="margin-bottom:10px">
+      <label style="margin-top:0">Фильтр по району / маршруту</label>
+      <select id="planFilterZoneMain"><option value="all">Все районы</option></select>
+     </div>
+
+     <div id="planSummaryStrip" class="summary-strip"></div>
+     <div id="planListContainer" style="margin-top:10px"></div>
+    </div>
+   </section>
+
+   <section id="sale" class="hidden">
+    <div class="card" data-card-id="sale_form">
+     <h2>Отгрузка пива, возврат кег и печать чека</h2>
+     <div id="fromPlanBanner" class="from-plan-banner hidden"></div>
+
+     <label>Торговая точка</label>
+     <select id="salePoint"></select>
+
+     <h3>Сорта и кеги к отгрузке (литры считаются автоматически по кегам)</h3>
+     <div id="beerRowsContainer"></div>
+     <button type="button" class="ghost" id="addBeerRowBtn">+ Добавить ещё сорт пива</button>
+
+     <div class="calc">
+      <div class="row"><span>Всего кег к отгрузке:</span><b id="saleTotalKegs">0 шт.</b></div>
+      <div class="row" style="margin-top:4px"><span>Общий объём пива:</span><b id="saleLiters">0 л</b></div>
+      <div class="row" style="margin-top:6px"><span>Сумма отгрузки:</span><strong id="saleAmount">0 ₸</strong></div>
+     </div>
+
+     <h3>Возврат пустых кег со склада / точки</h3>
+     <div class="twocol">
+      <div>
+       <label>Возврат пустых 30 л, шт.</label>
+       <div class="stepper-box">
+        <button type="button" class="step-btn" data-step-target="ret30" data-step-delta="-1" aria-label="Уменьшить возврат 30 л">−</button>
+        <input id="ret30" type="number" min="0" step="1" value="0">
+        <button type="button" class="step-btn" data-step-target="ret30" data-step-delta="1" aria-label="Увеличить возврат 30 л">+</button>
+       </div>
+      </div>
+      <div>
+       <label>Возврат пустых 50 л, шт.</label>
+       <div class="stepper-box">
+        <button type="button" class="step-btn" data-step-target="ret50" data-step-delta="-1" aria-label="Уменьшить возврат 50 л">−</button>
+        <input id="ret50" type="number" min="0" step="1" value="0">
+        <button type="button" class="step-btn" data-step-target="ret50" data-step-delta="1" aria-label="Увеличить возврат 50 л">+</button>
+       </div>
+      </div>
+     </div>
+
+     <div class="twocol">
+      <div><label>Комментарий</label><input id="saleNote" placeholder="Например, доставка до 12:00"></div>
+      <div>
+       <label>Ширина чека</label>
+       <select id="receiptWidth">
+        <option value="58">58 мм</option>
+        <option value="80">80 мм</option>
+       </select>
+      </div>
+     </div>
+     <button type="button" class="primary" id="saveSale">Далее к оплате и чеку</button>
+    </div>
+   </section>
+
+   <section id="debts" class="hidden">
+    <div class="card" data-card-id="debts_pay">
+     <h2>Погашение долга торговой точкой</h2>
+     <div class="row" style="margin-bottom:8px">
+      <span class="muted">Суммарный долг всех точек:</span>
+      <span class="pill debt" id="totalAllDebts">0 ₸</span>
+     </div>
+     <label>Торговая точка</label>
+     <select id="debtPayPoint"></select>
+     <div id="debtPointCurrentInfo" class="muted" style="margin-top:6px"></div>
+     <div class="twocol">
+      <div><label>Сумма погашения, ₸</label><input id="debtPayAmount" type="number" min="1" step="1" placeholder="0"></div>
+      <div style="display:flex;align-items:flex-end">
+       <button type="button" class="secondary" id="payAllPointDebtBtn" style="padding:10px">Погасить весь долг точки</button>
+      </div>
+     </div>
+     <label>Комментарий</label>
+     <input id="debtPayNote" placeholder="Например, перевод на Kaspi / наличные">
+     <button type="button" class="primary" id="saveDebtPayment">Записать погашение долга</button>
+    </div>
+
+    <div class="card" data-card-id="debts_by_point">
+     <h2>Текущие долги по точкам</h2>
+     <div id="debtsByPointList"></div>
+    </div>
+
+    <div class="card" data-card-id="debts_history">
+     <h2>История долгов и погашений</h2>
+     <div id="debtHistoryList"></div>
+    </div>
+   </section>
+
+   <section id="brew" class="hidden">
+    <div class="card" data-card-id="brew_card">
+     <h2>🍺 Варка пива и списание сырья</h2>
+     <div class="muted">Укажите сорт и объём готового пива — остаток пива увеличится, а сырьё по рецепту спишется со склада.</div>
+
+     <div class="twocol">
+      <div>
+       <label>Название сорта пива</label>
+       <input id="brewBeerName" list="brewBeerDatalist" placeholder="Например, Светлый лагер">
+       <datalist id="brewBeerDatalist"></datalist>
+      </div>
+      <div>
+       <label>Сварено пива, л</label>
+       <input id="brewOutputLiters" type="number" min="1" step="1" placeholder="Например, 1000">
+      </div>
+     </div>
+
+     <div class="twocol">
+      <div><label>Крепость (ABV), %</label><input id="brewAbv" type="number" min="0" max="30" step="0.1" placeholder="Например, 4.8"></div>
+      <div><label>Плотность (OG), %</label><input id="brewOg" type="number" min="0" max="40" step="0.1" placeholder="Например, 12.0"></div>
+     </div>
+
+     <h3>Сырьё, использованное на варку</h3>
+     <div id="recipeRowsContainer"></div>
+     <button type="button" class="ghost" id="addRecipeRowBtn">+ Добавить сырьё в варку</button>
+
+     <label>Примечание к варке</label>
+     <input id="brewNote" placeholder="Например, варка №14, партия солода">
+     <button type="button" class="primary" id="doBrewBtn">Записать варку и списать сырьё</button>
+    </div>
+   </section>
+
+   <section id="stock" class="hidden">
+    <div class="card" data-card-id="stock_kegs">
+     <h2>Свободные кеги на складе</h2>
+     <div class="twocol">
+      <div><label>Кег 30 л на складе, шт.</label><input id="stock30" type="number" min="0"></div>
+      <div><label>Кег 50 л на складе, шт.</label><input id="stock50" type="number" min="0"></div>
+     </div>
+     <button type="button" class="primary" id="setKegs">Сохранить остаток кег</button>
+     <div id="kegStockSummary"></div>
+    </div>
+
+    <div class="card" data-card-id="stock_beers">
+     <div class="row" style="margin-bottom:8px;flex-wrap:wrap">
+      <h2 style="margin:0;padding-right:34px">Сорта пива и цены за литр</h2>
+      <button type="button" class="secondary sm-btn" id="downloadPricePdfBtn" style="margin-right:34px">📄 Скачать прайс-лист (PDF)</button>
+     </div>
+     <div class="twocol">
+      <div><label>Название сорта</label><input id="newProduct" placeholder="Например, Пшеничное"></div>
+      <div><label>Цена за 1 литр, ₸</label><input id="newProductPrice" type="number" min="0" step="1" placeholder="650"></div>
+     </div>
+     <div class="threecol">
+      <div><label>Крепость (ABV), %</label><input id="newProductAbv" type="number" min="0" max="30" step="0.1" placeholder="4.8"></div>
+      <div><label>Плотность (OG), %</label><input id="newProductOg" type="number" min="0" max="40" step="0.1" placeholder="12.0"></div>
+      <div><label>Остаток на складе, л</label><input id="newProductQty" type="number" min="0" step="0.1" placeholder="0"></div>
+     </div>
+     <button type="button" class="primary" id="addProduct">Добавить сорт пива</button>
+     <div id="productsList"></div>
+    </div>
+
+    <div class="card" data-card-id="stock_raw">
+     <h2>Сырьё и материалы</h2>
+     <div class="threecol">
+      <div><label>Наименование</label><input id="newRaw" placeholder="Солод / Хмель / CO2"></div>
+      <div><label>Ед. изм.</label><select id="rawUnit"><option>кг</option><option>г</option><option>л</option><option>шт</option></select></div>
+      <div><label>Количество</label><input id="newRawQty" type="number" min="0" step="0.01" placeholder="0"></div>
+     </div>
+     <button type="button" class="primary" id="addRaw">Добавить сырьё</button>
+     <div id="rawList"></div>
+    </div>
+
+    <div class="card" data-card-id="stock_other">
+     <h2>Прочий приход / списание</h2>
+     <label>Тип операции</label>
+     <select id="otherType">
+      <option value="beer_in">Приход пива на склад</option>
+      <option value="beer_out">Списание пива со склада</option>
+      <option value="raw_in">Приход сырья</option>
+      <option value="raw_out">Списание сырья</option>
+     </select>
+     <div id="otherBeer">
+      <label>Сорт пива</label><select id="otherProduct"></select>
+      <label>Количество, л</label><input id="otherBeerQty" type="number" min="0" step="0.1">
+     </div>
+     <div id="otherRaw" class="hidden">
+      <label>Сырьё</label><select id="otherRawSelect"></select>
+      <label>Количество</label><input id="otherRawQty" type="number" min="0" step="0.01">
+     </div>
+     <button type="button" class="primary" id="saveOther">Провести операцию</button>
+    </div>
+   </section>
+
+   <section id="points" class="hidden">
+    <div class="card" data-card-id="points_add">
+     <h2>Новая торговая точка</h2>
+     <div class="twocol">
+      <div><label>Название точки</label><input id="newPoint" placeholder="Например, Бар у дома"></div>
+      <div><label>Район / маршрут</label><input id="newPointZone" placeholder="Например, Центр / Север"></div>
+     </div>
+     <div class="twocol">
+      <div><label>Имя (контактное лицо)</label><input id="newPointContact" placeholder="Например, Алексей"></div>
+      <div><label>Телефон</label><input id="newPointPhone" type="tel" placeholder="+7 ..."></div>
+     </div>
+     <div class="twocol">
+      <div><label>Адрес</label><input id="newPointAddr" placeholder="Улица, дом"></div>
+      <div><label>2ГИС: ссылка или координаты</label><input id="newPointGis" placeholder="Ссылка 2ГИС или 43.2389, 76.8897"></div>
+     </div>
+     <button type="button" class="primary" id="addPoint">Добавить точку</button>
+    </div>
+
+    <div class="card" data-card-id="points_active_list">
+     <div class="points-head-row">
+      <h2>Торговые точки</h2>
+      <div class="sort-wrap" id="pointsSortWrap">
+       <button type="button" class="sort-btn" id="pointsSortBtn" title="Сортировка точек">
+        <span>⇅</span>
+        <span id="pointsSortLabel">По имени</span>
+       </button>
+       <div class="sort-menu hidden" id="pointsSortMenu">
+        <button type="button" class="sort-option active" data-sort="name">По имени</button>
+        <button type="button" class="sort-option" data-sort="date">По дате</button>
+        <button type="button" class="sort-option" data-sort="sales">По продажам</button>
+        <button type="button" class="sort-option" data-sort="kegs">По кегам</button>
+        <button type="button" class="sort-option" data-sort="debt">По долгу</button>
+       </div>
+      </div>
+     </div>
+     <div id="pointsList"></div>
+    </div>
+
+    <div class="card" data-card-id="points_prospects">
+     <h2>🤝 Точки в переговорах / CRM-напоминания</h2>
+     <div class="muted">Сюда можно отложить точки, с которыми ещё не договорились, но есть шанс. Когда договоритесь — нажмите «Активировать точку».</div>
+     <div class="twocol">
+      <div><label>Название точки</label><input id="newProspectName" placeholder="Например, Паб «Угол»"></div>
+      <div><label>Район / маршрут</label><input id="newProspectZone" placeholder="Например, Бостандыкский"></div>
+     </div>
+     <div class="twocol">
+      <div><label>Имя (контактное лицо)</label><input id="newProspectContact" placeholder="Например, Марат"></div>
+      <div><label>Телефон</label><input id="newProspectPhone" type="tel" placeholder="+7 ..."></div>
+     </div>
+     <div class="twocol">
+      <div><label>Адрес</label><input id="newProspectAddr" placeholder="Улица, дом"></div>
+      <div><label>2ГИС: ссылка или координаты</label><input id="newProspectGis" placeholder="Ссылка 2ГИС или координаты"></div>
+     </div>
+     <label>Напоминание / статус переговоров</label>
+     <input id="newProspectNote" placeholder="Например, перезвонить в пятницу, ждут дегустацию">
+     <button type="button" class="secondary" id="addProspectBtn" style="margin-top:12px">+ Добавить в переговоры</button>
+     <div id="prospectsList" style="margin-top:10px"></div>
+    </div>
+   </section>
+
+   <section id="stats" class="hidden">
+    <div class="card" data-card-id="stats_sales">
+     <div class="row" style="margin-bottom:8px;flex-wrap:wrap">
+      <h2 style="margin:0;padding-right:34px">📊 Статистика продаж по периодам</h2>
+      <button type="button" class="secondary sm-btn" id="downloadReportPdfBtn" style="margin-right:34px">📄 Скачать отчёт (PDF)</button>
+     </div>
+     <div class="period-btns" id="statPeriodBtns">
+      <button type="button" class="period-btn active" data-period="day">За день</button>
+      <button type="button" class="period-btn" data-period="week">За неделю</button>
+      <button type="button" class="period-btn" data-period="month">За месяц</button>
+      <button type="button" class="period-btn" data-period="all">За всё время</button>
+      <button type="button" class="period-btn" data-period="custom">Период</button>
+     </div>
+     <div class="twocol hidden" id="statCustomDates" style="margin-bottom:10px">
+      <div><label style="margin-top:0">С даты</label><input type="date" id="statDateFrom"></div>
+      <div><label style="margin-top:0">По дату</label><input type="date" id="statDateTo"></div>
+     </div>
+     <label style="margin-top:0">Фильтр по торговой точке</label>
+     <select id="statPointFilter"><option value="all">Все торговые точки</option></select>
+     <div id="statSummaryStrip" class="summary-strip"></div>
+     <h3>Продажи по сортам пива</h3>
+     <div id="statByProductBox"></div>
+    </div>
+   </section>
+
+   <section id="history" class="hidden">
+    <div class="card" data-card-id="history_list">
+     <h2>История операций</h2>
+     <label style="margin-top:0">Фильтр операций</label>
+     <select id="histTypeFilter">
+      <option value="all">Все операции</option>
+      <option value="sale_return">Отгрузки и возвраты кег</option>
+      <option value="brew">Варки пива</option>
+      <option value="debt_pay">Погашения долгов</option>
+      <option value="stock_other">Прочий приход / списание</option>
+     </select>
+     <div id="historyList"></div>
+    </div>
+   </section>
+
+   <section id="settings" class="hidden">
+    <div class="card" id="driveCard" data-card-id="settings_drive">
+     <h2>☁️ Общая база в Google Drive</h2>
+     <div class="muted">Позволяет работать с одной базой с разных устройств (владелец + водитель) через ваш Google Диск.</div>
+     <label>Google OAuth Client ID</label>
+     <input id="googleClientIdInput" placeholder="Вставьте Client ID из Google Cloud Console">
+     <div class="twocol" style="margin-top:10px">
+      <button type="button" class="secondary" id="saveClientIdBtn">Сохранить Client ID</button>
+      <button type="button" class="primary" id="connectGoogleDriveBtn" style="margin-top:0">Подключить Google Drive</button>
+     </div>
+     <div class="threecol" style="margin-top:8px">
+      <button type="button" class="mini-btn" id="syncNowBtn" style="width:100%;padding:9px">🔄 Синхронизировать</button>
+      <button type="button" class="mini-btn" id="drivePushBtn" style="width:100%;padding:9px">⬆️ Загрузить в облако</button>
+      <button type="button" class="mini-btn" id="drivePullBtn" style="width:100%;padding:9px">⬇️ Скачать из облака</button>
+     </div>
+     <div id="driveAccountInfo" class="muted" style="margin-top:8px">Статус: не подключено</div>
+    </div>
+
+    <div class="card" id="bioCard" data-card-id="settings_bio">
+     <h2>👆 Вход по отпечатку пальца / биометрии</h2>
+     <div class="muted">Привязывает вход по отпечатку (Touch ID / сканер экрана / Face ID) к текущему аккаунту <b id="bioCurrentUserLabel"></b> на этом устройстве.</div>
+     <div id="bioSettingsStatus" class="muted" style="margin-top:8px">Проверка поддержки биометрии...</div>
+     <div class="twocol" style="margin-top:10px">
+      <button type="button" class="primary" id="registerBioBtn" style="margin-top:0">Привязать отпечаток</button>
+      <button type="button" class="danger" id="removeBioBtn" style="margin-top:0">Удалить отпечаток</button>
+     </div>
+    </div>
+
+    <div class="card" id="usersCard" data-card-id="settings_users">
+     <h2>👥 Пользователи и смена паролей</h2>
+     <div class="muted">Управляйте аккаунтами сотрудников, меняйте пароли и назначайте роли.</div>
+
+     <h3>Сменить пароль пользователю</h3>
+     <div class="twocol">
+      <div><label>Пользователь</label><select id="pwdTargetUser"></select></div>
+      <div><label>Новый пароль</label><input id="pwdNewValue" type="password" placeholder="Минимум 4 символа"></div>
+     </div>
+     <button type="button" class="secondary" id="saveChangedPwdBtn" style="margin-top:10px">Сохранить новый пароль</button>
+
+     <h3>Добавить нового пользователя</h3>
+     <div class="threecol">
+      <div><label>Логин</label><input id="newUserLogin" placeholder="Например, sklad1"></div>
+      <div><label>Пароль</label><input id="newUserPass" type="password" placeholder="Пароль"></div>
+      <div><label>Роль</label><select id="newUserRole"></select></div>
+     </div>
+     <button type="button" class="primary" id="createUserBtn">Добавить пользователя</button>
+
+     <h3>Список пользователей</h3>
+     <div id="usersListBox"></div>
+    </div>
+
+    <div class="card" id="rolesCard" data-card-id="settings_roles">
+     <h2>🔐 Роли и права доступа</h2>
+     <div class="muted">Настраивайте, какие вкладки и действия доступны каждой роли, или создавайте новые роли.</div>
+
+     <div class="twocol">
+      <div>
+       <label>Выберите роль для настройки</label>
+       <select id="roleEditorSelect"></select>
+      </div>
+      <div>
+       <label>Название роли</label>
+       <input id="roleEditorTitle" placeholder="Название роли">
+      </div>
+     </div>
+
+     <label>Доступные вкладки</label>
+     <div id="roleTabsPermGrid" class="perm-grid"></div>
+
+     <label>Доступные действия</label>
+     <div id="roleActionsPermGrid" class="perm-grid"></div>
+
+     <div class="twocol" style="margin-top:12px">
+      <button type="button" class="primary" id="saveRolePermBtn" style="margin-top:0">Сохранить права роли</button>
+      <button type="button" class="secondary" id="createNewRoleBtn">+ Создать новую роль</button>
+     </div>
+     <button type="button" class="danger hidden" id="deleteRoleBtn" style="margin-top:8px">Удалить выбранную роль</button>
+    </div>
+
+    <div class="card" id="backupCard" data-card-id="settings_backup">
+     <h2>Резервная копия и сброс</h2>
+     <div class="twocol">
+      <button type="button" class="secondary" id="exportJsonBtn">Скачать резервную копию (JSON)</button>
+      <button type="button" class="mini-btn" id="importJsonBtn" style="width:100%;padding:10px">Восстановить из JSON</button>
+     </div>
+     <input type="file" id="importJsonFile" accept="application/json" class="hidden">
+     <button type="button" class="danger" id="resetAllBtn" style="margin-top:12px">Сбросить все данные</button>
+    </div>
+   </section>
+  </main>
  </div>
 
- <div id="planZoneFilterSingle" style="margin-bottom:8px">
-  <label style="margin-top:4px">Фильтр по району / маршруту</label>
-  <select id="planFilterZoneMain"><option value="all">Все районы</option></select>
- </div>
-
- <div class="summary-strip" id="planSummaryStrip"></div>
- <div id="planListContainer"></div>
-</div>
-</section>
-
-<!-- ПРОДАЖА / ВОЗВРАТ КЕГ -->
-<section id="sale" class="hidden">
-<div class="card" data-card-id="sale_main"><h2>Отгрузка пива и возврат кег</h2>
-<div id="fromPlanBanner" class="notice info hidden"></div>
-<label>Торговая точка</label><select id="salePoint"></select>
-
-<h3 style="margin-top:12px">Отгрузка пива по кегам (литраж считается автоматически)</h3>
-<div id="beerRowsContainer" style="margin-top:8px"></div>
-<button type="button" class="secondary sm-btn" id="addBeerRowBtn" style="width:100%;margin-top:4px">+ Добавить сорт</button>
-
-<div id="saleFinancialBlock">
-<div class="calc">
-<div class="row"><span>Всего кег к отгрузке:</span><b id="saleTotalKegs">0 шт. (30 л: 0, 50 л: 0)</b></div>
-<div class="row" style="margin-top:4px"><span>Общий объём:</span><b id="saleLiters">0 л</b></div>
-<div class="row" style="margin-top:6px;padding-top:6px;border-top:1px solid #224d39"><span>Итого к оплате:</span><strong id="saleAmount">0 ₸</strong></div>
-</div>
+ <footer>
+  <span>KegControl · Локальное хранилище + Google Drive</span>
+  <span id="footerUserInfo"></span>
+ </footer>
 </div>
 
-<h3>Возврат пустых кег с этой точки</h3>
-<div class="twocol">
-<div>
- <label>30-литровые, шт.</label>
- <div class="stepper-box">
-  <button type="button" class="step-btn" data-step-target="ret30" data-step-delta="-1" aria-label="Уменьшить возврат 30 л">−</button>
-  <input id="ret30" type="number" min="0" step="1" value="0">
-  <button type="button" class="step-btn" data-step-target="ret30" data-step-delta="1" aria-label="Увеличить возврат 30 л">+</button>
- </div>
-</div>
-<div>
- <label>50-литровые, шт.</label>
- <div class="stepper-box">
-  <button type="button" class="step-btn" data-step-target="ret50" data-step-delta="-1" aria-label="Уменьшить возврат 50 л">−</button>
-  <input id="ret50" type="number" min="0" step="1" value="0">
-  <button type="button" class="step-btn" data-step-target="ret50" data-step-delta="1" aria-label="Увеличить возврат 50 л">+</button>
- </div>
-</div>
-</div>
-
-<label>Ширина термочека / квитанции</label><select id="receiptWidth"><option value="58">58 мм</option><option value="80" selected>80 мм</option></select>
-<label>Комментарий / накладная</label><input id="saleNote" placeholder="Необязательно">
-<button class="primary" id="saveSale">Оформить и перейти к оплате →</button>
-<div class="notice info">При нажатии на кнопку откроется <b>окно оплаты</b> (наличные, перевод или в долг). При сохранении PDF имя файла формируется автоматически с названием точки и датой.</div>
-</div></section>
-
-<!-- ДОЛГИ -->
-<section id="debts" class="hidden">
-<div class="card accent-red" data-card-id="debts_list">
-<h2>Долги торговых точек</h2>
-<div class="metric debt-metric" style="margin-bottom:12px">
-<small>Итого задолженность по всем точкам</small>
-<strong id="totalAllDebts">0 ₸</strong>
-</div>
-<div id="debtsByPointList" class="empty">Долгов нет. Все точки рассчитались!</div>
-</div>
-
-<div class="card accent-amber" data-card-id="debts_pay">
-<h2>Внести оплату долга</h2>
-<label>Торговая точка</label><select id="debtPayPoint"></select>
-<div class="muted" id="debtPointCurrentInfo" style="margin-top:5px"></div>
-<label>Сумма погашения, ₸</label>
-<input id="debtPayAmount" class="price-input" type="number" min="1" step="1" placeholder="Например, 15000">
-<div class="quick-pay-btns">
-<button type="button" id="payAllPointDebtBtn">Закрыть весь долг точки</button>
-</div>
-<label>Комментарий (наличные / перевод)</label><input id="debtPayNote" placeholder="Например, перевод Kaspi">
-<button class="primary" id="saveDebtPayment">Записать погашение долга</button>
-</div>
-
-<div class="card accent-blue" data-card-id="debts_history">
-<h2>История долгов и погашений</h2>
-<div id="debtHistoryList" class="empty">Записей по долгам пока нет.</div>
-</div>
-</section>
-
-<!-- СКЛАД -->
-<section id="stock" class="hidden">
-<div class="card accent-amber" data-card-id="stock_brew">
-<h2>🍺 Сварить пиво (из рецепта сырья)</h2>
-<div class="twocol">
- <div>
-  <label>Сорт пива (существующий или новый)</label>
-  <input id="brewBeerName" list="brewBeerDatalist" placeholder="Например, Светлый лагер">
-  <datalist id="brewBeerDatalist"></datalist>
- </div>
- <div>
-  <label>Сварено готового пива, литров</label>
-  <input id="brewOutputLiters" type="number" min="0.1" step="0.1" placeholder="Например, 1000">
- </div>
-</div>
-<div class="twocol">
- <div>
-  <label>Крепость (ABV), %</label>
-  <input id="brewAbv" type="number" min="0" max="30" step="0.1" placeholder="Например, 4.8">
- </div>
- <div>
-  <label>Плотность (OG / Plato), %</label>
-  <input id="brewOg" type="number" min="0" max="40" step="0.1" placeholder="Например, 12.0">
- </div>
-</div>
-
-<div class="row" style="margin-top:12px">
- <h3 style="margin:0">Рецепт (сырьё на варку)</h3>
- <button type="button" class="secondary sm-btn" id="addRecipeRowBtn">+ Добавить сырьё</button>
-</div>
-<div id="recipeRowsContainer" style="margin-top:8px"></div>
-
-<label>Комментарий к варке</label>
-<input id="brewNote" placeholder="Номер варки, партия и т.д.">
-<button type="button" class="primary" id="doBrewBtn">Сварить пиво (списать сырьё и добавить литры)</button>
-<div class="notice info">При варке указанное сырьё автоматически списывается со склада, а готовые литры добавляются на остаток выбранного сорта пива (если сорта ещё нет — он создаётся автоматически).</div>
-</div>
-
-<div class="card accent-blue" data-card-id="stock_kegs"><h2>Учёт кег по объёму</h2>
-<div class="twocol">
-<div><label>30-литровые на складе, шт.</label><input id="stock30" type="number" min="0" step="1"></div>
-<div><label>50-литровые на складе, шт.</label><input id="stock50" type="number" min="0" step="1"></div>
-</div>
-<button class="secondary" id="setKegs" style="width:100%;margin-top:10px">Сохранить начальный остаток</button>
-<div id="kegStockSummary"></div>
-</div>
-
-<div class="card" data-card-id="stock_products">
-<div class="row card-hdr-bar" style="flex-wrap:wrap">
- <h2 style="margin:0">Пиво на складе и прайс-лист</h2>
- <button type="button" class="blue-btn sm-btn" id="downloadPricePdfBtn">📄 Скачать прайс-лист PDF</button>
-</div>
-<div class="twocol">
- <div><label>Название сорта</label><input id="newProduct" placeholder="Например, Немецкое"></div>
- <div><label>Цена за 1 литр, ₸</label><input id="newProductPrice" class="price-input" type="number" min="0" step="1" placeholder="Например, 660"></div>
-</div>
-<div class="threecol">
- <div><label>Крепость, %</label><input id="newProductAbv" type="number" min="0" max="30" step="0.1" placeholder="4.8"></div>
- <div><label>Плотность, %</label><input id="newProductOg" type="number" min="0" max="40" step="0.1" placeholder="12.0"></div>
- <div><label>Остаток, л</label><input id="newProductQty" type="number" min="0" step="0.1" placeholder="0"></div>
-</div>
-<button class="secondary" id="addProduct" style="width:100%;margin-top:9px">Добавить сорт и цену</button>
-<div id="productsList" style="margin-top:8px"></div>
-</div>
-
-<div class="card accent-teal" data-card-id="stock_raw"><h2>Сырьё и материалы</h2><label>Название</label><input id="newRaw" placeholder="Например, солод Pilsner"><div class="twocol"><div><label>Единица</label><select id="rawUnit"><option>кг</option><option>шт.</option><option>л</option><option>уп.</option></select></div><div><label>Начальный остаток</label><input id="newRawQty" type="number" min="0" step="0.01"></div></div><button class="secondary" id="addRaw" style="width:100%;margin-top:9px">Добавить сырьё</button><div id="rawList"></div></div>
-<div class="card accent-purple" data-card-id="stock_other"><h2>Приход / расход пива и сырья</h2><label>Операция</label><select id="otherType"><option value="beer_in">Приход пива (л)</option><option value="beer_out">Списание пива (л)</option><option value="raw_in">Приход сырья</option><option value="raw_out">Расход сырья</option></select><div id="otherBeer"><label>Сорт</label><select id="otherProduct"></select><label>Литров</label><input id="otherBeerQty" type="number" min="0.1" step="0.1"></div><div id="otherRaw" class="hidden"><label>Сырьё</label><select id="otherRawSelect"></select><label>Количество</label><input id="otherRawQty" type="number" min="0.01" step="0.01"></div><button class="secondary" id="saveOther" style="width:100%;margin-top:10px">Сохранить</button></div>
-</section>
-
-<!-- ТОЧКИ -->
-<section id="points" class="hidden">
-<div class="card accent-purple" data-card-id="points_main">
-<div class="row card-hdr-bar">
- <h2 style="margin:0">Торговые точки</h2>
- <div class="sort-menu-wrap" id="pointsSortWrap">
-  <button type="button" class="secondary sm-btn" id="pointsSortBtn">🔃 <span id="pointsSortLabel">По имени</span></button>
-  <div class="sort-popover hidden" id="pointsSortMenu">
-   <button type="button" class="sort-option active" data-sort="name">По имени</button>
-   <button type="button" class="sort-option" data-sort="date">По дате</button>
-   <button type="button" class="sort-option" data-sort="sales">По количеству продаж</button>
-   <button type="button" class="sort-option" data-sort="kegs">По количеству кег</button>
-   <button type="button" class="sort-option" data-sort="debt">По количеству долга</button>
-  </div>
- </div>
-</div>
-<div class="twocol">
- <div><label>Название новой точки</label><input id="newPoint" placeholder="Например, Бирмикс"></div>
- <div><label>Район / маршрут</label><input id="newPointZone" placeholder="Например, Центр / Трасса"></div>
-</div>
-<div class="twocol">
- <div><label>Телефон (необяз.)</label><input id="newPointPhone" placeholder="+7 777 ..."></div>
- <div><label>Адрес / ориентир (необяз.)</label><input id="newPointAddr" placeholder="Улица, дом"></div>
-</div>
-<button class="secondary" id="addPoint" style="width:100%;margin-top:9px">Добавить торговую точку</button>
-<div id="pointsList" style="margin-top:12px"></div>
-</div>
-</section>
-
-<!-- ИСТОРИЯ + СТАТИСТИКА -->
-<section id="history" class="hidden">
-<div class="card accent-teal" data-card-id="history_stats">
- <div class="row card-hdr-bar" style="flex-wrap:wrap">
-  <h2 style="margin:0">📊 Статистика продаж</h2>
-  <button type="button" class="blue-btn sm-btn" id="downloadReportPdfBtn">📄 Скачать PDF</button>
- </div>
- <div class="period-btns" id="statPeriodBtns">
-  <button type="button" class="period-btn active" data-period="day">За день</button>
-  <button type="button" class="period-btn" data-period="week">За 7 дней</button>
-  <button type="button" class="period-btn" data-period="month">За 30 дней</button>
-  <button type="button" class="period-btn" data-period="custom">За период</button>
-  <button type="button" class="period-btn" data-period="all">За всё время</button>
- </div>
- <div id="statCustomDates" class="twocol hidden" style="margin-top:6px">
-  <div><label style="margin-top:4px">С даты</label><input type="date" id="statDateFrom"></div>
-  <div><label style="margin-top:4px">По дату</label><input type="date" id="statDateTo"></div>
- </div>
- <div style="margin-top:6px">
-  <label style="margin-top:4px">Фильтр по торговой точке</label>
-  <select id="statPointFilter"><option value="all">Все торговые точки</option></select>
- </div>
-
- <div class="summary-strip" id="statSummaryStrip"></div>
- <h3 style="margin-top:10px">Продажи по сортам пива за период</h3>
- <div id="statByProductBox"></div>
-</div>
-
-<div class="card" data-card-id="history_journal">
- <div class="row card-hdr-bar">
-  <h2 style="margin:0">Журнал операций</h2>
-  <select id="histTypeFilter" style="width:auto;padding:6px 9px;font-size:13px">
-   <option value="all">Все операции</option>
-   <option value="sale_return">Отгрузки / возвраты</option>
-   <option value="brew">Варки пива</option>
-   <option value="debt_pay">Погашения долгов</option>
-   <option value="stock_other">Склад (приход/расход)</option>
-  </select>
- </div>
- <div id="historyList" class="empty">История пуста.</div>
-</div>
-</section>
-
-<!-- НАСТРОЙКИ И ОБЛАКО -->
-<section id="settings" class="hidden">
-<div class="card accent-blue" id="driveCard" data-card-id="settings_drive">
- <h2>☁️ Облачная синхронизация Google Drive</h2>
- <div class="notice info">
-  Подключите один и тот же аккаунт Google на вашем телефоне и на телефоне водителя. Приложение сохранит общую базу <code>kegcontrol_shared_db.json</code> на Google Диске и будет синхронизировать продажи, заявки, остатки, пользователей и долги. При открытии приложения оно тихо проверяет сеанс без всплывающих окон, а при нажатии на облако или кнопку синхронизации открывает окно входа для вашего сохранённого аккаунта.
- </div>
- <label>Google OAuth Client ID (для облачного диска)</label>
- <input id="googleClientIdInput" placeholder="Вставьте Client ID вида 1234567890-xxxx.apps.googleusercontent.com">
- <div class="twocol" style="margin-top:10px">
-  <button type="button" class="primary" style="margin-top:0" id="connectGoogleDriveBtn">Подключить Google Drive</button>
-  <button type="button" class="secondary" id="saveClientIdBtn">Сохранить Client ID</button>
- </div>
- <div id="driveAccountInfo" class="muted" style="margin-top:8px">Статус: Google Drive не подключён (работает локально на устройстве).</div>
- <div class="twocol" style="margin-top:10px">
-  <button type="button" class="blue-btn" id="drivePushBtn">⬆️ Отправить базу в облако</button>
-  <button type="button" class="secondary" id="drivePullBtn">⬇️ Загрузить базу из облака</button>
- </div>
-</div>
-
-<div class="card" id="bioCard" data-card-id="settings_bio">
- <h2>👆 Вход по отпечатку / биометрии</h2>
- <div class="notice info" style="margin-top:0">
-  Вы вошли как <b id="bioCurrentUserLabel">admin1</b>. Здесь можно привязать сканер отпечатка пальца или Face ID этого телефона к вашему аккаунту, чтобы входить в 1 касание.
- </div>
- <div id="bioSettingsStatus" class="muted" style="margin-bottom:10px">Проверка поддержки биометрии...</div>
- <div class="twocol">
-  <button type="button" class="bio-btn" style="margin-top:0" id="registerBioBtn">👆 Привязать отпечаток к аккаунту</button>
-  <button type="button" class="danger" id="removeBioBtn">Отвязать отпечаток на устройстве</button>
- </div>
-</div>
-
-<div class="card accent-purple" id="usersCard" data-card-id="settings_users">
- <h2>👥 Пользователи и пароли</h2>
- <div class="notice info" style="margin-top:0">
-  Здесь вы можете сменить свой пароль, поменять пароль водителя (или любого другого сотрудника), добавить новых пользователей и назначить им роли.
- </div>
-
- <h3>Смена пароля пользователя</h3>
- <div class="twocol">
-  <div>
-   <label>Выберите пользователя</label>
-   <select id="pwdTargetUser"></select>
-  </div>
-  <div>
-   <label>Новый пароль</label>
-   <input id="pwdNewValue" type="password" placeholder="Минимум 4 символа">
-  </div>
- </div>
- <button type="button" class="secondary" id="saveChangedPwdBtn" style="width:100%;margin-top:9px">Сохранить новый пароль</button>
-
- <h3 style="margin-top:16px">Добавить нового пользователя</h3>
- <div class="threecol">
-  <div>
-   <label>Логин</label>
-   <input id="newUserLogin" placeholder="Например, driver2">
-  </div>
-  <div>
-   <label>Пароль</label>
-   <input id="newUserPass" type="password" placeholder="Пароль">
-  </div>
-  <div>
-   <label>Роль</label>
-   <select id="newUserRole"></select>
-  </div>
- </div>
- <button type="button" class="primary" id="createUserBtn">Добавить пользователя</button>
-
- <h3 style="margin-top:16px">Список пользователей</h3>
- <div id="usersListBox"></div>
-</div>
-
-<div class="card accent-amber" id="rolesCard" data-card-id="settings_roles">
- <h2>🛡️ Роли и права доступа</h2>
- <div class="notice info" style="margin-top:0">
-  Выберите роль, чтобы изменить её название, доступные вкладки и разрешённые действия, либо создайте новую роль.
- </div>
- <div class="twocol">
-  <div>
-   <label>Редактируемая роль</label>
-   <select id="roleEditorSelect"></select>
-  </div>
-  <div>
-   <label>Название роли</label>
-   <input id="roleEditorTitle" placeholder="Например, Водитель">
-  </div>
- </div>
-
- <label>Доступные вкладки для этой роли</label>
- <div class="perm-grid" id="roleTabsPermGrid"></div>
-
- <label>Дополнительные права и действия</label>
- <div class="perm-grid" id="roleActionsPermGrid"></div>
-
- <div class="twocol" style="margin-top:10px">
-  <button type="button" class="primary" style="margin-top:0" id="saveRolePermBtn">Сохранить права роли</button>
-  <button type="button" class="secondary" id="createNewRoleBtn">+ Создать новую роль</button>
- </div>
- <button type="button" class="danger hidden" id="deleteRoleBtn" style="width:100%;margin-top:8px">Удалить выбранную роль</button>
-</div>
-
-<div class="card" id="backupCard" data-card-id="settings_backup">
- <h2>📦 Резервная копия (файл JSON)</h2>
- <div class="twocol">
-  <button type="button" class="secondary" id="exportJsonBtn">Скачать резервную копию</button>
-  <button type="button" class="secondary" id="importJsonBtn">Загрузить из файла</button>
- </div>
- <input type="file" id="importJsonFile" accept=".json,application/json" class="hidden">
- <button type="button" class="danger" id="resetAllBtn" style="width:100%;margin-top:12px">Очистить операции и сбросить остатки</button>
-</div>
-</section>
-</main>
-<footer>KegControl 1.4 Cloud · <span id="footerUserInfo">Авторизован</span></footer>
-</div>
-
-<!-- МОДАЛКА НОВОЙ ЗАЯВКИ (ПЛАНИРОВКА) -->
+<!-- Модальное окно новой заявки в план -->
 <div id="planModal" class="modal-backdrop hidden">
- <div class="modal-box" style="border-top-color:var(--purple)">
-  <div class="modal-head">
-   <h2 style="margin:0">📅 Новая заявка (план отгрузки)</h2>
-   <button type="button" class="secondary sm-btn" id="closePlanModal">Закрыть</button>
+ <div class="modal-card">
+  <div class="row">
+   <h2 style="margin:0">🚚 Новая заявка на доставку</h2>
+   <button type="button" class="mini-btn" id="closePlanModal">✕</button>
   </div>
+  <label>Торговая точка</label>
+  <select id="planPoint"></select>
   <div class="twocol">
-   <div>
-    <label>Торговая точка</label>
-    <select id="planPoint"></select>
-   </div>
-   <div>
-    <label>Дата доставки</label>
-    <input type="date" id="planDate">
-   </div>
+   <div><label>Дата доставки</label><input type="date" id="planDate"></div>
+   <div><label>Время (необязательно)</label><input type="time" id="planTime"></div>
   </div>
-  <div class="quick-days" id="quickPlanDays">
-   <button type="button" data-offset="0">Сегодня</button>
-   <button type="button" data-offset="1">Завтра</button>
-   <button type="button" data-weekday="3">Ближ. среда</button>
-   <button type="button" data-weekday="5">Ближ. пятница</button>
+  <div class="quick-amt-row" id="quickPlanDays">
+   <button type="button" class="quick-amt-btn" data-offset="0">Сегодня</button>
+   <button type="button" class="quick-amt-btn" data-offset="1">Завтра</button>
+   <button type="button" class="quick-amt-btn" data-weekday="1">Пн</button>
+   <button type="button" class="quick-amt-btn" data-weekday="3">Ср</button>
+   <button type="button" class="quick-amt-btn" data-weekday="5">Пт</button>
   </div>
-
-  <div class="twocol">
-   <div>
-    <label>Время напоминания (необяз.)</label>
-    <input type="time" id="planTime" value="08:30">
-   </div>
-   <div>
-    <label>Район / маршрут (берётся из точки)</label>
-    <input id="planZoneOverride" placeholder="Например, Верх города">
-   </div>
-  </div>
-
-  <div class="row" style="margin-top:12px">
-   <h3 style="margin:0">Что заказала точка (литраж по кегам считается сам)</h3>
-   <button type="button" class="secondary sm-btn" id="addPlanRowBtn">+ Добавить сорт</button>
-  </div>
-  <div id="planRowsContainer" style="margin-top:8px"></div>
-
+  <label>Район / маршрут</label>
+  <input id="planZoneOverride" placeholder="Подставится из точки или укажите свой">
+  <h3>Пиво и кеги к загрузке</h3>
+  <div id="planRowsContainer"></div>
+  <button type="button" class="ghost" id="addPlanRowBtn">+ Добавить сорт в заявку</button>
   <div class="twocol">
    <div><label>Забрать пустых 30 л, шт.</label><input id="planRet30" type="number" min="0" step="1" value="0"></div>
    <div><label>Забрать пустых 50 л, шт.</label><input id="planRet50" type="number" min="0" step="1" value="0"></div>
   </div>
-  <label>Комментарий к заявке</label>
-  <input id="planNote" placeholder="Например, позвонить за 30 минут, оплата наличными">
+  <label>Комментарий водителю</label>
+  <input id="planNote" placeholder="Например, звонить за 30 минут, вход со двора">
   <button type="button" class="primary" id="savePlanBtn">Сохранить заявку в план</button>
-  <div class="notice info">Заявка не списывает пиво и кеги со склада заранее. Когда водитель или вы поедете на развоз, нажмите <b>«Оформить отгрузку»</b> прямо в карточке заявки.</div>
  </div>
 </div>
 
-<!-- МОДАЛКА ОПЛАТЫ ПРИ ОТГРУЗКЕ -->
+<!-- Модальное окно выбора способа оплаты при отгрузке -->
 <div id="payModal" class="modal-backdrop hidden">
- <div class="modal-box" style="border-top-color:var(--teal)">
-  <div class="modal-head">
+ <div class="modal-card">
+  <div class="row">
    <h2 style="margin:0">💳 Оплата отгрузки</h2>
-   <button type="button" class="secondary sm-btn" id="closePayModal">Отмена</button>
+   <button type="button" class="mini-btn" id="closePayModal">✕</button>
   </div>
-  <div id="payModalSummary" class="calc" style="margin-top:0"></div>
-
+  <div id="payModalSummary" class="calc" style="margin-top:10px"></div>
   <label>Способ оплаты</label>
   <div class="pay-methods-grid" id="payMethodsGrid">
    <button type="button" class="pay-method-btn active" data-pm="Наличные">💵 Наличные</button>
-   <button type="button" class="pay-method-btn" data-pm="Перевод">📱 Перевод</button>
-   <button type="button" class="pay-method-btn" data-pm="В долг">📒 В долг</button>
+   <button type="button" class="pay-method-btn" data-pm="Перевод">📲 Перевод</button>
+   <button type="button" class="pay-method-btn" data-pm="Частично нал / перевод">🔀 Нал + Перевод</button>
+   <button type="button" class="pay-method-btn" data-pm="В долг">⏳ В долг</button>
   </div>
-
   <div id="payAmountWrap">
-   <label>Оплачено сейчас, ₸ (можно ввести часть — остаток пойдёт в долг)</label>
-   <input id="modalPaidAmount" class="price-input" type="number" min="0" step="1">
-   <div class="quick-pay-btns">
-    <button type="button" id="modalPayFullBtn">Оплачено полностью</button>
-    <button type="button" id="modalPayHalfBtn">50%</button>
-    <button type="button" id="modalPayZeroBtn">0 ₸ (Весь чек в долг)</button>
+   <label>Внесено оплаты сейчас, ₸</label>
+   <input id="modalPaidAmount" type="number" min="0" step="1">
+   <div class="quick-amt-row">
+    <button type="button" class="quick-amt-btn" id="modalPayFullBtn">Оплачено полностью</button>
+    <button type="button" class="quick-amt-btn" id="modalPayHalfBtn">Половина</button>
+    <button type="button" class="quick-amt-btn" id="modalPayZeroBtn">0 ₸ (весь чек в долг)</button>
    </div>
   </div>
-
   <div id="modalPayResultBox" class="calc paid-box"></div>
-  <button type="button" class="primary" id="confirmSalePayBtn">Подтвердить отгрузку и печать чека</button>
+  <button type="button" class="primary" id="confirmSalePayBtn">Подтвердить и распечатать чек</button>
  </div>
 </div>
 
-<!-- МОДАЛКА РЕДАКТИРОВАНИЯ ОПЕРАЦИИ / СОРТА / ТОЧКИ -->
+<!-- Модальное окно редактирования / просмотра -->
 <div id="editModal" class="modal-backdrop hidden">
- <div class="modal-box">
-  <div class="modal-head">
+ <div class="modal-card">
+  <div class="row">
    <h2 id="editModalTitle" style="margin:0">✏️ Редактирование</h2>
-   <button type="button" class="secondary sm-btn" id="closeEditModal">Закрыть</button>
+   <button type="button" class="mini-btn" id="closeEditModal">✕</button>
   </div>
-  <div id="editModalBody"></div>
+  <div id="editModalBody" style="margin-top:8px"></div>
  </div>
 </div>
 
 <div id="printArea"></div>
 
 <script>
-const STORAGE_KEY='kegcontrol_1_4_cloud';
-const SESSION_KEY='kegcontrol_session_user';
-const CLIENT_ID_KEY='kegcontrol_google_client_id';
+const STORAGE_KEY='kegcontrol_db_v4';
+const SESSION_KEY='kegcontrol_session_v1';
+const CLIENT_ID_KEY='kegcontrol_google_client_id_v1';
 const DRIVE_META_KEY='kegcontrol_drive_meta_v1';
 const BIO_CREDS_KEY='kegcontrol_bio_creds_v1';
 const COLLAPSED_CARDS_KEY='kegcontrol_collapsed_cards_v1';
 const DRIVE_FILE_NAME='kegcontrol_shared_db.json';
-const DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email';
-
-const WHATSAPP_LOGO_SVG=`<svg class="wa-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.52 3.48A11.82 11.82 0 0 0 12.07 0C5.5 0 .16 5.34.16 11.91c0 2.1.55 4.15 1.59 5.96L0 24l6.29-1.65a11.88 11.88 0 0 0 5.77 1.47h.01c6.57 0 11.91-5.34 11.91-11.91 0-3.18-1.24-6.17-3.46-8.43zM12.07 21.8h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.73.98 1-3.64-.23-.37a9.84 9.84 0 0 1-1.51-5.23c0-5.45 4.44-9.89 9.9-9.89 2.64 0 5.12 1.03 6.99 2.9a9.83 9.83 0 0 1 2.9 7c0 5.45-4.44 9.88-9.88 9.88zm5.42-7.4c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.06 2.88 1.21 3.08c.15.2 2.09 3.19 5.06 4.47.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.3.17-1.42-.07-.12-.27-.2-.57-.35z"/></svg>`;
+const DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file';
+const WHATSAPP_LOGO_SVG='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.52 3.48A11.82 11.82 0 0 0 12.07 0C5.5 0 .16 5.34.16 11.91c0 2.1.55 4.15 1.6 5.96L0 24l6.3-1.65a11.88 11.88 0 0 0 5.77 1.47h.01c6.57 0 11.91-5.34 11.91-11.91 0-3.18-1.24-6.17-3.47-8.43ZM12.08 21.8h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.85 9.85 0 0 1-1.51-5.26c0-5.45 4.44-9.89 9.9-9.89 2.64 0 5.12 1.03 6.99 2.9a9.83 9.83 0 0 1 2.9 7c0 5.45-4.44 9.88-9.87 9.88Zm5.42-7.4c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.05 1.02-1.05 2.5s1.07 2.9 1.22 3.1c.15.2 2.11 3.22 5.11 4.52.71.31 1.27.49 1.7.63.72.23 1.37.2 1.89.12.58-.09 1.76-.72 2.01-1.41.25-.7.25-1.3.17-1.42-.07-.12-.27-.2-.57-.35Z"/></svg>';
 
 const ALL_TABS=[
- {id:'home',label:'Обзор'},
- {id:'plan',label:'Планировка'},
+ {id:'home',label:'Главная'},
+ {id:'plan',label:'План'},
  {id:'sale',label:'Продажа / Возврат'},
  {id:'debts',label:'Долги'},
+ {id:'brew',label:'Варка'},
  {id:'stock',label:'Склад'},
  {id:'points',label:'Точки'},
+ {id:'stats',label:'Статистика'},
  {id:'history',label:'История'},
- {id:'settings',label:'Настройки & Облако'}
+ {id:'settings',label:'Настройки'}
 ];
 
 const ALL_ACTIONS=[
  {id:'edit_ops',label:'Редактировать и удалять операции'},
- {id:'edit_points_plans',label:'Редактировать точки и заявки'},
- {id:'manage_users_roles',label:'Управлять пользователями и ролями'},
- {id:'manage_system',label:'Сброс базы и экспорт/импорт JSON'}
+ {id:'edit_points_plans',label:'Редактировать и удалять точки, переговоры и заявки'},
+ {id:'manage_users_roles',label:'Управлять пользователями, паролями и ролями'},
+ {id:'manage_system',label:'Сбрасывать всю базу данных'}
 ];
 
 const DEFAULT_ROLES={
  owner:{
   id:'owner',
   title:'Владелец',
-  tabs:['home','plan','sale','debts','stock','points','history','settings'],
+  tabs:['home','plan','sale','debts','brew','stock','points','stats','history','settings'],
   actions:['edit_ops','edit_points_plans','manage_users_roles','manage_system']
  },
  driver:{
   id:'driver',
   title:'Водитель',
   tabs:['home','plan','sale','debts','points','settings'],
-  actions:[]
+  actions:['edit_points_plans']
  }
 };
 
-const DEFAULT_USERS=[
- {username:'admin1',pass:'augusttime@!08',role:'owner'},
- {username:'driver',pass:'1111',role:'driver'}
-];
+function defaultData(){
+ return {
+  updatedAt:Date.now(),
+  users:[
+   {username:'admin1',pass:'1234',role:'owner'},
+   {username:'driver1',pass:'1111',role:'driver'}
+  ],
+  roles:JSON.parse(JSON.stringify(DEFAULT_ROLES)),
+  kegs30:10,
+  kegs50:10,
+  products:[
+   {id:1,name:'Светлый лагер',price:600,abv:'4.8',og:'11.8',qty:500},
+   {id:2,name:'Пшеничное',price:650,abv:'5.0',og:'12.4',qty:300}
+  ],
+  raw:[],
+  points:[
+   {id:1,name:'Бар «Угол»',zone:'Центр',contact:'Алексей',phone:'+7 701 000 00 01',addr:'ул. Примерная, 10',gis:'',lat:null,lng:null,createdAt:Date.now()-86400000*2},
+   {id:2,name:'Паб «Кегля»',zone:'Север',contact:'Дмитрий',phone:'+7 701 000 00 02',addr:'пр. Мира, 25',gis:'',lat:null,lng:null,createdAt:Date.now()-86400000}
+  ],
+  prospects:[],
+  plans:[],
+  ops:[]
+ };
+}
 
-const defaultData=()=>({
- updatedAt:0,
- roles:JSON.parse(JSON.stringify(DEFAULT_ROLES)),
- users:JSON.parse(JSON.stringify(DEFAULT_USERS)),
- kegs30:0,
- kegs50:0,
- products:[
-  {id:1,name:'Светлое',qty:0,price:620,abv:'',og:''},
-  {id:2,name:'Пшеничное',qty:0,price:660,abv:'',og:''}
- ],
- raw:[],
- points:[
-  {id:1,name:'Точка 1',zone:'Центр',phone:'',addr:'',createdAt:1},
-  {id:2,name:'Точка 2',zone:'Трасса',phone:'',addr:'',createdAt:2}
- ],
- plans:[],
- ops:[]
-});
-
-function normalizeDb(rawObj){
+function normalizeDb(raw){
  const base=defaultData();
- const merged={...base,...(rawObj&&typeof rawObj==='object'?rawObj:{})};
+ const merged={...base,...(raw||{})};
  if(!Array.isArray(merged.users)||!merged.users.length) merged.users=base.users;
- if(!merged.roles||typeof merged.roles!=='object'||!Object.keys(merged.roles).length) merged.roles=base.roles;
- if(!Array.isArray(merged.plans)) merged.plans=[];
- if(!Array.isArray(merged.ops)) merged.ops=[];
- if(!Array.isArray(merged.raw)) merged.raw=[];
- if(!Array.isArray(merged.points)) merged.points=[];
- if(!Array.isArray(merged.products)) merged.products=[];
-
- const oldRashid=merged.users.find(u=>u.username==='rashid');
- if(oldRashid&&!merged.users.some(u=>u.username==='admin1')){
-  oldRashid.username='admin1';
-  oldRashid.pass='augusttime@!08';
-  oldRashid.role='owner';
- }
- if(!merged.users.some(u=>u.username==='admin1')){
-  merged.users.unshift({username:'admin1',pass:'augusttime@!08',role:'owner'});
- }
- if(!merged.roles.owner){
-  merged.roles.owner=JSON.parse(JSON.stringify(DEFAULT_ROLES.owner));
- }
- if(!merged.roles.driver){
-  merged.roles.driver=JSON.parse(JSON.stringify(DEFAULT_ROLES.driver));
- }else if(!Array.isArray(merged.roles.driver.tabs)){
-  merged.roles.driver.tabs=['home','plan','sale','debts','points','settings'];
- }else if(!merged.roles.driver.tabs.includes('settings')){
-  merged.roles.driver.tabs.push('settings');
- }
+ merged.roles={...JSON.parse(JSON.stringify(DEFAULT_ROLES)),...(merged.roles||{})};
+ Object.keys(DEFAULT_ROLES).forEach(rk=>{
+  merged.roles[rk]={
+   ...DEFAULT_ROLES[rk],
+   ...(merged.roles[rk]||{}),
+   tabs:Array.isArray(merged.roles[rk]?.tabs)?merged.roles[rk].tabs:DEFAULT_ROLES[rk].tabs,
+   actions:Array.isArray(merged.roles[rk]?.actions)?merged.roles[rk].actions:DEFAULT_ROLES[rk].actions
+  };
+ });
  merged.users=merged.users.map(u=>({
   username:String(u.username||'').trim(),
   pass:String(u.pass||''),
-  role:merged.roles[u.role]?u.role:(u.role==='owner'?'owner':'driver')
+  role:merged.roles[u.role]?u.role:'driver'
  })).filter(u=>u.username);
- merged.points=merged.points.map((p,idx)=>({zone:'',phone:'',addr:'',createdAt:Number(p.createdAt||p.id||idx+1),...p}));
- merged.products=merged.products.map(p=>({qty:0,price:0,abv:'',og:'',...p}));
+ if(!merged.users.some(u=>u.role==='owner')){
+  merged.users.unshift({username:'admin1',pass:'1234',role:'owner'});
+ }
+ if(!Array.isArray(merged.products)) merged.products=[];
+ if(!Array.isArray(merged.raw)) merged.raw=[];
+ if(!Array.isArray(merged.points)) merged.points=[];
+ merged.points=merged.points.map((p,i)=>({
+  ...p,
+  contact:String(p.contact||'').trim(),
+  phone:String(p.phone||'').trim(),
+  addr:String(p.addr||'').trim(),
+  zone:String(p.zone||'').trim(),
+  gis:String(p.gis||'').trim(),
+  lat:p.lat!==undefined&&p.lat!==null&&p.lat!==''?Number(p.lat):null,
+  lng:p.lng!==undefined&&p.lng!==null&&p.lng!==''?Number(p.lng):null,
+  createdAt:Number(p.createdAt||p.id||(Date.now()-i*1000))
+ }));
+ if(!Array.isArray(merged.prospects)) merged.prospects=[];
+ merged.prospects=merged.prospects.map((p,i)=>({
+  ...p,
+  contact:String(p.contact||'').trim(),
+  phone:String(p.phone||'').trim(),
+  addr:String(p.addr||'').trim(),
+  zone:String(p.zone||'').trim(),
+  gis:String(p.gis||'').trim(),
+  note:String(p.note||'').trim(),
+  lat:p.lat!==undefined&&p.lat!==null&&p.lat!==''?Number(p.lat):null,
+  lng:p.lng!==undefined&&p.lng!==null&&p.lng!==''?Number(p.lng):null,
+  createdAt:Number(p.createdAt||p.id||(Date.now()-i*1000))
+ }));
+ if(!Array.isArray(merged.plans)) merged.plans=[];
+ if(!Array.isArray(merged.ops)) merged.ops=[];
  merged.kegs30=Math.max(0,Number(merged.kegs30||0));
  merged.kegs50=Math.max(0,Number(merged.kegs50||0));
  merged.updatedAt=Number(merged.updatedAt||0);
@@ -993,6 +1001,84 @@ const fmtDateRu=(iso)=>{
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>Date.now()+Math.floor(Math.random()*10000);
 const fmtDeg=v=>(v!==undefined&&v!==null&&String(v).trim()!==''?`${fmt(Number(v))}%`:'—');
+
+/* ==================== ПОМОЩНИКИ ДЛЯ ТЕЛЕФОНА И 2ГИС ==================== */
+function normalizeTelHref(phone){
+ const raw=String(phone||'').trim();
+ if(!raw) return '';
+ let digits=raw.replace(/[^\d+]/g,'');
+ if(!digits.startsWith('+')){
+  const onlyDig=digits.replace(/\D/g,'');
+  if(onlyDig.length===11&&onlyDig.startsWith('8')){
+   digits='+7'+onlyDig.slice(1);
+  }else if(onlyDig.length===10){
+   digits='+7'+onlyDig;
+  }else if(onlyDig){
+   digits='+'+onlyDig;
+  }
+ }
+ return digits.replace(/[^\d+]/g,'').length>=6?`tel:${digits}`:'';
+}
+
+function parseGisInput(gisRaw){
+ const txt=String(gisRaw||'').trim();
+ if(!txt) return {gis:'',lat:null,lng:null,url:''};
+ let lat=null,lng=null;
+
+ const coordMatch=txt.match(/(-?\d{1,2}\.\d+)\s*[,;\s]\s*(-?\d{1,3}\.\d+)/);
+ if(coordMatch){
+  const a=Number(coordMatch[1]);
+  const b=Number(coordMatch[2]);
+  if(Math.abs(a)<=90&&Math.abs(b)<=180){
+   lat=a;
+   lng=b;
+  }
+ }
+
+ if(lat===null||lng===null){
+  const urlCoord=txt.match(/[?&](?:m|ll|center)=([^&]+)/i);
+  if(urlCoord){
+   const parts=decodeURIComponent(urlCoord[1]).split(',');
+   if(parts.length>=2){
+    const a=Number(parts[0]);
+    const b=Number(parts[1]);
+    if(!Number.isNaN(a)&&!Number.isNaN(b)&&Math.abs(a)<=90&&Math.abs(b)<=180){
+     lat=a;
+     lng=b;
+    }
+   }
+  }
+ }
+
+ let url='';
+ if(/^https?:\/\//i.test(txt)){
+  url=txt;
+ }else if(lat!==null&&lng!==null){
+  url=`https://2gis.kz/geo/${lng},${lat}`;
+ }else{
+  url=`https://2gis.kz/search/${encodeURIComponent(txt)}`;
+ }
+
+ return {gis:txt,lat,lng,url};
+}
+
+function renderGisBadge(pt,fallbackQuery=''){
+ const parsed=parseGisInput(pt.gis||(pt.lat!=null&&pt.lng!=null?`${pt.lat}, ${pt.lng}`:''));
+ const targetUrl=parsed.url||(fallbackQuery?`https://2gis.kz/search/${encodeURIComponent(fallbackQuery)}`:'');
+ if(!targetUrl&&!parsed.gis) return '';
+ const label=parsed.lat!=null&&parsed.lng!=null
+  ?`2ГИС (${parsed.lat.toFixed(4)}, ${parsed.lng.toFixed(4)})`
+  :(parsed.gis&&!/^https?:\/\//i.test(parsed.gis)?`2ГИС: ${parsed.gis}`:'2ГИС');
+ return `<a class="gis-mini-link" href="${esc(targetUrl)}" target="_blank" rel="noopener noreferrer">🗺️ ${esc(label)}</a>`;
+}
+
+function renderPhoneLink(phone){
+ const clean=String(phone||'').trim();
+ if(!clean) return '';
+ const href=normalizeTelHref(clean);
+ if(!href) return `<span>📞 ${esc(clean)}</span>`;
+ return `<a class="phone-call-link" href="${esc(href)}" title="Позвонить">📞 ${esc(clean)}</a>`;
+}
 
 /* ==================== СВОРАЧИВАНИЕ КАРТОЧЕК (С СОХРАНЕНИЕМ СОСТОЯНИЯ) ==================== */
 function loadCollapsedCards(){
@@ -1884,7 +1970,7 @@ $('beerStockCard').onclick=()=>{
  $('editModal').classList.remove('hidden');
 };
 
-/* ==================== СОРТИРОВКА ТОЧЕК (ВСПЛЫВАЮЩЕЕ МЕНЮ) ==================== */
+/* ==================== СОРТИРОВКА ТОЧЕК И CRM-ТОЧКИ В РАБОТЕ ==================== */
 const POINTS_SORT_TITLES={
  name:'По имени',
  date:'По дате',
@@ -1974,6 +2060,23 @@ function renderPointsList(kmap=kegsByPoint(),dmap=debtsByPoint(),smap=salesByPoi
   const d=dmap[p.id]?dmap[p.id].debt:0;
   const sl=Number(smap[p.id]||0);
   const menuHidden=openPointMenuId===p.id?'':'hidden';
+
+  const gisHtml=renderGisBadge(p,`${p.name} ${p.addr||''} ${p.zone||''}`.trim());
+  const addrLine=(p.addr||gisHtml)?`
+   <div class="point-line-addr">
+    ${p.addr?`<span>📍 ${esc(p.addr)}</span>`:''}
+    ${gisHtml}
+   </div>
+  `:'';
+
+  const phoneHtml=renderPhoneLink(p.phone);
+  const contactLine=(p.contact||phoneHtml)?`
+   <div class="point-line-contact">
+    ${p.contact?`<span>👤 <b>${esc(p.contact)}</b></span>`:''}
+    ${phoneHtml}
+   </div>
+  `:'';
+
   return `
    <div class="item">
     <div class="point-row">
@@ -1986,8 +2089,9 @@ function renderPointsList(kmap=kegsByPoint(),dmap=debtsByPoint(),smap=salesByPoi
         <button type="button" class="point-menu-item del" onclick="deletePoint(${p.id})">🗑️ Удалить</button>
        </div>
       </div>
-      ${p.addr||p.phone?`<div class="muted">${p.addr?'📍 '+esc(p.addr)+' ':''}${p.phone?'📞 '+esc(p.phone):''}</div>`:''}
-      <div class="muted">Продано: <b>${fmt(sl)} л</b></div>
+      ${addrLine}
+      ${contactLine}
+      <div class="muted" style="margin-top:4px">Продано: <b>${fmt(sl)} л</b></div>
      </div>
      <div class="point-row-right">
       ${d>0?`<span class="pill debt">Долг: ${money(d)}</span>`:''}
@@ -1997,6 +2101,148 @@ function renderPointsList(kmap=kegsByPoint(),dmap=debtsByPoint(),smap=salesByPoi
    </div>
   `;
  }).join(''):'<div class="empty">Торговых точек пока нет.</div>';
+}
+
+$('addProspectBtn').onclick=()=>{
+ if(!hasAction('edit_points_plans')) return alert('У вашей роли нет прав на добавление точек.');
+ const name=$('newProspectName').value.trim();
+ if(!name) return alert('Введите название точки');
+ const zone=$('newProspectZone').value.trim();
+ const contact=$('newProspectContact').value.trim();
+ const phone=$('newProspectPhone').value.trim();
+ const addr=$('newProspectAddr').value.trim();
+ const gisParsed=parseGisInput($('newProspectGis').value);
+ const note=$('newProspectNote').value.trim();
+
+ db.prospects.unshift({
+  id:uid(),
+  name,
+  zone,
+  contact,
+  phone,
+  addr,
+  gis:gisParsed.gis,
+  lat:gisParsed.lat,
+  lng:gisParsed.lng,
+  note,
+  createdAt:Date.now()
+ });
+
+ $('newProspectName').value='';
+ $('newProspectZone').value='';
+ $('newProspectContact').value='';
+ $('newProspectPhone').value='';
+ $('newProspectAddr').value='';
+ $('newProspectGis').value='';
+ $('newProspectNote').value='';
+ save();
+};
+
+window.activateProspect=id=>{
+ if(!hasAction('edit_points_plans')) return alert('У вашей роли нет прав на активацию точек.');
+ const idx=db.prospects.findIndex(x=>x.id===id);
+ if(idx===-1) return;
+ const pr=db.prospects[idx];
+ if(!confirm(`Активировать точку «${pr.name}» и перенести её в «Торговые точки»?`)) return;
+ db.prospects.splice(idx,1);
+ db.points.push({
+  id:uid(),
+  name:pr.name,
+  zone:pr.zone||'',
+  contact:pr.contact||'',
+  phone:pr.phone||'',
+  addr:pr.addr||'',
+  gis:pr.gis||'',
+  lat:pr.lat??null,
+  lng:pr.lng??null,
+  createdAt:Date.now()
+ });
+ save();
+};
+
+window.editProspectModal=id=>{
+ if(!hasAction('edit_points_plans')) return alert('У вашей роли нет прав на редактирование точек.');
+ const pr=db.prospects.find(x=>x.id===id);
+ if(!pr) return;
+ $('editModalTitle').textContent='✏️ Точка в переговорах';
+ $('editModalBody').innerHTML=`
+  <label>Название точки</label><input id="eprName" value="${esc(pr.name)}">
+  <label>Район / маршрут</label><input id="eprZone" value="${esc(pr.zone||'')}">
+  <label>Имя (контактное лицо)</label><input id="eprContact" value="${esc(pr.contact||'')}">
+  <label>Телефон</label><input id="eprPhone" value="${esc(pr.phone||'')}">
+  <label>Адрес</label><input id="eprAddr" value="${esc(pr.addr||'')}">
+  <label>2ГИС: ссылка или координаты</label><input id="eprGis" value="${esc(pr.gis||(pr.lat!=null&&pr.lng!=null?pr.lat+', '+pr.lng:''))}">
+  <label>Заметка / напоминание</label><input id="eprNote" value="${esc(pr.note||'')}">
+  <button type="button" class="primary" id="saveProspectEditBtn">Сохранить</button>
+ `;
+ $('editModal').classList.remove('hidden');
+ $('saveProspectEditBtn').onclick=()=>{
+  const n=$('eprName').value.trim();
+  if(!n) return alert('Название не может быть пустым');
+  const gisParsed=parseGisInput($('eprGis').value);
+  pr.name=n;
+  pr.zone=$('eprZone').value.trim();
+  pr.contact=$('eprContact').value.trim();
+  pr.phone=$('eprPhone').value.trim();
+  pr.addr=$('eprAddr').value.trim();
+  pr.gis=gisParsed.gis;
+  pr.lat=gisParsed.lat;
+  pr.lng=gisParsed.lng;
+  pr.note=$('eprNote').value.trim();
+  $('editModal').classList.add('hidden');
+  save();
+ };
+};
+
+window.deleteProspect=id=>{
+ if(!hasAction('edit_points_plans')) return alert('У вашей роли нет прав на удаление точек.');
+ const pr=db.prospects.find(x=>x.id===id);
+ if(!pr) return;
+ if(!confirm(`Удалить точку «${pr.name}» из списка переговоров?`)) return;
+ db.prospects=db.prospects.filter(x=>x.id!==id);
+ save();
+};
+
+function renderProspectsList(){
+ const box=$('prospectsList');
+ if(!box) return;
+ if(!db.prospects.length){
+  box.innerHTML='<div class="empty">Точек в переговорах пока нет.</div>';
+  return;
+ }
+ box.innerHTML=db.prospects.map(pr=>{
+  const gisHtml=renderGisBadge(pr,`${pr.name} ${pr.addr||''} ${pr.zone||''}`.trim());
+  const addrLine=(pr.addr||gisHtml)?`
+   <div class="point-line-addr">
+    ${pr.addr?`<span>📍 ${esc(pr.addr)}</span>`:''}
+    ${gisHtml}
+   </div>
+  `:'';
+  const phoneHtml=renderPhoneLink(pr.phone);
+  const contactLine=(pr.contact||phoneHtml)?`
+   <div class="point-line-contact">
+    ${pr.contact?`<span>👤 <b>${esc(pr.contact)}</b></span>`:''}
+    ${phoneHtml}
+   </div>
+  `:'';
+  return `
+   <div class="item">
+    <div class="row" style="align-items:flex-start;flex-wrap:wrap">
+     <div style="flex:1 1 240px;min-width:0">
+      <div><b>${esc(pr.name)}</b> ${pr.zone?`<span class="pill zone">${esc(pr.zone)}</span>`:''}</div>
+      ${addrLine}
+      ${contactLine}
+      ${pr.note?`<div class="muted" style="margin-top:4px;color:#ffd896">💬 ${esc(pr.note)}</div>`:''}
+     </div>
+     <div class="op-actions" style="margin-top:0">
+      <button type="button" class="primary sm-btn" style="margin-top:0;width:auto" onclick="activateProspect(${pr.id})">✅ Активировать точку</button>
+      <button type="button" class="warn sm-btn" onclick="editProspectModal(${pr.id})" title="Изменить">✏️</button>
+      <button type="button" class="danger sm-btn" onclick="deleteProspect(${pr.id})" title="Удалить">🗑️</button>
+     </div>
+    </div>
+   </div>
+  `;
+ }).join('');
 }
 
 /* ==================== СТРОКИ В ПРОДАЖЕ (ЛИТРАЖ СЧИТАЕТСЯ ПО КЕГАМ) ==================== */
@@ -2426,7 +2672,7 @@ function renderPlans(){
     ?`<div class="op-line ret-line">↩️ Забрать пустых: <b>30л — ${pl.ret30||0} шт., 50л — ${pl.ret50||0} шт.</b></div>`:'';
 
    const ptObj=db.points.find(x=>x.id===pl.pointId);
-   const ptMeta=ptObj&&(ptObj.phone||ptObj.addr)?`<div class="muted" style="margin-top:3px">${ptObj.addr?'📍 '+esc(ptObj.addr)+' ':''}${ptObj.phone?'📞 '+esc(ptObj.phone):''}</div>`:'';
+   const ptMeta=ptObj&&(ptObj.phone||ptObj.addr||ptObj.contact)?`<div class="muted" style="margin-top:3px">${ptObj.addr?'📍 '+esc(ptObj.addr)+' ':''}${ptObj.contact?'👤 '+esc(ptObj.contact)+' ':''}${ptObj.phone?'📞 '+esc(ptObj.phone):''}</div>`:'';
 
    return `
     <div class="order-card ${cls}">
@@ -3511,14 +3757,29 @@ $('saveOther').onclick=()=>{
 $('addPoint').onclick=()=>{
  const name=$('newPoint').value.trim();
  const zone=$('newPointZone').value.trim();
+ const contact=$('newPointContact').value.trim();
  const phone=$('newPointPhone').value.trim();
  const addr=$('newPointAddr').value.trim();
+ const gisParsed=parseGisInput($('newPointGis').value);
  if(!name) return alert('Введите название точки');
- db.points.push({id:uid(),name,zone,phone,addr,createdAt:Date.now()});
+ db.points.push({
+  id:uid(),
+  name,
+  zone,
+  contact,
+  phone,
+  addr,
+  gis:gisParsed.gis,
+  lat:gisParsed.lat,
+  lng:gisParsed.lng,
+  createdAt:Date.now()
+ });
  $('newPoint').value='';
  $('newPointZone').value='';
+ $('newPointContact').value='';
  $('newPointPhone').value='';
  $('newPointAddr').value='';
+ $('newPointGis').value='';
  save();
 };
 
@@ -3531,18 +3792,25 @@ window.editPointModal=id=>{
  $('editModalBody').innerHTML=`
   <label>Название точки</label><input id="epName" value="${esc(pt.name)}">
   <label>Район / маршрут</label><input id="epZone" value="${esc(pt.zone||'')}">
+  <label>Имя (контактное лицо)</label><input id="epContact" value="${esc(pt.contact||'')}">
   <label>Телефон</label><input id="epPhone" value="${esc(pt.phone||'')}">
   <label>Адрес</label><input id="epAddr" value="${esc(pt.addr||'')}">
+  <label>2ГИС: ссылка или координаты</label><input id="epGis" value="${esc(pt.gis||(pt.lat!=null&&pt.lng!=null?pt.lat+', '+pt.lng:''))}">
   <button type="button" class="primary" id="savePointEditBtn">Сохранить изменения</button>
  `;
  $('editModal').classList.remove('hidden');
  $('savePointEditBtn').onclick=()=>{
   const n=$('epName').value.trim();
   if(!n) return alert('Название не может быть пустым');
+  const gisParsed=parseGisInput($('epGis').value);
   pt.name=n;
   pt.zone=$('epZone').value.trim();
+  pt.contact=$('epContact').value.trim();
   pt.phone=$('epPhone').value.trim();
   pt.addr=$('epAddr').value.trim();
+  pt.gis=gisParsed.gis;
+  pt.lat=gisParsed.lat;
+  pt.lng=gisParsed.lng;
   $('editModal').classList.add('hidden');
   save();
  };
@@ -4184,126 +4452,122 @@ function render(){
  $('mClientsSplit').innerHTML=`30л: <b>${c30}</b> · 50л: <b>${c50}</b>`;
  $('mBeer').textContent=fmt(db.products.reduce((s,p)=>s+Number(p.qty||0),0))+' л';
  $('mDebt').textContent=money(totalDebtAll);
- $('debtBadge').textContent=totalDebtAll>0?`(${fmt(totalDebtAll)} ₸)`:'';
+ $('totalAllDebts').textContent=money(totalDebtAll);
+ $('debtBadge').textContent=totalDebtAll>0?`(${money(totalDebtAll)})`:'';
 
  const t=todayIso();
- const duePlans=db.plans.filter(p=>p.status!=='done'&&p.date<=t);
- $('planBadge').textContent=duePlans.length?`(${duePlans.length})`:'';
+ const activePlansCount=db.plans.filter(p=>p.status!=='done').length;
+ const dueTodayOrOver=db.plans.filter(p=>p.status!=='done'&&p.date<=t).length;
+ $('planBadge').textContent=activePlansCount>0?`(${activePlansCount})`:'';
+
  const banner=$('homePlanBanner');
- if(duePlans.length){
+ if(dueTodayOrOver>0){
   banner.classList.remove('hidden');
-  banner.innerHTML=`🚚 <b>Запланировано заявок на сегодня / просрочено: ${duePlans.length} шт.</b> — нажмите, чтобы открыть маршрутный лист.`;
+  banner.innerHTML=`🚚 <b>Напоминание по доставке:</b> активных заявок на сегодня или просроченных — <b>${dueTodayOrOver} шт.</b> Нажмите, чтобы открыть маршрутный лист.`;
  }else{
   banner.classList.add('hidden');
  }
 
+ $('recent').innerHTML=db.ops.length
+  ?db.ops.slice(0,5).map(o=>renderOpCard(o,false)).join('')
+  :'<div class="empty">Операций пока нет.</div>';
+
  $('stock30').value=db.kegs30;
  $('stock50').value=db.kegs50;
- $('kegStockSummary').innerHTML=`
-  <div class="item">Склад: <b>30 л — ${db.kegs30} шт.</b>, <b>50 л — ${db.kegs50} шт.</b></div>
-  <div class="item">У клиентов: <b>30 л — ${c30} шт.</b>, <b>50 л — ${c50} шт.</b></div>
- `;
+ $('kegStockSummary').innerHTML=`<div class="muted" style="margin-top:8px">На складе: <b>${wh30} шт. по 30 л</b> (${fmt(wh30*30)} л) и <b>${wh50} шт. по 50 л</b> (${fmt(wh50*50)} л). Всего кег: <b>${whKegs} шт.</b> · У клиентов: <b>${clKegs} шт.</b> (30л: ${c30}, 50л: ${c50}).</div>`;
 
- const prevSalePt=$('salePoint').value;
- const prevDebtPt=$('debtPayPoint').value;
- const prevPlanPt=$('planPoint').value;
- const prevStatPt=$('statPointFilter').value;
+ $('brewBeerDatalist').innerHTML=db.products.map(p=>`<option value="${esc(p.name)}"></option>`).join('');
 
- const ptsOpts=db.points.map(p=>`<option value="${p.id}">${esc(p.name)}${p.zone?' ['+esc(p.zone)+']':''}</option>`).join('');
- $('salePoint').innerHTML=ptsOpts;
- $('debtPayPoint').innerHTML=ptsOpts;
- $('planPoint').innerHTML=ptsOpts;
- $('statPointFilter').innerHTML='<option value="all">Все торговые точки</option>'+ptsOpts;
-
- if(prevSalePt&&db.points.some(p=>String(p.id)===String(prevSalePt))) $('salePoint').value=prevSalePt;
- if(prevDebtPt&&db.points.some(p=>String(p.id)===String(prevDebtPt))) $('debtPayPoint').value=prevDebtPt;
- if(prevPlanPt&&db.points.some(p=>String(p.id)===String(prevPlanPt))) $('planPoint').value=prevPlanPt;
- if(prevStatPt) $('statPointFilter').value=prevStatPt;
-
- if(!$('planDate').value) $('planDate').value=todayIso();
- const curPlanPt=db.points.find(x=>x.id===Number($('planPoint').value));
- if(curPlanPt&&!$('planZoneOverride').value) $('planZoneOverride').value=curPlanPt.zone||'';
-
- $('otherProduct').innerHTML=db.products.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
- $('otherRawSelect').innerHTML=db.raw.map(r=>`<option value="${r.id}">${esc(r.name)} (${esc(r.unit)})</option>`).join('');
- $('brewBeerDatalist').innerHTML=db.products.map(p=>`<option value="${esc(p.name)}">`).join('');
-
- ensureAtLeastOneBeerRow();
- ensurePlanRow();
-
- $('productsList').innerHTML=db.products.map(p=>{
+ $('productsList').innerHTML=db.products.length?db.products.map(p=>{
   const specs=[
-   p.abv!==undefined&&p.abv!==null&&String(p.abv).trim()!==''?`Крепость: <b>${fmtDeg(p.abv)}</b>`:'',
-   p.og!==undefined&&p.og!==null&&String(p.og).trim()!==''?`Плотность: <b>${fmtDeg(p.og)}</b>`:''
+   p.abv!==undefined&&p.abv!==null&&String(p.abv).trim()!==''?`ABV ${fmtDeg(p.abv)}`:'',
+   p.og!==undefined&&p.og!==null&&String(p.og).trim()!==''?`OG ${fmtDeg(p.og)}`:''
   ].filter(Boolean).join(' · ');
   return `
    <div class="item">
-    <div class="row">
-     <div>
-      <b>${esc(p.name)}</b>
-      <div class="muted">Остаток: <b>${fmt(p.qty)} л</b>${specs?` · ${specs}`:''}</div>
+    <div class="row" style="gap:8px;flex-wrap:wrap">
+     <div style="min-width:130px;flex:1">
+      <div><b>${esc(p.name)}</b> <span class="pill">${fmt(p.qty)} л</span></div>
+      ${specs?`<div class="muted" style="margin-top:3px">${esc(specs)}</div>`:''}
      </div>
      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-      <input type="number" min="0" step="1" value="${p.price||0}" style="width:88px;padding:6px 8px;text-align:right" onchange="updateProdPrice(${p.id},this.value)">
-      <span class="muted">₸/л</span>
-      <button type="button" class="warn sm-btn" onclick="editProductModal(${p.id})" title="Редактировать сорт">✏️</button>
+      <span class="muted">Цена/л:</span>
+      <input class="price-input" type="number" min="0" step="1" value="${p.price||0}" style="width:86px;padding:6px 8px" onchange="updateProdPrice(${p.id},this.value)">
+      <span class="muted">₸</span>
+      <button type="button" class="warn sm-btn" onclick="editProductModal(${p.id})" title="Изменить сорт">✏️</button>
       <button type="button" class="danger sm-btn" onclick="deleteProduct(${p.id})" title="Удалить сорт">🗑️</button>
      </div>
     </div>
    </div>
   `;
- }).join('');
+ }).join(''):'<div class="empty">Сортов пива пока нет.</div>';
 
- $('rawList').innerHTML=db.raw.length
-  ?db.raw.map(r=>`<div class="item row"><span>${esc(r.name)}</span><b>${fmt(r.qty)} ${esc(r.unit)}</b></div>`).join('')
-  :'<div class="empty">Сырьё пока не добавлено.</div>';
+ $('rawList').innerHTML=db.raw.length?db.raw.map(r=>`<div class="item"><div class="row"><span>${esc(r.name)}</span><span class="pill">${fmt(r.qty)} ${esc(r.unit)}</span></div></div>`).join(''):'<div class="empty">Сырьё пока не добавлено.</div>';
 
- renderPointsList(kmap,dmap,smap);
+ const ptOpts=db.points.map(p=>`<option value="${p.id}">${esc(p.name)}${p.zone?' ('+esc(p.zone)+')':''}</option>`).join('');
+ const prevSalePt=$('salePoint').value;
+ const prevDebtPt=$('debtPayPoint').value;
+ const prevPlanPt=$('planPoint').value;
+ const prevStatPt=$('statPointFilter').value;
 
- $('totalAllDebts').textContent=money(totalDebtAll);
- const debtors=Object.values(dmap).filter(x=>x.debt>0).sort((a,b)=>b.debt-a.debt);
- $('debtsByPointList').innerHTML=debtors.length
-  ?debtors.map(x=>`
-   <div class="item row">
-    <div><b>${esc(x.name)}</b> ${x.zone?`<span class="pill zone">${esc(x.zone)}</span>`:''}</div>
-    <span class="pill debt">${money(x.debt)}</span>
-   </div>
-  `).join('')
-  :'<div class="empty">Долгов нет. Все точки рассчитались!</div>';
+ $('salePoint').innerHTML=ptOpts;
+ $('debtPayPoint').innerHTML=ptOpts;
+ $('planPoint').innerHTML=ptOpts;
+ $('statPointFilter').innerHTML='<option value="all">Все торговые точки</option>'+ptOpts;
+
+ if(prevSalePt&&db.points.some(p=>String(p.id)===String(prevSalePt))) $('salePoint').value=prevSalePt;
+ if(prevDebtPt&&db.points.some(p=>String(p.id)===String(prevDebtPt))) $('debtPayPoint').value=prevDebtPt;
+ if(prevPlanPt&&db.points.some(p=>String(p.id)===String(prevPlanPt))) $('planPoint').value=prevPlanPt;
+ if(prevStatPt&&(prevStatPt==='all'||db.points.some(p=>String(p.id)===String(prevStatPt)))) $('statPointFilter').value=prevStatPt;
+
+ $('otherProduct').innerHTML=db.products.map(p=>`<option value="${p.id}">${esc(p.name)} (${fmt(p.qty)} л)</option>`).join('');
+ $('otherRawSelect').innerHTML=db.raw.map(r=>`<option value="${r.id}">${esc(r.name)} (${fmt(r.qty)} ${esc(r.unit)})</option>`).join('');
+
+ ensureAtLeastOneBeerRow();
+ updateSaleSummary();
  updateDebtPointInfo();
 
- const debtOps=db.ops.filter(o=>(o.type==='sale_return'&&Number(o.debtAdded||0)>0)||o.type==='debt_pay');
+ renderPointsList(kmap,dmap,smap);
+ renderProspectsList();
+
+ const activeDebts=Object.values(dmap).filter(x=>x.debt>0).sort((a,b)=>b.debt-a.debt);
+ $('debtsByPointList').innerHTML=activeDebts.length
+  ?activeDebts.map(x=>`
+    <div class="item">
+     <div class="row">
+      <div><b>${esc(x.name)}</b> ${x.zone?`<span class="pill zone">${esc(x.zone)}</span>`:''}</div>
+      <span class="pill debt">Долг: ${money(x.debt)}</span>
+     </div>
+    </div>
+  `).join('')
+  :'<div class="empty">Долгов нет. Все точки рассчитались!</div>';
+
+ const debtOps=db.ops.filter(o=>(o.type==='sale_return'&&o.debtAdded>0)||o.type==='debt_pay');
  $('debtHistoryList').innerHTML=debtOps.length
   ?debtOps.map(o=>renderOpCard(o,true)).join('')
   :'<div class="empty">Записей по долгам пока нет.</div>';
 
- $('recent').innerHTML=db.ops.length
-  ?db.ops.slice(0,5).map(o=>renderOpCard(o,true)).join('')
-  :'<div class="empty">Операций пока нет.</div>';
-
  renderPlans();
  renderSalesStats();
  renderHistoryList();
- initCardCollapseButtons();
+ renderUsersAndRolesSettings();
+ refreshDriveStatusUi();
 }
 
-/* ==================== СТАРТ СЕССИИ ==================== */
-$('planDate').value=todayIso();
-$('planFilterDate').value=todayIso();
-$('statDateFrom').value=addDaysIso(-6);
-$('statDateTo').value=todayIso();
-
-const savedLogin=localStorage.getItem(SESSION_KEY);
-if(savedLogin){
- const u=db.users.find(x=>x.username===savedLogin);
- if(u) applyAuth(u);
- else{
+const savedSessionUser=localStorage.getItem(SESSION_KEY);
+if(savedSessionUser){
+ const found=db.users.find(u=>u.username===savedSessionUser);
+ if(found){
+  applyAuth(found);
+ }else{
+  $('authScreen').classList.remove('hidden');
+  $('appShell').classList.add('hidden');
   updateBioUi();
-  refreshDriveStatusUi();
  }
 }else{
+ $('authScreen').classList.remove('hidden');
+ $('appShell').classList.add('hidden');
  updateBioUi();
- refreshDriveStatusUi();
 }
 </script>
 </body>
