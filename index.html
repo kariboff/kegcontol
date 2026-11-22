@@ -84,8 +84,7 @@ button:active{transform:scale(0.985)}
 .card.collapsed{padding-bottom:12px}
 .card.collapsed>:not(h2):not(.card-collapse-btn):not(.card-hdr-bar){display:none!important}
 .card.collapsed>h2,.card.collapsed>.card-hdr-bar{margin-bottom:0!important}
-.card>:not(.card-collapse-btn){padding-right:34px}
-.card>.card-hdr-bar{padding-right:36px}
+.card>h2,.card>.card-hdr-bar{padding-right:36px}
 
 .sort-menu-wrap{position:relative;display:inline-block}
 .sort-popover{position:absolute;right:0;top:calc(100% + 6px);min-width:215px;background:#15241d;border:1px solid #2e4b3d;border-radius:12px;padding:5px;box-shadow:0 12px 30px rgba(0,0,0,0.55);z-index:15}
@@ -142,6 +141,8 @@ code{background:#0e1914;color:#a7e3c5;padding:1px 5px;border-radius:5px;border:1
 a{color:var(--blue)}
 
 .pill{font-size:11px;background:var(--green-soft);color:#6be0a9;padding:4px 8px;border-radius:99px;white-space:nowrap;font-weight:650;border:1px solid #21523b}
+.pill.keg-zero{background:#14211b;color:#7e968b;font-weight:600;border-color:#263b31}
+.pill.keg-active{background:#12382c;color:#52f2b4;font-weight:850;border-color:#23855e;box-shadow:0 0 0 1px rgba(82,242,180,0.12)}
 .pill.debt{background:var(--red-soft);color:var(--red);font-weight:750;border-color:#5e282d}
 .pill.ret{background:var(--blue-soft);color:var(--blue);font-weight:750;border-color:#23476e}
 .pill.zone{background:var(--purple-soft);color:var(--purple);font-weight:700;border-color:#442f6e}
@@ -149,9 +150,9 @@ a{color:var(--blue)}
 .pill.plan-over{background:var(--red-soft);color:var(--red);font-weight:750;border-color:#5e282d}
 .pill.pay-method{background:var(--teal-soft);color:var(--teal);font-weight:700;border-color:#1d5451}
 
-.item{padding:11px 0;border-bottom:1px solid var(--line)}
+.item{padding:11px 0;border-bottom:1px solid var(--line);width:100%}
 .item:last-child{border:0}
-.empty{color:var(--muted);padding:16px;text-align:center;background:#0e1914;border-radius:12px;border:1px dashed #283f34}
+.empty{color:var(--muted);padding:16px;text-align:center;background:#0e1914;border-radius:12px;border:1px dashed #283f34;width:100%}
 .hidden{display:none!important}
 
 .notice{background:var(--amber-soft);border:1px solid #5c4116;border-left:4px solid var(--amber);border-radius:11px;padding:10px 12px;font-size:12px;color:#ffd896;margin:10px 0}
@@ -327,7 +328,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 <div class="grid">
 <div class="metric m-kegs"><small>Всего кег</small><strong id="mTotal">0</strong></div>
 <div class="metric m-wh"><small>На складе</small><strong id="mWarehouse">0</strong></div>
-<div class="metric m-cl"><small>У клиентов</small><strong id="mClients">0</strong></div>
+<div class="metric m-cl" style="cursor:pointer" id="clientsKegsCard" title="Нажмите, чтобы посмотреть кеги по точкам"><small>У клиентов</small><strong id="mClients">0</strong></div>
 <div class="metric m-beer"><small>Пиво на складе</small><strong id="mBeer">0 л</strong></div>
 </div>
 <div class="metric debt-metric" style="margin-top:10px;cursor:pointer" onclick="go('debts')">
@@ -1609,6 +1610,46 @@ function debtsByPoint(){
  return map;
 }
 
+/* ==================== МОДАЛЬНОЕ ОКНО «КЕГИ У КЛИЕНТОВ» ==================== */
+$('clientsKegsCard').onclick=()=>{
+ const kmap=kegsByPoint();
+ const activePoints=Object.values(kmap)
+  .map(x=>({
+   ...x,
+   k30:Math.max(0,Number(x.k30||0)),
+   k50:Math.max(0,Number(x.k50||0))
+  }))
+  .filter(x=>(x.k30+x.k50)>0)
+  .sort((a,b)=>(b.k30+b.k50)-(a.k30+a.k50));
+
+ const total30=activePoints.reduce((s,x)=>s+x.k30,0);
+ const total50=activePoints.reduce((s,x)=>s+x.k50,0);
+ const totalAll=total30+total50;
+
+ $('editModalTitle').textContent='🛢️ Кеги у клиентов';
+ $('editModalBody').innerHTML=`
+  <div class="calc" style="margin-top:0;margin-bottom:10px">
+   <div class="row"><span>Всего кег на руках у точек:</span><strong>${totalAll} шт.</strong></div>
+   <div class="row" style="margin-top:4px"><span class="muted">По объёму:</span><b>30 л — ${total30} шт. · 50 л — ${total50} шт.</b></div>
+  </div>
+  ${activePoints.length?activePoints.map(x=>`
+   <div class="item">
+    <div class="point-row">
+     <div class="point-row-left">
+      <b>${esc(x.name)}</b>
+      ${x.zone?`<span class="pill zone" style="margin-left:6px">${esc(x.zone)}</span>`:''}
+     </div>
+     <div class="point-row-right">
+      <span class="pill keg-active">Всего: ${x.k30+x.k50} шт.</span>
+      <span class="muted">30л: <b>${x.k30}</b> · 50л: <b>${x.k50}</b></span>
+     </div>
+    </div>
+   </div>
+  `).join(''):'<div class="empty">Сейчас ни у одной точки нет кег на руках.</div>'}
+ `;
+ $('editModal').classList.remove('hidden');
+};
+
 /* ==================== СОРТИРОВКА ТОЧЕК (ВСПЛЫВАЮЩЕЕ МЕНЮ) ==================== */
 const POINTS_SORT_TITLES={
  name:'По имени',
@@ -1693,6 +1734,9 @@ function renderPointsList(kmap=kegsByPoint(),dmap=debtsByPoint(),smap=salesByPoi
 
  $('pointsList').innerHTML=list.length?list.map(p=>{
   const k=kmap[p.id]||{k30:0,k50:0};
+  const k30Val=Math.max(0,Number(k.k30||0));
+  const k50Val=Math.max(0,Number(k.k50||0));
+  const hasKegs=(k30Val+k50Val)>0;
   const d=dmap[p.id]?dmap[p.id].debt:0;
   const sl=Number(smap[p.id]||0);
   const menuHidden=openPointMenuId===p.id?'':'hidden';
@@ -1713,7 +1757,7 @@ function renderPointsList(kmap=kegsByPoint(),dmap=debtsByPoint(),smap=salesByPoi
      </div>
      <div class="point-row-right">
       ${d>0?`<span class="pill debt">Долг: ${money(d)}</span>`:''}
-      <span class="pill">30л: ${Math.max(0,Number(k.k30||0))} · 50л: ${Math.max(0,Number(k.k50||0))}</span>
+      <span class="pill ${hasKegs?'keg-active':'keg-zero'}">30л: ${k30Val} · 50л: ${k50Val}</span>
      </div>
     </div>
    </div>
