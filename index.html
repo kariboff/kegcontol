@@ -147,6 +147,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);b
 .primary:hover{background:#27ab6f}
 .secondary{background:#182921;color:#d6e8de;font-weight:600;border:1px solid #2b4539}
 .secondary:hover{background:#1e3329}
+.wa-btn{background:#123827;color:#6ef0b2;font-weight:700;border:1px solid #22734e;display:inline-flex;align-items:center;gap:5px}
+.wa-btn:hover{background:#174731;color:#9cf7cb}
 .danger{background:var(--red-soft);color:var(--red);font-weight:650;border:1px solid #5c272c}
 .danger:hover{background:#451c20}
 .warn{background:var(--amber-soft);color:var(--amber);font-weight:650;border:1px solid #634618}
@@ -1789,6 +1791,22 @@ function debtsByPoint(){
  return map;
 }
 
+function getPointDebtBreakdownForOp(op){
+ const dmap=debtsByPoint();
+ let totalDebt=0;
+ if(op.pointId&&dmap[op.pointId]){
+  totalDebt=Math.max(0,Number(dmap[op.pointId].debt||0));
+ }else if(op.pointName){
+  const found=Object.values(dmap).find(x=>x.name===op.pointName);
+  if(found) totalDebt=Math.max(0,Number(found.debt||0));
+ }
+ const delta=op.type==='sale_return'
+  ?Number(op.debtAdded||0)
+  :(op.type==='debt_pay'?-Number(op.amount||0):0);
+ const prevDebt=Math.max(0,totalDebt-delta);
+ return {prevDebt,totalDebt};
+}
+
 /* ==================== МОДАЛЬНОЕ ОКНО «КЕГИ У КЛИЕНТОВ» ==================== */
 $('clientsKegsCard').onclick=()=>{
  const kmap=kegsByPoint();
@@ -2660,7 +2678,7 @@ $('saveSale').onclick=()=>{
  }
 };
 
-/* ==================== ЧЕК, ПРАЙС-ЛИСТ И PDF-ОТЧЁТ ==================== */
+/* ==================== ЧЕК, WHATSAPP, ПРАЙС-ЛИСТ И PDF-ОТЧЁТ ==================== */
 function makePdfFilename(op){
  const safePoint=(op.pointName||'Точка').replace(/[\\/:*?"<>|]+/g,'_').trim();
  const d=new Date();
@@ -2685,6 +2703,50 @@ function getPointKegBalanceAfterOp(op){
  return {rem30,rem50};
 }
 
+function buildReceiptText(op){
+ const lines=[];
+ lines.push(`🧾 *НАКЛАДНАЯ / КВИТАНЦИЯ*`);
+ lines.push(`Точка: *${op.pointName}*`);
+ lines.push(`Дата: ${op.date}`);
+ if(op.items&&op.items.length){
+  lines.push(`---`);
+  op.items.forEach(i=>{
+   lines.push(`🍺 *${i.productName}*: ${Number(i.k30||0)+Number(i.k50||0)} кег (${fmt(i.liters)} л) × ${fmt(i.price)} ₸ = *${money(i.subtotal)}*`);
+   lines.push(`   30л: ${i.k30||0} шт., 50л: ${i.k50||0} шт.`);
+  });
+ }
+ if(op.totalAmount>0){
+  lines.push(`---`);
+  lines.push(`Итого по чеку: *${money(op.totalAmount)}*`);
+  lines.push(`Способ оплаты: ${op.payMethod||'Не указан'}`);
+  lines.push(`Оплачено: ${money(op.paidAmount)}`);
+  if(Number(op.debtAdded||0)>0){
+   lines.push(`В долг по чеку: *${money(op.debtAdded)}*`);
+  }
+ }
+ const {prevDebt,totalDebt}=getPointDebtBreakdownForOp(op);
+ if(prevDebt>0||totalDebt>0){
+  if(prevDebt>0) lines.push(`Прошлый долг: ${money(prevDebt)}`);
+  if(totalDebt>0) lines.push(`*Общий долг точки: ${money(totalDebt)}*`);
+ }
+ if(Number(op.ret30||0)>0||Number(op.ret50||0)>0){
+  lines.push(`---`);
+  lines.push(`Возврат пустых: 30л — ${op.ret30||0} шт., 50л — ${op.ret50||0} шт.`);
+ }
+ const {rem30,rem50}=getPointKegBalanceAfterOp(op);
+ lines.push(`Остаток кег на точке: *${rem30+rem50} шт.* (30л: ${rem30}, 50л: ${rem50})`);
+ if(op.note) lines.push(`Комментарий: ${op.note}`);
+ return lines.join('\n');
+}
+
+window.shareOpWhatsApp=id=>{
+ const op=db.ops.find(x=>x.id===id);
+ if(!op) return;
+ const txt=buildReceiptText(op);
+ const url=`https://wa.me/?text=${encodeURIComponent(txt)}`;
+ window.open(url,'_blank','noopener,noreferrer');
+};
+
 function printReceipt(op){
  const p=$('printArea');
  p.className=op.width==='80'?'wide':'';
@@ -2695,12 +2757,21 @@ function printReceipt(op){
   `).join('')
   :'<div class="line"><span>Отгрузка пива:</span><span>нет</span></div>';
 
- const payBlock=op.totalAmount>0?`
+ const {prevDebt,totalDebt}=getPointDebtBreakdownForOp(op);
+ const debtSummaryLines=[
+  prevDebt>0?`<div class="line"><span>Прошлый долг:</span><span><b>${money(prevDebt)}</b></span></div>`:'',
+  totalDebt>0?`<div class="line big"><span>ОБЩИЙ ДОЛГ:</span><span>${money(totalDebt)}</span></div>`:''
+ ].filter(Boolean).join('');
+
+ const payBlock=(op.totalAmount>0||debtSummaryLines)?`
   <div class="rule"></div>
-  <div class="line big"><span>ИТОГО:</span><span>${money(op.totalAmount)}</span></div>
-  <div class="line"><span>Способ оплаты:</span><span><b>${esc(op.payMethod||'Не указан')}</b></span></div>
-  <div class="line"><span>Оплачено:</span><span>${money(op.paidAmount)}</span></div>
-  ${op.debtAdded>0?`<div class="line"><span><b>В ДОЛГ ПО ЧЕКУ:</b></span><span><b>${money(op.debtAdded)}</b></span></div>`:''}
+  ${op.totalAmount>0?`
+   <div class="line big"><span>ИТОГО:</span><span>${money(op.totalAmount)}</span></div>
+   <div class="line"><span>Способ оплаты:</span><span><b>${esc(op.payMethod||'Не указан')}</b></span></div>
+   <div class="line"><span>Оплачено:</span><span>${money(op.paidAmount)}</span></div>
+   ${op.debtAdded>0?`<div class="line"><span><b>В ДОЛГ ПО ЧЕКУ:</b></span><span><b>${money(op.debtAdded)}</b></span></div>`:''}
+  `:''}
+  ${debtSummaryLines}
  `:'';
 
  const {rem30,rem50}=getPointKegBalanceAfterOp(op);
@@ -3761,7 +3832,7 @@ $('resetAllBtn').onclick=()=>{
 function renderOpCard(o,allowManage){
  const manageBtns=allowManage?`
   <div class="op-actions">
-   ${o.type==='sale_return'?`<button type="button" class="secondary sm-btn" onclick="reprintOp(${o.id})">🖨️ Чек</button>`:''}
+   ${o.type==='sale_return'?`<button type="button" class="secondary sm-btn" onclick="reprintOp(${o.id})">🖨️ Чек</button><button type="button" class="wa-btn sm-btn" onclick="shareOpWhatsApp(${o.id})" title="Отправить чек в WhatsApp">✓ WhatsApp</button>`:''}
    ${hasAction('edit_ops')?`<button type="button" class="warn sm-btn" onclick="openEditOp(${o.id})">✏️ Изменить</button>`:''}
    ${hasAction('edit_ops')?`<button type="button" class="danger sm-btn" onclick="deleteOp(${o.id})">🗑️ Удалить</button>`:''}
   </div>
