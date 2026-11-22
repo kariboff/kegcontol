@@ -59,7 +59,7 @@ header{background:linear-gradient(90deg,#09120e 0%,#10241b 100%);color:var(--ink
 .user-chip b{font-size:12px;color:var(--ink);white-space:nowrap}
 .user-chip .role-tag{font-size:10px;padding:2px 6px;border-radius:6px;background:#1a7a4e;color:#eafff4;white-space:nowrap;font-weight:600}
 .user-chip .role-tag.driver{background:#1f4e73;color:#e4f2ff}
-.sync-pill{font-size:10px;padding:2px 7px;border-radius:99px;background:var(--green-soft);color:#8be3b8;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;font-weight:600;border:1px solid #22543c}
+.sync-pill{font-size:10px;padding:2px 7px;border-radius:99px;background:var(--green-soft);color:#8be3b8;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;font-weight:600;border:1px solid #22543c;cursor:pointer}
 .sync-pill.err{background:var(--red-soft);color:#ffa8a8;border-color:#61282d}
 .sync-pill.busy{background:var(--amber-soft);color:#ffd280;border-color:#664819}
 
@@ -265,7 +265,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 <header>
  <div class="hdr-brand">
   <span class="hdr-title">🍺 KegControl</span>
-  <span id="syncStatusPill" class="sync-pill">Локально</span>
+  <span id="syncStatusPill" class="sync-pill" title="Нажмите для подключения или синхронизации Google Drive">Локально</span>
  </div>
  <div class="user-chip">
   <b id="hdrUserName">admin1</b>
@@ -561,7 +561,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 <div class="card accent-blue">
  <h2>☁️ Облачная синхронизация Google Drive</h2>
  <div class="notice info">
-  Подключите один и тот же аккаунт Google на вашем телефоне и на телефоне водителя. Приложение сохранит общую базу <code>kegcontrol_shared_db.json</code> на Google Диске и будет автоматически синхронизировать продажи, заявки, остатки, пользователей и долги.
+  Подключите один и тот же аккаунт Google на вашем телефоне и на телефоне водителя. Приложение сохранит общую базу <code>kegcontrol_shared_db.json</code> на Google Диске и будет синхронизировать продажи, заявки, остатки, пользователей и долги. При перезагрузке страницы Google выдаёт новый сеансовый токен — приложение автоматически попробует восстановить его, а при необходимости достаточно нажать на плашку облака или кнопку синхронизации.
  </div>
  <label>Google OAuth Client ID (для облачного диска)</label>
  <input id="googleClientIdInput" placeholder="Вставьте Client ID вида 1234567890-xxxx.apps.googleusercontent.com">
@@ -719,6 +719,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 const STORAGE_KEY='kegcontrol_1_4_cloud';
 const SESSION_KEY='kegcontrol_session_user';
 const CLIENT_ID_KEY='kegcontrol_google_client_id';
+const DRIVE_META_KEY='kegcontrol_drive_meta_v1';
 const BIO_CREDS_KEY='kegcontrol_bio_creds_v1';
 const DRIVE_FILE_NAME='kegcontrol_shared_db.json';
 const DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email';
@@ -790,7 +791,6 @@ function loadLocal(){
   if(!merged.roles||typeof merged.roles!=='object'||!Object.keys(merged.roles).length) merged.roles=base.roles;
   if(!Array.isArray(merged.plans)) merged.plans=[];
 
-  // Миграция старого аккаунта rashid на admin1 с новым паролем
   const oldRashid=merged.users.find(u=>u.username==='rashid');
   if(oldRashid&&!merged.users.some(u=>u.username==='admin1')){
    oldRashid.username='admin1';
@@ -819,11 +819,21 @@ function loadLocal(){
  }
 }
 
+function loadDriveMeta(){
+ try{return JSON.parse(localStorage.getItem(DRIVE_META_KEY)||'{}')||{};}catch(e){return {};}
+}
+function saveDriveMeta(patch){
+ const cur=loadDriveMeta();
+ localStorage.setItem(DRIVE_META_KEY,JSON.stringify({...cur,...patch}));
+}
+
 let db=loadLocal();
 let currentUser=null;
 let driveToken=null;
-let driveFileId=null;
-let driveUserEmail='';
+let driveTokenExpiresAt=0;
+let driveFileId=loadDriveMeta().fileId||null;
+let driveUserEmail=loadDriveMeta().email||'';
+let driveWasConnected=!!loadDriveMeta().wasConnected;
 let isSyncing=false;
 let activeSalePlanId=null;
 let statPeriod='day';
@@ -866,6 +876,10 @@ function hasAction(actionId,user=currentUser){
  return Array.isArray(role.actions)&&role.actions.includes(actionId);
 }
 
+function hasValidDriveToken(){
+ return !!driveToken&&Date.now()<driveTokenExpiresAt-5000;
+}
+
 function setSyncPill(text,cls=''){
  const el=$('syncStatusPill');
  if(!el) return;
@@ -873,11 +887,31 @@ function setSyncPill(text,cls=''){
  el.className='sync-pill'+(cls?' '+cls:'');
 }
 
+function refreshDriveStatusUi(){
+ const infoEl=$('driveAccountInfo');
+ if(hasValidDriveToken()){
+  setSyncPill('Облако OK','');
+  if(infoEl){
+   infoEl.innerHTML=`Статус: <b style="color:#6be0a9">Подключено${driveUserEmail?' ('+esc(driveUserEmail)+')':''}</b> · Автосинхронизация активна.`;
+  }
+ }else if(driveWasConnected||getClientId()){
+  setSyncPill('Облако: войти','busy');
+  if(infoEl){
+   infoEl.innerHTML=`Статус: <b style="color:var(--amber)">Сеанс Google истёк после перезагрузки${driveUserEmail?' ('+esc(driveUserEmail)+')':''}</b> — нажмите «Подключить Google Drive» или значок 🔄 в шапке для продолжения синхронизации.`;
+  }
+ }else{
+  setSyncPill('Локально','');
+  if(infoEl){
+   infoEl.textContent='Статус: Google Drive не подключён (работает локально на устройстве).';
+  }
+ }
+}
+
 function save(skipDrivePush=false){
  db.updatedAt=Date.now();
  localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
  render();
- if(!skipDrivePush&&driveToken){
+ if(!skipDrivePush&&hasValidDriveToken()){
   scheduleDrivePush();
  }
 }
@@ -1078,14 +1112,14 @@ function getClientId(){
  return (localStorage.getItem(CLIENT_ID_KEY)||'').trim();
 }
 
-function connectGoogleDrive(afterCallback){
+function requestGoogleToken({silent=false,afterCallback=null,showAlerts=true}={}){
  const clientId=getClientId();
  if(!clientId){
-  alert('Сначала вставьте Google OAuth Client ID в разделе «Настройки & Облако» и нажмите «Сохранить Client ID».');
+  if(showAlerts) alert('Сначала вставьте Google OAuth Client ID в разделе «Настройки & Облако» и нажмите «Сохранить Client ID».');
   return;
  }
  if(!window.google||!google.accounts||!google.accounts.oauth2){
-  alert('Скрипт Google Identity ещё загружается или нет интернета. Попробуйте через 2 секунды.');
+  if(showAlerts) alert('Скрипт Google Identity ещё загружается или нет интернета. Попробуйте через 2 секунды.');
   return;
  }
  const tokenClient=google.accounts.oauth2.initTokenClient({
@@ -1093,28 +1127,55 @@ function connectGoogleDrive(afterCallback){
   scope:DRIVE_SCOPE,
   callback:async(resp)=>{
    if(resp.error){
-    setSyncPill('Ошибка входа','err');
-    alert('Ошибка авторизации Google: '+resp.error);
+    if(!silent){
+     setSyncPill('Облако: войти','busy');
+     if(showAlerts) alert('Ошибка авторизации Google: '+resp.error);
+    }else{
+     refreshDriveStatusUi();
+    }
     return;
    }
    driveToken=resp.access_token;
+   const expiresInSec=Number(resp.expires_in||3500);
+   driveTokenExpiresAt=Date.now()+expiresInSec*1000;
+   driveWasConnected=true;
+   saveDriveMeta({wasConnected:true});
    setSyncPill('Синхронизация...','busy');
    await fetchDriveUserInfo();
-   await pullFromGoogleDrive(false);
+   await pullFromGoogleDrive(!showAlerts);
    if(typeof afterCallback==='function') afterCallback();
   }
  });
- tokenClient.requestAccessToken({prompt:driveToken?'':'consent'});
+ tokenClient.requestAccessToken({prompt:silent?'none':(driveWasConnected?'':'consent')});
+}
+
+function connectGoogleDrive(afterCallback){
+ requestGoogleToken({silent:false,afterCallback,showAlerts:true});
+}
+
+function trySilentGoogleReconnect(){
+ if(!driveWasConnected||!getClientId()||hasValidDriveToken()) return;
+ const run=()=>{
+  if(window.google&&google.accounts&&google.accounts.oauth2){
+   requestGoogleToken({silent:true,showAlerts:false});
+  }
+ };
+ if(window.google&&google.accounts&&google.accounts.oauth2){
+  run();
+ }else{
+  window.addEventListener('load',()=>setTimeout(run,600),{once:true});
+ }
 }
 
 async function fetchDriveUserInfo(){
- if(!driveToken) return;
+ if(!hasValidDriveToken()) return;
  try{
   const r=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+driveToken}});
   if(r.ok){
    const u=await r.json();
    driveUserEmail=u.email||'Подключён';
-   $('driveAccountInfo').innerHTML=`Статус: <b style="color:#6be0a9">Подключено (${esc(driveUserEmail)})</b>`;
+   saveDriveMeta({email:driveUserEmail,wasConnected:true});
+   refreshDriveStatusUi();
   }
  }catch(e){}
 }
@@ -1130,7 +1191,10 @@ async function findDriveFile(){
 }
 
 async function pullFromGoogleDrive(silent=false){
- if(!driveToken) return;
+ if(!hasValidDriveToken()){
+  if(!silent) connectGoogleDrive();
+  return;
+ }
  if(isSyncing) return;
  isSyncing=true;
  setSyncPill('Загрузка...','busy');
@@ -1138,12 +1202,14 @@ async function pullFromGoogleDrive(silent=false){
   const file=await findDriveFile();
   if(!file){
    driveFileId=null;
+   saveDriveMeta({fileId:null});
    isSyncing=false;
    await pushToGoogleDrive(true);
    if(!silent) alert('В Google Drive создан новый файл общей базы!');
    return;
   }
   driveFileId=file.id;
+  saveDriveMeta({fileId:driveFileId});
   const r=await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`,{
    headers:{Authorization:'Bearer '+driveToken}
   });
@@ -1165,7 +1231,7 @@ async function pullFromGoogleDrive(silent=false){
     }
     render();
     updateBioUi();
-    setSyncPill('Облако OK','');
+    refreshDriveStatusUi();
     if(!silent) alert('Общая база успешно загружена из Google Drive!');
    }else{
     isSyncing=false;
@@ -1178,18 +1244,25 @@ async function pullFromGoogleDrive(silent=false){
   if(!silent) alert('Не удалось синхронизироваться с Google Drive: '+e.message);
  }finally{
   isSyncing=false;
+  refreshDriveStatusUi();
  }
 }
 
 async function pushToGoogleDrive(silent=false){
- if(!driveToken) return;
+ if(!hasValidDriveToken()){
+  if(!silent) connectGoogleDrive(()=>pushToGoogleDrive(false));
+  return;
+ }
  if(isSyncing) return;
  isSyncing=true;
  setSyncPill('Сохранение...','busy');
  try{
   if(!driveFileId){
    const existing=await findDriveFile();
-   if(existing) driveFileId=existing.id;
+   if(existing){
+    driveFileId=existing.id;
+    saveDriveMeta({fileId:driveFileId});
+   }
   }
   const metadata={name:DRIVE_FILE_NAME,mimeType:'application/json'};
   const boundary='-------kegcontrol31415926535';
@@ -1218,8 +1291,11 @@ async function pushToGoogleDrive(silent=false){
   });
   if(!r.ok) throw new Error('Drive upload failed '+r.status);
   const resJson=await r.json();
-  if(resJson.id) driveFileId=resJson.id;
-  setSyncPill('Облако OK','');
+  if(resJson.id){
+   driveFileId=resJson.id;
+   saveDriveMeta({fileId:driveFileId});
+  }
+  refreshDriveStatusUi();
   if(!silent) alert('База успешно отправлена в Google Drive!');
  }catch(e){
   setSyncPill('Ошибка облака','err');
@@ -1265,6 +1341,8 @@ function applyAuth(user){
  $('googleClientIdInput').value=getClientId();
  render();
  updateBioUi();
+ refreshDriveStatusUi();
+ trySilentGoogleReconnect();
  const firstAllowed=ALL_TABS.find(t=>hasTabAccess(t.id,user));
  go(firstAllowed?firstAllowed.id:'home');
  checkDuePlansNotification();
@@ -1287,6 +1365,10 @@ $('logoutBtn').onclick=logout;
 $('loginDrivePullBtn').onclick=()=>connectGoogleDrive();
 $('registerBioBtn').onclick=registerBiometricForCurrentUser;
 $('removeBioBtn').onclick=removeBiometricForCurrentUser;
+$('syncStatusPill').onclick=()=>{
+ if(hasValidDriveToken()) pullFromGoogleDrive(false);
+ else connectGoogleDrive();
+};
 
 /* ==================== НАВИГАЦИЯ ==================== */
 function go(page){
@@ -1300,6 +1382,7 @@ function go(page){
  if(page==='settings'){
   updateBioUi();
   renderUsersAndRolesSettings();
+  refreshDriveStatusUi();
  }
 }
 $('tabs').onclick=e=>{
@@ -2485,7 +2568,6 @@ function renderUsersAndRolesSettings(){
  const roleIds=Object.keys(db.roles);
  const roleOptsHtml=roleIds.map(rid=>`<option value="${esc(rid)}">${esc(db.roles[rid].title)}</option>`).join('');
 
- // Селект смены пароля
  const prevPwdUser=$('pwdTargetUser').value;
  $('pwdTargetUser').innerHTML=db.users.map(u=>{
   const rTitle=getUserRoleObj(u).title;
@@ -2497,13 +2579,11 @@ function renderUsersAndRolesSettings(){
   $('pwdTargetUser').value=currentUser.username;
  }
 
- // Селект роли для нового пользователя
  const prevNewRole=$('newUserRole').value;
  $('newUserRole').innerHTML=roleOptsHtml;
  if(prevNewRole&&db.roles[prevNewRole]) $('newUserRole').value=prevNewRole;
  else if(db.roles.driver) $('newUserRole').value='driver';
 
- // Список пользователей
  $('usersListBox').innerHTML=db.users.map(u=>{
   const rTitle=getUserRoleObj(u).title;
   const isMe=u.username===currentUser.username;
@@ -2527,7 +2607,6 @@ function renderUsersAndRolesSettings(){
   `;
  }).join('');
 
- // Редактор ролей
  const prevRoleEdit=$('roleEditorSelect').value;
  $('roleEditorSelect').innerHTML=roleOptsHtml;
  if(prevRoleEdit&&db.roles[prevRoleEdit]) $('roleEditorSelect').value=prevRoleEdit;
@@ -2673,7 +2752,7 @@ $('createNewRoleBtn').onclick=()=>{
 };
 
 $('deleteRoleBtn').onclick=()=>{
- if(!hasAction('manage_users_roles')) return;
+ if(!hasAction('manage_users_roles')) return alert('Нет прав на удаление ролей.');
  const rid=$('roleEditorSelect').value;
  if(rid==='owner'||rid==='driver') return alert('Базовые роли удалить нельзя.');
  const role=db.roles[rid];
@@ -2689,19 +2768,20 @@ $('deleteRoleBtn').onclick=()=>{
 $('saveClientIdBtn').onclick=()=>{
  const v=$('googleClientIdInput').value.trim();
  localStorage.setItem(CLIENT_ID_KEY,v);
+ refreshDriveStatusUi();
  alert('Google Client ID сохранён на устройстве.');
 };
 $('connectGoogleDriveBtn').onclick=()=>connectGoogleDrive();
 $('syncNowBtn').onclick=()=>{
- if(driveToken) pullFromGoogleDrive(false);
+ if(hasValidDriveToken()) pullFromGoogleDrive(false);
  else connectGoogleDrive();
 };
 $('drivePushBtn').onclick=()=>{
- if(driveToken) pushToGoogleDrive(false);
+ if(hasValidDriveToken()) pushToGoogleDrive(false);
  else connectGoogleDrive(()=>pushToGoogleDrive(false));
 };
 $('drivePullBtn').onclick=()=>{
- if(driveToken) pullFromGoogleDrive(false);
+ if(hasValidDriveToken()) pullFromGoogleDrive(false);
  else connectGoogleDrive();
 };
 
@@ -2852,7 +2932,6 @@ function render(){
  $('mDebt').textContent=money(totalDebtAll);
  $('debtBadge').textContent=totalDebtAll>0?`(${fmt(totalDebtAll)} ₸)`:'';
 
- // Баннер плановых заявок на сегодня
  const t=todayIso();
  const duePlans=db.plans.filter(p=>p.status!=='done'&&p.date<=t);
  $('planBadge').textContent=duePlans.length?`(${duePlans.length})`:'';
@@ -2902,7 +2981,6 @@ function render(){
  ensureAtLeastOneBeerRow();
  ensurePlanRow();
 
- // Пиво и прайс-лист
  $('productsList').innerHTML=db.products.map(p=>`
   <div class="item">
    <div class="row">
@@ -2915,12 +2993,10 @@ function render(){
   </div>
  `).join('');
 
- // Сырьё
  $('rawList').innerHTML=db.raw.length
   ?db.raw.map(r=>`<div class="item row"><span>${esc(r.name)}</span><b>${fmt(r.qty)} ${esc(r.unit)}</b></div>`).join('')
   :'<div class="empty">Сырьё пока не добавлено.</div>';
 
- // Точки (кеги + долг + зона + редактирование)
  const canEditPts=hasAction('edit_points_plans');
  $('pointsList').innerHTML=db.points.map(p=>{
   const k=kmap[p.id]||{k30:0,k50:0};
@@ -2942,7 +3018,6 @@ function render(){
   `;
  }).join('');
 
- // Вкладка Долги
  $('totalAllDebts').textContent=money(totalDebtAll);
  const debtors=Object.values(dmap).filter(x=>x.debt>0).sort((a,b)=>b.debt-a.debt);
  $('debtsByPointList').innerHTML=debtors.length
@@ -2960,7 +3035,6 @@ function render(){
   ?debtOps.map(o=>renderOpCard(o,true)).join('')
   :'<div class="empty">Записей по долгам пока нет.</div>';
 
- // Последние операции на обзоре
  $('recent').innerHTML=db.ops.length
   ?db.ops.slice(0,5).map(o=>renderOpCard(o,true)).join('')
   :'<div class="empty">Операций пока нет.</div>';
@@ -2980,9 +3054,13 @@ const savedLogin=localStorage.getItem(SESSION_KEY);
 if(savedLogin){
  const u=db.users.find(x=>x.username===savedLogin);
  if(u) applyAuth(u);
- else updateBioUi();
+ else{
+  updateBioUi();
+  refreshDriveStatusUi();
+ }
 }else{
  updateBioUi();
+ refreshDriveStatusUi();
 }
 </script>
 </body>
