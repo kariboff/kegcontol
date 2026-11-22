@@ -561,7 +561,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 <div class="card accent-blue">
  <h2>☁️ Облачная синхронизация Google Drive</h2>
  <div class="notice info">
-  Подключите один и тот же аккаунт Google на вашем телефоне и на телефоне водителя. Приложение сохранит общую базу <code>kegcontrol_shared_db.json</code> на Google Диске и будет синхронизировать продажи, заявки, остатки, пользователей и долги. При открытии приложения оно автоматически пробует восстановить подключение к вашему сохранённому аккаунту Google.
+  Подключите один и тот же аккаунт Google на вашем телефоне и на телефоне водителя. Приложение сохранит общую базу <code>kegcontrol_shared_db.json</code> на Google Диске и будет синхронизировать продажи, заявки, остатки, пользователей и долги. При открытии приложения оно тихо проверяет сеанс без всплывающих окон, а при нажатии на облако или кнопку синхронизации открывает окно входа для вашего сохранённого аккаунта.
  </div>
  <label>Google OAuth Client ID (для облачного диска)</label>
  <input id="googleClientIdInput" placeholder="Вставьте Client ID вида 1234567890-xxxx.apps.googleusercontent.com">
@@ -834,7 +834,6 @@ let driveTokenExpiresAt=0;
 let driveFileId=loadDriveMeta().fileId||null;
 let driveUserEmail=loadDriveMeta().email||'';
 let driveWasConnected=!!loadDriveMeta().wasConnected;
-let autoReconnectTriedOnInteraction=false;
 let isSyncing=false;
 let activeSalePlanId=null;
 let statPeriod='day';
@@ -896,9 +895,9 @@ function refreshDriveStatusUi(){
    infoEl.innerHTML=`Статус: <b style="color:#6be0a9">Подключено${driveUserEmail?' ('+esc(driveUserEmail)+')':''}</b> · Автосинхронизация активна.`;
   }
  }else if(driveWasConnected||getClientId()){
-  setSyncPill('Облако: автоподкл.','busy');
+  setSyncPill('Облако: войти','busy');
   if(infoEl){
-   infoEl.innerHTML=`Статус: <b style="color:var(--amber)">Обновление сеанса${driveUserEmail?' для '+esc(driveUserEmail):''}</b> — приложение автоматически подхватит подключение при открытии или первом действии.`;
+   infoEl.innerHTML=`Статус: <b style="color:var(--amber)">Сеанс Google истёк${driveUserEmail?' ('+esc(driveUserEmail)+')':''}</b> — нажмите на значок облака или «Подключить Google Drive» для входа.`;
   }
  }else{
   setSyncPill('Локально','');
@@ -1140,7 +1139,6 @@ function requestGoogleToken({silent=false,afterCallback=null,showAlerts=true}={}
    const expiresInSec=Number(resp.expires_in||3500);
    driveTokenExpiresAt=Date.now()+expiresInSec*1000;
    driveWasConnected=true;
-   autoReconnectTriedOnInteraction=true;
    saveDriveMeta({wasConnected:true});
    setSyncPill('Синхронизация...','busy');
    await fetchDriveUserInfo();
@@ -1149,7 +1147,7 @@ function requestGoogleToken({silent=false,afterCallback=null,showAlerts=true}={}
   }
  });
  const reqOpts={prompt:silent?'none':''};
- if(driveUserEmail) reqOpts.hint=driveUserEmail;
+ if(!silent&&driveUserEmail) reqOpts.hint=driveUserEmail;
  tokenClient.requestAccessToken(reqOpts);
 }
 
@@ -1170,15 +1168,6 @@ function trySilentGoogleReconnect(){
   window.addEventListener('load',()=>setTimeout(run,500),{once:true});
  }
 }
-
-document.addEventListener('pointerdown',()=>{
- if(autoReconnectTriedOnInteraction) return;
- if(!driveWasConnected||!getClientId()||hasValidDriveToken()) return;
- if(window.google&&google.accounts&&google.accounts.oauth2){
-  autoReconnectTriedOnInteraction=true;
-  requestGoogleToken({silent:false,showAlerts:false});
- }
-},{passive:true});
 
 async function fetchDriveUserInfo(){
  if(!hasValidDriveToken()) return;
