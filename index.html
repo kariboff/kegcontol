@@ -107,7 +107,7 @@ button:active{transform:scale(0.985)}
 .point-menu-wrap{position:relative;display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
 .point-name-btn{background:transparent;color:var(--ink);padding:2px 4px;margin:-2px -4px;border-radius:7px;font-weight:750;font-size:15px;display:inline-flex;align-items:center;gap:4px;text-align:left}
 .point-name-btn:hover{background:#1b2e25;color:#78ebb5}
-.point-popover{position:absolute;left:0;top:calc(100% + 4px);min-width:168px;background:#15241d;border:1px solid #2e4b3d;border-radius:11px;padding:5px;box-shadow:0 12px 28px rgba(0,0,0,0.6);z-index:16}
+.point-popover{position:absolute;left:0;top:calc(100% + 4px);min-width:176px;background:#15241d;border:1px solid #2e4b3d;border-radius:11px;padding:5px;box-shadow:0 12px 28px rgba(0,0,0,0.6);z-index:16}
 .point-menu-item{width:100%;text-align:left;background:transparent;color:var(--ink);padding:8px 10px;border-radius:8px;font-size:13px;font-weight:650;display:flex;align-items:center;gap:7px}
 .point-menu-item:hover{background:#1e342a}
 .point-menu-item.del{color:var(--red)}
@@ -116,6 +116,13 @@ button:active{transform:scale(0.985)}
 .point-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;width:100%}
 .point-row-left{flex:1 1 auto;min-width:0}
 .point-row-right{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;text-align:right}
+.point-line-1{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.point-line-2{margin-top:3px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.point-line-3{margin-top:4px;font-size:12px;color:#cfe0d7;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.phone-call-link{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:8px;background:var(--green-soft);color:#6be0a9;border:1px solid #236144;text-decoration:none;font-weight:700;font-size:12px}
+.phone-call-link:hover{background:#194531;color:#98f2c7}
+.gis-link-btn{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:7px;background:var(--blue-soft);color:var(--blue);border:1px solid #23476e;text-decoration:none;font-weight:700;font-size:11px}
+.gis-link-btn:hover{background:#183454;color:#8cc2ff}
 .keg-cnt-num{font-weight:900;font-size:12px;font-variant-numeric:tabular-nums}
 
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
@@ -185,7 +192,7 @@ a{color:var(--blue)}
 .twocol{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .threecol{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 @media(max-width:600px){
- .threecol{grid-template-columns:1fr}
+ .twocol,.threecol{grid-template-columns:1fr}
 }
 .calc{background:#10241b;border:1px solid #224d39;border-left:4px solid var(--green);border-radius:12px;padding:12px;margin-top:10px}
 .calc strong{font-size:20px;color:#5ce0a3}
@@ -564,11 +571,39 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
  <div><label>Район / маршрут</label><input id="newPointZone" placeholder="Например, Центр / Трасса"></div>
 </div>
 <div class="twocol">
- <div><label>Телефон (необяз.)</label><input id="newPointPhone" placeholder="+7 777 ..."></div>
+ <div><label>Имя (контактное лицо)</label><input id="newPointContactName" placeholder="Например, Алексей"></div>
+ <div><label>Телефон (необяз.)</label><input id="newPointPhone" type="tel" placeholder="+7 777 ..."></div>
+</div>
+<div class="twocol">
  <div><label>Адрес / ориентир (необяз.)</label><input id="newPointAddr" placeholder="Улица, дом"></div>
+ <div><label>Точка в 2ГИС (ссылка или координаты)</label><input id="newPointGis" placeholder="43.2389, 76.8897 или ссылка 2ГИС"></div>
 </div>
 <button class="secondary" id="addPoint" style="width:100%;margin-top:9px">Добавить торговую точку</button>
 <div id="pointsList" style="margin-top:12px"></div>
+</div>
+
+<!-- СВОРАЧИВАЕМАЯ CRM-КАРТОЧКА ДЛЯ ТОЧЕК В ПРОЦЕССЕ / ПЕРЕГОВОРАХ -->
+<div class="card accent-amber" data-card-id="points_prospects">
+ <div class="row card-hdr-bar" style="flex-wrap:wrap">
+  <h2 style="margin:0">⏳ В процессе / переговоры (CRM) <span id="prospectsBadge"></span></h2>
+ </div>
+ <div class="muted" style="margin-bottom:8px">Точки, с которыми пока не договорились, но есть шанс. Когда договоритесь — нажмите <b>«Активировать точку»</b>, и она перейдёт в «Торговые точки».</div>
+ <div class="twocol">
+  <div><label>Название точки</label><input id="newProspectName" placeholder="Например, Бар Уют"></div>
+  <div><label>Район / маршрут</label><input id="newProspectZone" placeholder="Например, Ауэзовский"></div>
+ </div>
+ <div class="twocol">
+  <div><label>Имя</label><input id="newProspectContactName" placeholder="Например, Марат"></div>
+  <div><label>Телефон (необяз.)</label><input id="newProspectPhone" type="tel" placeholder="+7 777 ..."></div>
+ </div>
+ <div class="twocol">
+  <div><label>Адрес (необяз.)</label><input id="newProspectAddr" placeholder="Улица, дом"></div>
+  <div><label>Точка в 2ГИС (ссылка или координаты)</label><input id="newProspectGis" placeholder="43.2389, 76.8897 или ссылка 2ГИС"></div>
+ </div>
+ <label>Напоминание / на чём остановились</label>
+ <input id="newProspectNote" placeholder="Например, перезвонить в пятницу, ждут прайс">
+ <button class="warn" id="addProspectBtn" style="width:100%;margin-top:9px">Добавить в «В процессе»</button>
+ <div id="prospectsList" style="margin-top:12px"></div>
 </div>
 </section>
 
@@ -888,9 +923,10 @@ const defaultData=()=>({
  ],
  raw:[],
  points:[
-  {id:1,name:'Точка 1',zone:'Центр',phone:'',addr:'',createdAt:1},
-  {id:2,name:'Точка 2',zone:'Трасса',phone:'',addr:'',createdAt:2}
+  {id:1,name:'Точка 1',zone:'Центр',contactName:'',phone:'',addr:'',gis:'',createdAt:1},
+  {id:2,name:'Точка 2',zone:'Трасса',contactName:'',phone:'',addr:'',gis:'',createdAt:2}
  ],
+ prospects:[],
  plans:[],
  ops:[]
 });
@@ -904,6 +940,7 @@ function normalizeDb(rawObj){
  if(!Array.isArray(merged.ops)) merged.ops=[];
  if(!Array.isArray(merged.raw)) merged.raw=[];
  if(!Array.isArray(merged.points)) merged.points=[];
+ if(!Array.isArray(merged.prospects)) merged.prospects=[];
  if(!Array.isArray(merged.products)) merged.products=[];
 
  const oldRashid=merged.users.find(u=>u.username==='rashid');
@@ -930,7 +967,16 @@ function normalizeDb(rawObj){
   pass:String(u.pass||''),
   role:merged.roles[u.role]?u.role:(u.role==='owner'?'owner':'driver')
  })).filter(u=>u.username);
- merged.points=merged.points.map((p,idx)=>({zone:'',phone:'',addr:'',createdAt:Number(p.createdAt||p.id||idx+1),...p}));
+ merged.points=merged.points.map((p,idx)=>({
+  zone:'',contactName:'',phone:'',addr:'',gis:'',
+  createdAt:Number(p.createdAt||p.id||idx+1),
+  ...p
+ }));
+ merged.prospects=merged.prospects.map((p,idx)=>({
+  zone:'',contactName:'',phone:'',addr:'',gis:'',note:'',
+  createdAt:Number(p.createdAt||p.id||idx+1),
+  ...p
+ }));
  merged.products=merged.products.map(p=>({qty:0,price:0,abv:'',og:'',...p}));
  merged.kegs30=Math.max(0,Number(merged.kegs30||0));
  merged.kegs50=Math.max(0,Number(merged.kegs50||0));
@@ -993,6 +1039,26 @@ const fmtDateRu=(iso)=>{
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>Date.now()+Math.floor(Math.random()*10000);
 const fmtDeg=v=>(v!==undefined&&v!==null&&String(v).trim()!==''?`${fmt(Number(v))}%`:'—');
+
+function buildTelHref(phone){
+ const raw=String(phone||'').trim();
+ const cleaned=raw.replace(/[^\d+]/g,'');
+ return cleaned?`tel:${cleaned}`:'';
+}
+
+function build2GisUrl(pt){
+ const gis=String(pt?.gis||'').trim();
+ if(/^https?:\/\//i.test(gis)||/^2gis:\/\//i.test(gis)) return gis;
+ const coordMatch=gis.match(/(-?\d{1,2}\.\d+)\s*[,;\s]\s*(-?\d{1,3}\.\d+)/);
+ if(coordMatch){
+  return `https://2gis.kz/geo/${coordMatch[2]},${coordMatch[1]}`;
+ }
+ const query=[pt?.addr,pt?.zone,pt?.name].filter(Boolean).join(', ').trim();
+ if(query){
+  return `https://2gis.kz/search/${encodeURIComponent(query)}`;
+ }
+ return '';
+}
 
 /* ==================== СВОРАЧИВАНИЕ КАРТОЧЕК (С СОХРАНЕНИЕМ СОСТОЯНИЯ) ==================== */
 function loadCollapsedCards(){
@@ -1942,6 +2008,27 @@ window.deletePoint=id=>{
  save();
 };
 
+function renderContactAndPhoneRow(pt){
+ const namePart=pt.contactName?`<span>👤 <b>${esc(pt.contactName)}</b></span>`:'';
+ const telHref=buildTelHref(pt.phone);
+ const phonePart=pt.phone
+  ?(telHref
+   ?`<a class="phone-call-link" href="${esc(telHref)}" title="Позвонить">📞 ${esc(pt.phone)}</a>`
+   :`<span>📞 ${esc(pt.phone)}</span>`)
+  :'';
+ if(!namePart&&!phonePart) return '';
+ return `<div class="point-line-3">${namePart}${phonePart}</div>`;
+}
+
+function renderAddressAndGisRow(pt){
+ const gisUrl=build2GisUrl(pt);
+ const gisBadge=gisUrl
+  ?`<a class="gis-link-btn" href="${esc(gisUrl)}" target="_blank" rel="noopener noreferrer" title="Открыть точку в 2ГИС">🗺️ 2ГИС</a>`
+  :'';
+ if(!pt.addr&&!gisBadge) return '';
+ return `<div class="point-line-2">${pt.addr?`<span>📍 ${esc(pt.addr)}</span>`:''}${gisBadge}</div>`;
+}
+
 function renderPointsList(kmap=kegsByPoint(),dmap=debtsByPoint(),smap=salesByPoint()){
  const list=[...db.points];
 
@@ -1978,16 +2065,19 @@ function renderPointsList(kmap=kegsByPoint(),dmap=debtsByPoint(),smap=salesByPoi
    <div class="item">
     <div class="point-row">
      <div class="point-row-left">
-      <div class="point-menu-wrap">
-       <button type="button" class="point-name-btn" onclick="togglePointMenu(${p.id},event)">${esc(p.name)}</button>
-       ${p.zone?`<span class="pill zone">${esc(p.zone)}</span>`:''}
-       <div class="point-popover ${menuHidden}" data-point-menu="${p.id}">
-        <button type="button" class="point-menu-item" onclick="editPointModal(${p.id})">✏️ Редактировать</button>
-        <button type="button" class="point-menu-item del" onclick="deletePoint(${p.id})">🗑️ Удалить</button>
+      <div class="point-line-1">
+       <div class="point-menu-wrap">
+        <button type="button" class="point-name-btn" onclick="togglePointMenu(${p.id},event)">${esc(p.name)}</button>
+        <div class="point-popover ${menuHidden}" data-point-menu="${p.id}">
+         <button type="button" class="point-menu-item" onclick="editPointModal(${p.id})">✏️ Редактировать</button>
+         <button type="button" class="point-menu-item del" onclick="deletePoint(${p.id})">🗑️ Удалить</button>
+        </div>
        </div>
+       ${p.zone?`<span class="pill zone">${esc(p.zone)}</span>`:''}
       </div>
-      ${p.addr||p.phone?`<div class="muted">${p.addr?'📍 '+esc(p.addr)+' ':''}${p.phone?'📞 '+esc(p.phone):''}</div>`:''}
-      <div class="muted">Продано: <b>${fmt(sl)} л</b></div>
+      ${renderAddressAndGisRow(p)}
+      ${renderContactAndPhoneRow(p)}
+      <div class="muted" style="margin-top:3px">Продано: <b>${fmt(sl)} л</b></div>
      </div>
      <div class="point-row-right">
       ${d>0?`<span class="pill debt">Долг: ${money(d)}</span>`:''}
@@ -1997,6 +2087,129 @@ function renderPointsList(kmap=kegsByPoint(),dmap=debtsByPoint(),smap=salesByPoi
    </div>
   `;
  }).join(''):'<div class="empty">Торговых точек пока нет.</div>';
+}
+
+/* ==================== CRM-КАРТОЧКА «В ПРОЦЕССЕ / ПЕРЕГОВОРЫ» ==================== */
+$('addProspectBtn').onclick=()=>{
+ const name=$('newProspectName').value.trim();
+ const zone=$('newProspectZone').value.trim();
+ const contactName=$('newProspectContactName').value.trim();
+ const phone=$('newProspectPhone').value.trim();
+ const addr=$('newProspectAddr').value.trim();
+ const gis=$('newProspectGis').value.trim();
+ const note=$('newProspectNote').value.trim();
+ if(!name) return alert('Введите название точки');
+ db.prospects.unshift({
+  id:uid(),
+  name,
+  zone,
+  contactName,
+  phone,
+  addr,
+  gis,
+  note,
+  createdAt:Date.now()
+ });
+ $('newProspectName').value='';
+ $('newProspectZone').value='';
+ $('newProspectContactName').value='';
+ $('newProspectPhone').value='';
+ $('newProspectAddr').value='';
+ $('newProspectGis').value='';
+ $('newProspectNote').value='';
+ save();
+};
+
+window.activateProspect=id=>{
+ const idx=db.prospects.findIndex(x=>x.id===id);
+ if(idx===-1) return;
+ const pr=db.prospects[idx];
+ if(!confirm(`Активировать точку «${pr.name}» и перенести её в «Торговые точки»?`)) return;
+ db.prospects.splice(idx,1);
+ db.points.push({
+  id:uid(),
+  name:pr.name,
+  zone:pr.zone||'',
+  contactName:pr.contactName||'',
+  phone:pr.phone||'',
+  addr:pr.addr||'',
+  gis:pr.gis||'',
+  createdAt:Date.now()
+ });
+ save();
+ alert(`Точка «${pr.name}» активирована и добавлена в «Торговые точки»!`);
+};
+
+window.editProspectModal=id=>{
+ const pr=db.prospects.find(x=>x.id===id);
+ if(!pr) return;
+ $('editModalTitle').textContent='✏️ Редактирование (в процессе)';
+ $('editModalBody').innerHTML=`
+  <label>Название точки</label><input id="eprName" value="${esc(pr.name)}">
+  <label>Район / маршрут</label><input id="eprZone" value="${esc(pr.zone||'')}">
+  <label>Имя</label><input id="eprContactName" value="${esc(pr.contactName||'')}">
+  <label>Телефон</label><input id="eprPhone" type="tel" value="${esc(pr.phone||'')}">
+  <label>Адрес</label><input id="eprAddr" value="${esc(pr.addr||'')}">
+  <label>Точка в 2ГИС (ссылка или координаты)</label><input id="eprGis" value="${esc(pr.gis||'')}">
+  <label>Напоминание / заметка</label><input id="eprNote" value="${esc(pr.note||'')}">
+  <button type="button" class="primary" id="saveProspectEditBtn">Сохранить изменения</button>
+ `;
+ $('editModal').classList.remove('hidden');
+ $('saveProspectEditBtn').onclick=()=>{
+  const n=$('eprName').value.trim();
+  if(!n) return alert('Название не может быть пустым');
+  pr.name=n;
+  pr.zone=$('eprZone').value.trim();
+  pr.contactName=$('eprContactName').value.trim();
+  pr.phone=$('eprPhone').value.trim();
+  pr.addr=$('eprAddr').value.trim();
+  pr.gis=$('eprGis').value.trim();
+  pr.note=$('eprNote').value.trim();
+  $('editModal').classList.add('hidden');
+  save();
+ };
+};
+
+window.deleteProspect=id=>{
+ const pr=db.prospects.find(x=>x.id===id);
+ if(!pr) return;
+ if(!confirm(`Удалить точку «${pr.name}» из списка «В процессе»?`)) return;
+ db.prospects=db.prospects.filter(x=>x.id!==id);
+ save();
+};
+
+function renderProspectsList(){
+ const badge=$('prospectsBadge');
+ if(badge) badge.textContent=db.prospects.length?`(${db.prospects.length})`:'';
+ const box=$('prospectsList');
+ if(!box) return;
+ if(!db.prospects.length){
+  box.innerHTML='<div class="empty">Точек в переговорах пока нет.</div>';
+  return;
+ }
+ box.innerHTML=db.prospects.map(pr=>`
+  <div class="item">
+   <div class="point-row">
+    <div class="point-row-left">
+     <div class="point-line-1">
+      <b style="font-size:15px">${esc(pr.name)}</b>
+      ${pr.zone?`<span class="pill zone">${esc(pr.zone)}</span>`:''}
+      <span class="pill plan-due">В процессе</span>
+     </div>
+     ${renderAddressAndGisRow(pr)}
+     ${renderContactAndPhoneRow(pr)}
+     ${pr.note?`<div class="muted" style="margin-top:4px;color:#ffd896">🔔 ${esc(pr.note)}</div>`:''}
+    </div>
+    <div class="point-row-right">
+     <button type="button" class="primary sm-btn" style="margin-top:0;width:auto" onclick="activateProspect(${pr.id})">✅ Активировать точку</button>
+     <div style="display:flex;gap:5px">
+      <button type="button" class="warn sm-btn" onclick="editProspectModal(${pr.id})" title="Редактировать">✏️</button>
+      <button type="button" class="danger sm-btn" onclick="deleteProspect(${pr.id})" title="Удалить">🗑️</button>
+     </div>
+    </div>
+   </div>
+  </div>
+ `).join('');
 }
 
 /* ==================== СТРОКИ В ПРОДАЖЕ (ЛИТРАЖ СЧИТАЕТСЯ ПО КЕГАМ) ==================== */
@@ -2341,1970 +2554,4 @@ function renderPlans(){
  const zones=new Set(['Без района']);
  db.points.forEach(p=>{if(p.zone) zones.add(p.zone);});
  db.plans.forEach(p=>{if(p.zone) zones.add(p.zone);});
- const zoneOpts='<option value="all">Все районы</option>'+Array.from(zones).map(z=>`<option value="${esc(z)}">${esc(z)}</option>`).join('');
-
- const prevZ1=$('planFilterZoneMain').value||'all';
- const prevZ2=$('planFilterZone').value||'all';
- $('planFilterZoneMain').innerHTML=zoneOpts;
- $('planFilterZone').innerHTML=zoneOpts;
- $('planFilterZoneMain').value=prevZ1;
- $('planFilterZone').value=prevZ2;
-
- const activeZone=planFilter==='date'?$('planFilterZone').value:$('planFilterZoneMain').value;
-
- let filtered=db.plans.filter(pl=>{
-  if(activeZone!=='all'&&(pl.zone||'Без района')!==activeZone) return false;
-  if(planFilter==='today') return pl.status!=='done'&&pl.date<=t;
-  if(planFilter==='tomorrow') return pl.status!=='done'&&pl.date===tom;
-  if(planFilter==='upcoming') return pl.status!=='done';
-  if(planFilter==='date'){
-   const picked=$('planFilterDate').value||t;
-   return pl.date===picked;
-  }
-  if(planFilter==='done') return pl.status==='done';
-  return true;
- });
-
- filtered.sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||''));
-
- let sumLiters=0,sumK30=0,sumK50=0,sumRet30=0,sumRet50=0;
- const prodTotals={};
- filtered.forEach(pl=>{
-  (pl.items||[]).forEach(it=>{
-   const k30=Number(it.k30||0);
-   const k50=Number(it.k50||0);
-   const lit=calcKegLiters(k30,k50);
-   sumLiters+=lit;
-   sumK30+=k30;
-   sumK50+=k50;
-   prodTotals[it.productName]=(prodTotals[it.productName]||0)+lit;
-  });
-  sumRet30+=Number(pl.ret30||0);
-  sumRet50+=Number(pl.ret50||0);
- });
-
- const prodSummaryStr=Object.entries(prodTotals).map(([k,v])=>`${esc(k)}: <b>${fmt(v)} л</b>`).join(' · ')||'нет пива';
- $('planSummaryStrip').innerHTML=`
-  <div class="sum-box"><small>Заявок в списке</small><b>${filtered.length} шт.</b></div>
-  <div class="sum-box"><small>Загрузить в машину</small><b>${fmt(sumLiters)} л (${sumK30+sumK50} кег)</b><span class="muted">30л: ${sumK30} · 50л: ${sumK50}</span></div>
-  <div class="sum-box"><small>Забрать пустых кег</small><b>${sumRet30+sumRet50} шт.</b><span class="muted">30л: ${sumRet30} · 50л: ${sumRet50}</span></div>
-  <div class="sum-box"><small>По сортам загрузить</small><span style="font-size:12px">${prodSummaryStr}</span></div>
- `;
-
- const box=$('planListContainer');
- if(!filtered.length){
-  box.innerHTML='<div class="empty">Заявок по выбранному фильтру нет.</div>';
-  return;
- }
-
- const groups={};
- filtered.forEach(pl=>{
-  const z=pl.zone||'Без района';
-  if(!groups[z]) groups[z]=[];
-  groups[z].push(pl);
- });
-
- box.innerHTML=Object.entries(groups).map(([zone,list])=>{
-  const cards=list.map(pl=>{
-   const isDone=pl.status==='done';
-   const isOver=!isDone&&pl.date<t;
-   const isToday=!isDone&&pl.date===t;
-   const cls=isDone?'done':(isOver?'overdue':(isToday?'today':''));
-   const statusPill=isDone
-    ?`<span class="pill">✅ Выполнено</span>`
-    :(isOver?`<span class="pill plan-over">⚠️ Просрочено (${fmtDateRu(pl.date)})</span>`
-    :(isToday?`<span class="pill plan-due">🔥 Сегодня ${pl.time?esc(pl.time):''}</span>`
-    :`<span class="pill ret">📅 ${fmtDateRu(pl.date)} ${pl.time?esc(pl.time):''}</span>`));
-
-   const itemsHtml=(pl.items||[]).map(it=>{
-    const k30=it.k30||0;
-    const k50=it.k50||0;
-    const lit=calcKegLiters(k30,k50);
-    return `<div class="op-line">🍺 <b>${esc(it.productName)}</b> — <b>${fmt(lit)} л</b> (30л: ${k30} шт., 50л: ${k50} шт.)</div>`;
-   }).join('');
-   const retHtml=(Number(pl.ret30||0)>0||Number(pl.ret50||0)>0)
-    ?`<div class="op-line ret-line">↩️ Забрать пустых: <b>30л — ${pl.ret30||0} шт., 50л — ${pl.ret50||0} шт.</b></div>`:'';
-
-   const ptObj=db.points.find(x=>x.id===pl.pointId);
-   const ptMeta=ptObj&&(ptObj.phone||ptObj.addr)?`<div class="muted" style="margin-top:3px">${ptObj.addr?'📍 '+esc(ptObj.addr)+' ':''}${ptObj.phone?'📞 '+esc(ptObj.phone):''}</div>`:'';
-
-   return `
-    <div class="order-card ${cls}">
-     <div class="row">
-      <div><b style="font-size:15px">${esc(pl.pointName)}</b></div>
-      ${statusPill}
-     </div>
-     ${ptMeta}
-     <div class="op-lines">${itemsHtml}${retHtml}</div>
-     ${pl.note?`<div class="muted" style="margin-top:5px">💬 ${esc(pl.note)}</div>`:''}
-     <div class="op-actions">
-      ${!isDone?`<button type="button" class="primary sm-btn" style="margin-top:0;width:auto" onclick="loadPlanIntoSale(${pl.id})">🚚 Оформить отгрузку</button>`:''}
-      <button type="button" class="secondary sm-btn" onclick="togglePlanDone(${pl.id})">${isDone?'Вернуть в план':'Отметить выполненной'}</button>
-      ${hasAction('edit_points_plans')?`<button type="button" class="danger sm-btn" onclick="deletePlan(${pl.id})" title="Удалить заявку">🗑️</button>`:''}
-     </div>
-    </div>
-   `;
-  }).join('');
-
-  return `
-   <div class="route-group">
-    <div class="route-group-head">
-     <span class="route-group-title">🗺️ Район / маршрут: ${esc(zone)}</span>
-     <span class="pill zone">${list.length} шт.</span>
-    </div>
-    ${cards}
-   </div>
-  `;
- }).join('');
-}
-
-/* ==================== МОДАЛЬНОЕ ОКНО ОПЛАТЫ ПРИ ОТГРУЗКЕ ==================== */
-function openSalePayModal(draft){
- pendingSaleDraft=draft;
- const pmBtns=document.querySelectorAll('#payMethodsGrid .pay-method-btn');
- pmBtns.forEach(b=>{
-  b.classList.remove('active','debt-mode');
-  if(b.dataset.pm==='Наличные') b.classList.add('active');
- });
- $('payAmountWrap').classList.remove('hidden');
- $('modalPaidAmount').value=draft.totalAmount;
-
- const linesSummary=draft.items.map(i=>`<div>• ${esc(i.productName)}: <b>${i.k30+i.k50} кег (${fmt(i.liters)} л)</b> × ${fmt(i.price)} ₸ = <b>${money(i.subtotal)}</b></div>`).join('');
- $('payModalSummary').innerHTML=`
-  <div class="row"><span>Точка:</span><b>${esc(draft.pointName)}</b></div>
-  <div style="margin-top:6px;font-size:13px">${linesSummary}</div>
-  <div class="row" style="margin-top:8px;padding-top:8px;border-top:1px solid #224d39">
-   <span>Итого по накладной:</span><strong>${money(draft.totalAmount)}</strong>
-  </div>
- `;
- updatePayModalCalc();
- $('payModal').classList.remove('hidden');
-}
-
-function getSelectedPayMethod(){
- const active=document.querySelector('#payMethodsGrid .pay-method-btn.active');
- return active?active.dataset.pm:'Наличные';
-}
-
-function updatePayModalCalc(){
- if(!pendingSaleDraft) return;
- const pm=getSelectedPayMethod();
- const total=pendingSaleDraft.totalAmount;
- let paid=pm==='В долг'?0:Math.max(0,Number($('modalPaidAmount').value||0));
- if(paid>total) paid=total;
- const debtAdded=Math.max(0,total-paid);
-
- const box=$('modalPayResultBox');
- if(debtAdded>0){
-  box.className='calc debt-box';
-  box.innerHTML=`
-   <div class="row"><span>Способ расчёта:</span><b>${esc(pm)}</b></div>
-   <div class="row" style="margin-top:4px"><span>Оплачено сейчас:</span><b>${money(paid)}</b></div>
-   <div class="row" style="margin-top:6px;padding-top:6px;border-top:1px solid #5c272d"><span>В долг на точку:</span><strong>${money(debtAdded)}</strong></div>
-  `;
- }else{
-  box.className='calc paid-box';
-  box.innerHTML=`
-   <div class="row"><span>Способ расчёта:</span><b>${esc(pm)}</b></div>
-   <div class="row" style="margin-top:4px"><span>Оплачено полностью:</span><strong>${money(paid)}</strong></div>
-   <div class="row" style="margin-top:4px"><span>Остаток в долг:</span><b>0 ₸</b></div>
-  `;
- }
-}
-
-$('payMethodsGrid').onclick=e=>{
- const btn=e.target.closest('.pay-method-btn');
- if(!btn||!pendingSaleDraft) return;
- document.querySelectorAll('#payMethodsGrid .pay-method-btn').forEach(b=>b.classList.remove('active','debt-mode'));
- btn.classList.add('active');
- const pm=btn.dataset.pm;
- if(pm==='В долг'){
-  btn.classList.add('debt-mode');
-  $('payAmountWrap').classList.add('hidden');
-  $('modalPaidAmount').value=0;
- }else{
-  $('payAmountWrap').classList.remove('hidden');
-  if(Number($('modalPaidAmount').value||0)===0){
-   $('modalPaidAmount').value=pendingSaleDraft.totalAmount;
-  }
- }
- updatePayModalCalc();
-};
-
-$('modalPaidAmount').oninput=updatePayModalCalc;
-$('modalPayFullBtn').onclick=()=>{if(pendingSaleDraft){$('modalPaidAmount').value=pendingSaleDraft.totalAmount;updatePayModalCalc();}};
-$('modalPayHalfBtn').onclick=()=>{if(pendingSaleDraft){$('modalPaidAmount').value=Math.round(pendingSaleDraft.totalAmount/2);updatePayModalCalc();}};
-$('modalPayZeroBtn').onclick=()=>{$('modalPaidAmount').value=0;updatePayModalCalc();};
-$('closePayModal').onclick=()=>{$('payModal').classList.add('hidden');pendingSaleDraft=null;};
-
-$('confirmSalePayBtn').onclick=()=>{
- if(!pendingSaleDraft) return;
- const pm=getSelectedPayMethod();
- const total=pendingSaleDraft.totalAmount;
- let paid=pm==='В долг'?0:Math.max(0,Number($('modalPaidAmount').value||0));
- if(paid>total) paid=total;
- const debtAdded=Math.max(0,total-paid);
- const payStatus=debtAdded===0?'Оплачено':(paid>0?'Частично в долг':'В долг');
-
- finalizeSaleOperation({
-  ...pendingSaleDraft,
-  payMethod:pm,
-  payStatus,
-  paidAmount:paid,
-  debtAdded
- });
-
- $('payModal').classList.add('hidden');
- pendingSaleDraft=null;
-};
-
-function finalizeSaleOperation(opData){
- opData.items.forEach(item=>{
-  const prod=db.products.find(p=>p.id===item.productId);
-  if(prod) prod.qty=Math.max(0,Number(prod.qty||0)-item.liters);
- });
- db.kegs30=Math.max(0,Number(db.kegs30||0)-opData.totalK30+opData.ret30);
- db.kegs50=Math.max(0,Number(db.kegs50||0)-opData.totalK50+opData.ret50);
-
- const now=new Date();
- const op={
-  id:uid(),
-  date:now.toLocaleString('ru-RU'),
-  isoDate:todayIso(),
-  type:'sale_return',
-  author:currentUser?currentUser.username:'system',
-  pointId:opData.pointId,
-  pointName:opData.pointName,
-  items:opData.items,
-  totalK30:opData.totalK30,
-  totalK50:opData.totalK50,
-  totalLiters:opData.totalLiters,
-  totalAmount:opData.totalAmount,
-  payMethod:opData.payMethod||'Не указано',
-  payStatus:opData.payStatus||'Оплачено',
-  paidAmount:opData.paidAmount,
-  debtAdded:opData.debtAdded,
-  ret30:opData.ret30,
-  ret50:opData.ret50,
-  note:opData.note,
-  width:opData.width
- };
-
- db.ops.unshift(op);
-
- if(activeSalePlanId){
-  const pl=db.plans.find(x=>x.id===activeSalePlanId);
-  if(pl){
-   pl.status='done';
-   pl.completedAt=op.date;
-  }
-  clearActivePlan();
- }
-
- $('beerRowsContainer').innerHTML='';
- ensureAtLeastOneBeerRow();
- $('ret30').value=0;
- $('ret50').value=0;
- $('saleNote').value='';
- save();
- printReceipt(op);
-}
-
-/* ==================== ПРОДАЖА / ВОЗВРАТ ==================== */
-$('saveSale').onclick=()=>{
- const pt=db.points.find(x=>x.id===Number($('salePoint').value));
- const items=getBeerRowsData();
- const ret30=Math.max(0,Math.floor(Number($('ret30').value||0)));
- const ret50=Math.max(0,Math.floor(Number($('ret50').value||0)));
- const note=$('saleNote').value.trim();
- const width=$('receiptWidth').value||'80';
-
- if(!pt) return alert('Выберите торговую точку');
- if(!items.length&&ret30===0&&ret50===0){
-  return alert('Укажите кеги (30 л или 50 л) хотя бы по одному сорту или возврат пустых кег.');
- }
-
- const litersByProd={};
- for(const item of items){
-  litersByProd[item.productId]=(litersByProd[item.productId]||0)+item.liters;
- }
- for(const [pid,needLiters] of Object.entries(litersByProd)){
-  const prod=db.products.find(p=>p.id===Number(pid));
-  if(!prod||needLiters>Number(prod.qty||0)){
-   return alert(`Не хватает пива «${prod?prod.name:''}» на складе (нужно ${fmt(needLiters)} л, доступно ${fmt(prod?prod.qty:0)} л).`);
-  }
- }
-
- const totalK30=items.reduce((s,i)=>s+i.k30,0);
- const totalK50=items.reduce((s,i)=>s+i.k50,0);
- const totalLiters=items.reduce((s,i)=>s+i.liters,0);
- const totalAmount=items.reduce((s,i)=>s+i.subtotal,0);
-
- if(totalK30>Number(db.kegs30||0)) return alert(`На складе только ${db.kegs30} кег по 30 л.`);
- if(totalK50>Number(db.kegs50||0)) return alert(`На складе только ${db.kegs50} кег по 50 л.`);
-
- const kmap=kegsByPoint();
- const ptKegs=kmap[pt.id]||{k30:0,k50:0};
- const curPt30=Math.max(0,Number(ptKegs.k30||0));
- const curPt50=Math.max(0,Number(ptKegs.k50||0));
- if(ret30>curPt30+totalK30){
-  return alert(`Возврат 30 л (${ret30} шт.) больше, чем есть у точки с учётом отгрузки (${curPt30+totalK30} шт.).`);
- }
- if(ret50>curPt50+totalK50){
-  return alert(`Возврат 50 л (${ret50} шт.) больше, чем есть у точки с учётом отгрузки (${curPt50+totalK50} шт.).`);
- }
-
- const draft={
-  pointId:pt.id,
-  pointName:pt.name,
-  items,
-  totalK30,
-  totalK50,
-  totalLiters,
-  totalAmount,
-  ret30,
-  ret50,
-  note,
-  width
- };
-
- if(totalAmount>0){
-  openSalePayModal(draft);
- }else{
-  finalizeSaleOperation({
-   ...draft,
-   payMethod:'Без оплаты',
-   payStatus:'Без оплаты',
-   paidAmount:0,
-   debtAdded:0
-  });
- }
-};
-
-/* ==================== ЧЕК, PDF, WHATSAPP, ПРАЙС-ЛИСТ И PDF-ОТЧЁТ ==================== */
-function makePdfFilename(op){
- const safePoint=(op.pointName||'Точка').replace(/[\\/:*?"<>|]+/g,'_').trim();
- const d=new Date();
- const datePart=`${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}_${String(d.getHours()).padStart(2,'0')}-${String(d.getMinutes()).padStart(2,'0')}`;
- return `${safePoint}_${datePart}`;
-}
-
-function getPointKegBalanceAfterOp(op){
- const kmap=kegsByPoint();
- let rem30=0;
- let rem50=0;
- if(op.pointId&&kmap[op.pointId]){
-  rem30=Math.max(0,Number(kmap[op.pointId].k30||0));
-  rem50=Math.max(0,Number(kmap[op.pointId].k50||0));
- }else if(op.pointName){
-  const match=Object.values(kmap).find(x=>x.name===op.pointName);
-  if(match){
-   rem30=Math.max(0,Number(match.k30||0));
-   rem50=Math.max(0,Number(match.k50||0));
-  }
- }
- return {rem30,rem50};
-}
-
-function buildReceiptText(op){
- const lines=[];
- lines.push(`НАКЛАДНАЯ / КВИТАНЦИЯ`);
- lines.push(`Точка: ${op.pointName}`);
- lines.push(`Дата: ${op.date}`);
- if(op.items&&op.items.length){
-  lines.push(`---`);
-  op.items.forEach(i=>{
-   lines.push(`${i.productName}: ${Number(i.k30||0)+Number(i.k50||0)} кег (${fmt(i.liters)} л) x ${fmt(i.price)} Т = ${money(i.subtotal)}`);
-   lines.push(`  30л: ${i.k30||0} шт., 50л: ${i.k50||0} шт.`);
-  });
- }
- if(op.totalAmount>0){
-  lines.push(`---`);
-  lines.push(`Итого по чеку: ${money(op.totalAmount)}`);
-  lines.push(`Способ оплаты: ${op.payMethod||'Не указан'}`);
-  lines.push(`Оплачено: ${money(op.paidAmount)}`);
-  if(Number(op.debtAdded||0)>0){
-   lines.push(`В долг по чеку: ${money(op.debtAdded)}`);
-  }
- }
- const {prevDebt,totalDebt}=getPointDebtBreakdownForOp(op);
- if(prevDebt>0||totalDebt>0){
-  if(prevDebt>0) lines.push(`Прошлый долг: ${money(prevDebt)}`);
-  if(totalDebt>0) lines.push(`Общий долг точки: ${money(totalDebt)}`);
- }
- if(Number(op.ret30||0)>0||Number(op.ret50||0)>0){
-  lines.push(`---`);
-  lines.push(`Возврат пустых: 30л — ${op.ret30||0} шт., 50л — ${op.ret50||0} шт.`);
- }
- const {rem30,rem50}=getPointKegBalanceAfterOp(op);
- lines.push(`Остаток кег на точке: ${rem30+rem50} шт. (30л: ${rem30}, 50л: ${rem50})`);
- if(op.note) lines.push(`Комментарий: ${op.note}`);
- return lines.join('\n');
-}
-
-function buildReceiptPdfLines(op){
- const rows=[];
- rows.push({text:'НАКЛАДНАЯ / КВИТАНЦИЯ',bold:true,size:14,align:'center'});
- rows.push({text:`Дата: ${op.date||''}`,bold:false,size:9,align:'center'});
- if(op.author) rows.push({text:`Оформил: ${op.author}`,bold:false,size:9,align:'center'});
- rows.push({rule:true});
- rows.push({left:'Точка:',right:op.pointName||'',bold:true,size:10});
- rows.push({rule:true});
-
- if(op.items&&op.items.length){
-  op.items.forEach(i=>{
-   rows.push({left:i.productName||'',right:money(i.subtotal),bold:true,size:10});
-   rows.push({text:`${fmt(i.liters)} л x ${fmt(i.price)} Т | 30л: ${i.k30||0} шт, 50л: ${i.k50||0} шт`,bold:false,size:8.5,indent:4});
-  });
-  rows.push({left:'Всего кег отгружено:',right:`${getOpKegs30(op)+getOpKegs50(op)} шт. (30л:${getOpKegs30(op)}, 50л:${getOpKegs50(op)})`,bold:true,size:9.5});
- }else{
-  rows.push({left:'Отгрузка пива:',right:'нет',bold:false,size:9.5});
- }
-
- const {prevDebt,totalDebt}=getPointDebtBreakdownForOp(op);
- if(op.totalAmount>0||prevDebt>0||totalDebt>0){
-  rows.push({rule:true});
-  if(op.totalAmount>0){
-   rows.push({left:'ИТОГО:',right:money(op.totalAmount),bold:true,size:12});
-   rows.push({left:'Способ оплаты:',right:op.payMethod||'Не указан',bold:true,size:9.5});
-   rows.push({left:'Оплачено:',right:money(op.paidAmount),bold:false,size:9.5});
-   if(Number(op.debtAdded||0)>0){
-    rows.push({left:'В ДОЛГ ПО ЧЕКУ:',right:money(op.debtAdded),bold:true,size:10});
-   }
-  }
-  if(prevDebt>0){
-   rows.push({left:'Прошлый долг:',right:money(prevDebt),bold:true,size:9.5});
-  }
-  if(totalDebt>0){
-   rows.push({left:'ОБЩИЙ ДОЛГ:',right:money(totalDebt),bold:true,size:11.5});
-  }
- }
-
- rows.push({rule:true});
- rows.push({left:'Возврат пустых 30 л:',right:`${op.ret30||0} шт.`,bold:true,size:9.5});
- rows.push({left:'Возврат пустых 50 л:',right:`${op.ret50||0} шт.`,bold:true,size:9.5});
-
- if(op.note){
-  rows.push({rule:true});
-  rows.push({text:`Комментарий: ${op.note}`,bold:false,size:9});
- }
-
- const {rem30,rem50}=getPointKegBalanceAfterOp(op);
- rows.push({rule:true});
- rows.push({left:'Остаток кег на точке:',right:`${rem30+rem50} шт.`,bold:true,size:10});
- rows.push({left:'30 л / 50 л на точке:',right:`${rem30} шт. / ${rem50} шт.`,bold:true,size:9.5});
- rows.push({rule:true});
- rows.push({left:'Сдал: ___________',right:'Принял: ___________',bold:false,size:9.5});
- return rows;
-}
-
-function createReceiptPdfBlob(op){
- const rows=buildReceiptPdfLines(op);
- const isWide=op.width==='80';
- const pdfWidthPt=isWide?226.77:164.41;
- const pxScale=3;
- const pageWidthPx=Math.round((isWide?302:220)*pxScale);
- const marginX=14*pxScale;
- const contentW=pageWidthPx-marginX*2;
-
- const measureCtx=document.createElement('canvas').getContext('2d');
- const wrapLines=(txt,fontSizePt,maxW)=>{
-  const pxSize=Math.round(fontSizePt*1.333*pxScale);
-  measureCtx.font=`${pxSize}px Arial, "DejaVu Sans", sans-serif`;
-  const words=String(txt||'').split(/\s+/);
-  const out=[];
-  let cur='';
-  for(const w of words){
-   const test=cur?cur+' '+w:w;
-   if(measureCtx.measureText(test).width<=maxW||!cur){
-    cur=test;
-   }else{
-    out.push(cur);
-    cur=w;
-   }
-  }
-  if(cur) out.push(cur);
-  return out.length?out:[''];
- };
-
- let totalHeightPx=16*pxScale;
- const layout=[];
- rows.forEach(r=>{
-  if(r.rule){
-   layout.push({kind:'rule',y:totalHeightPx});
-   totalHeightPx+=11*pxScale;
-  }else if(r.left!==undefined){
-   const sz=r.size||10;
-   const lh=Math.round(sz*1.35*pxScale);
-   const leftWrapped=wrapLines(r.left,sz,contentW*0.58);
-   const rightWrapped=wrapLines(r.right,sz,contentW*0.40);
-   const lineCount=Math.max(leftWrapped.length,rightWrapped.length);
-   layout.push({kind:'pair',left:leftWrapped,right:rightWrapped,bold:!!r.bold,size:sz,lh,y:totalHeightPx});
-   totalHeightPx+=lineCount*lh+3*pxScale;
-  }else{
-   const sz=r.size||10;
-   const lh=Math.round(sz*1.35*pxScale);
-   const ind=(r.indent||0)*pxScale;
-   const wrapped=wrapLines(r.text,sz,contentW-ind);
-   layout.push({kind:'text',lines:wrapped,bold:!!r.bold,size:sz,align:r.align||'left',indent:ind,lh,y:totalHeightPx});
-   totalHeightPx+=wrapped.length*lh+3*pxScale;
-  }
- });
- totalHeightPx+=18*pxScale;
-
- const canvas=document.createElement('canvas');
- canvas.width=pageWidthPx;
- canvas.height=totalHeightPx;
- const ctx=canvas.getContext('2d');
- ctx.fillStyle='#ffffff';
- ctx.fillRect(0,0,canvas.width,canvas.height);
- ctx.fillStyle='#000000';
-
- layout.forEach(item=>{
-  if(item.kind==='rule'){
-   ctx.save();
-   ctx.strokeStyle='#222222';
-   ctx.lineWidth=1.2*pxScale;
-   ctx.setLineDash([4*pxScale,3*pxScale]);
-   ctx.beginPath();
-   ctx.moveTo(marginX,item.y+5*pxScale);
-   ctx.lineTo(pageWidthPx-marginX,item.y+5*pxScale);
-   ctx.stroke();
-   ctx.restore();
-  }else if(item.kind==='pair'){
-   const pxSize=Math.round(item.size*1.333*pxScale);
-   ctx.font=`${item.bold?'bold ':''}${pxSize}px Arial, "DejaVu Sans", sans-serif`;
-   ctx.textBaseline='top';
-   ctx.textAlign='left';
-   item.left.forEach((ln,idx)=>{
-    ctx.fillText(ln,marginX,item.y+idx*item.lh);
-   });
-   ctx.textAlign='right';
-   item.right.forEach((ln,idx)=>{
-    ctx.fillText(ln,pageWidthPx-marginX,item.y+idx*item.lh);
-   });
-  }else if(item.kind==='text'){
-   const pxSize=Math.round(item.size*1.333*pxScale);
-   ctx.font=`${item.bold?'bold ':''}${pxSize}px Arial, "DejaVu Sans", sans-serif`;
-   ctx.textBaseline='top';
-   ctx.textAlign=item.align;
-   const x=item.align==='center'?pageWidthPx/2:(item.align==='right'?pageWidthPx-marginX:marginX+item.indent);
-   item.lines.forEach((ln,idx)=>{
-    ctx.fillText(ln,x,item.y+idx*item.lh);
-   });
-  }
- });
-
- const jpegDataUrl=canvas.toDataURL('image/jpeg',0.92);
- const base64=jpegDataUrl.split(',')[1];
- const binStr=atob(base64);
- const imgBytes=new Uint8Array(binStr.length);
- for(let i=0;i<binStr.length;i++) imgBytes[i]=binStr.charCodeAt(i);
-
- const pdfHeightPt=(totalHeightPx/pageWidthPx)*pdfWidthPt;
- const wPt=pdfWidthPt.toFixed(2);
- const hPt=pdfHeightPt.toFixed(2);
-
- const enc=new TextEncoder();
- const parts=[];
- const offsets=[];
- let pos=0;
- const pushStr=s=>{
-  const b=enc.encode(s);
-  parts.push(b);
-  pos+=b.length;
- };
- const pushBytes=b=>{
-  parts.push(b);
-  pos+=b.length;
- };
-
- pushStr('%PDF-1.4\n');
-
- offsets[1]=pos;
- pushStr('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
-
- offsets[2]=pos;
- pushStr('2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n');
-
- offsets[3]=pos;
- pushStr(`3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${wPt} ${hPt}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>\nendobj\n`);
-
- offsets[4]=pos;
- pushStr(`4 0 obj\n<< /Type /XObject /Subtype /Image /Width ${canvas.width} /Height ${canvas.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${imgBytes.length} >>\nstream\n`);
- pushBytes(imgBytes);
- pushStr('\nendstream\nendobj\n');
-
- const streamContent=`q\n${wPt} 0 0 ${hPt} 0 0 cm\n/Im0 Do\nQ\n`;
- offsets[5]=pos;
- pushStr(`5 0 obj\n<< /Length ${enc.encode(streamContent).length} >>\nstream\n${streamContent}endstream\nendobj\n`);
-
- const xrefPos=pos;
- pushStr(`xref\n0 6\n0000000000 65535 f \n`);
- for(let i=1;i<=5;i++){
-  pushStr(String(offsets[i]).padStart(10,'0')+' 00000 n \n');
- }
- pushStr(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefPos}\n%%EOF`);
-
- return new Blob(parts,{type:'application/pdf'});
-}
-
-window.shareOpWhatsApp=async id=>{
- const op=db.ops.find(x=>x.id===id);
- if(!op) return;
- const filename=`${makePdfFilename(op)}.pdf`;
- const pdfBlob=createReceiptPdfBlob(op);
- const pdfFile=new File([pdfBlob],filename,{type:'application/pdf'});
- const captionText=buildReceiptText(op);
-
- if(navigator.canShare&&navigator.share&&navigator.canShare({files:[pdfFile]})){
-  try{
-   await navigator.share({
-    files:[pdfFile],
-    title:filename,
-    text:captionText
-   });
-   return;
-  }catch(err){
-   if(err&&err.name==='AbortError') return;
-  }
- }
-
- const url=URL.createObjectURL(pdfBlob);
- const a=document.createElement('a');
- a.href=url;
- a.download=filename;
- document.body.appendChild(a);
- a.click();
- a.remove();
- setTimeout(()=>URL.revokeObjectURL(url),4000);
-
- const waUrl=`https://wa.me/?text=${encodeURIComponent(`PDF-чек сохранён (${filename}). Прикрепите его к сообщению.\n\n`+captionText)}`;
- window.open(waUrl,'_blank','noopener,noreferrer');
-};
-
-function printReceipt(op){
- const p=$('printArea');
- p.className=op.width==='80'?'wide':'';
- const itemsHtml=(op.items&&op.items.length)
-  ?op.items.map(i=>`
-    <div class="line"><span><b>${esc(i.productName)}</b></span><span><b>${money(i.subtotal)}</b></span></div>
-    <div class="subline">${fmt(i.liters)} л × ${fmt(i.price)} ₸ | 30л: ${i.k30} шт, 50л: ${i.k50} шт</div>
-  `).join('')
-  :'<div class="line"><span>Отгрузка пива:</span><span>нет</span></div>';
-
- const {prevDebt,totalDebt}=getPointDebtBreakdownForOp(op);
- const debtSummaryLines=[
-  prevDebt>0?`<div class="line"><span>Прошлый долг:</span><span><b>${money(prevDebt)}</b></span></div>`:'',
-  totalDebt>0?`<div class="line big"><span>ОБЩИЙ ДОЛГ:</span><span>${money(totalDebt)}</span></div>`:''
- ].filter(Boolean).join('');
-
- const payBlock=(op.totalAmount>0||debtSummaryLines)?`
-  <div class="rule"></div>
-  ${op.totalAmount>0?`
-   <div class="line big"><span>ИТОГО:</span><span>${money(op.totalAmount)}</span></div>
-   <div class="line"><span>Способ оплаты:</span><span><b>${esc(op.payMethod||'Не указан')}</b></span></div>
-   <div class="line"><span>Оплачено:</span><span>${money(op.paidAmount)}</span></div>
-   ${op.debtAdded>0?`<div class="line"><span><b>В ДОЛГ ПО ЧЕКУ:</b></span><span><b>${money(op.debtAdded)}</b></span></div>`:''}
-  `:''}
-  ${debtSummaryLines}
- `:'';
-
- const {rem30,rem50}=getPointKegBalanceAfterOp(op);
-
- p.innerHTML=`
-  <h2>НАКЛАДНАЯ / КВИТАНЦИЯ</h2>
-  <div class="center mutedPrint">${esc(op.date)}</div>
-  <div class="center mutedPrint">Оформил: ${esc(op.author||'')}</div>
-  <div class="rule"></div>
-  <div class="line"><span>Точка:</span><b>${esc(op.pointName)}</b></div>
-  <div class="rule"></div>
-  ${itemsHtml}
-  ${op.items&&op.items.length?`<div class="line"><span>Всего кег отгружено:</span><span><b>${getOpKegs30(op)+getOpKegs50(op)} шт.</b> (30л:${getOpKegs30(op)}, 50л:${getOpKegs50(op)})</span></div>`:''}
-  ${payBlock}
-  <div class="rule"></div>
-  <div class="line"><span>Возврат пустых 30 л:</span><span><b>${op.ret30||0} шт.</b></span></div>
-  <div class="line"><span>Возврат пустых 50 л:</span><span><b>${op.ret50||0} шт.</b></span></div>
-  ${op.note?`<div class="rule"></div><div>Комментарий: ${esc(op.note)}</div>`:''}
-  <div class="rule"></div>
-  <div class="line"><span><b>Остаток кег на точке:</b></span><span><b>${rem30+rem50} шт.</b></span></div>
-  <div class="line"><span>30 л / 50 л на точке:</span><span><b>${rem30} шт. / ${rem50} шт.</b></span></div>
-  <div class="rule"></div>
-  <div class="line"><span>Сдал: _________</span><span>Принял: _________</span></div>
- `;
- const prevTitle=document.title;
- document.title=makePdfFilename(op);
- window.print();
- setTimeout(()=>{document.title=prevTitle;},1500);
-}
-window.reprintOp=id=>{
- const op=db.ops.find(x=>x.id===id);
- if(op) printReceipt(op);
-};
-
-function downloadPriceListPdf(){
- const p=$('printArea');
- p.className='report';
- const rowsHtml=db.products.length
-  ?db.products.map(prod=>`
-    <tr>
-     <td><b>${esc(prod.name)}</b></td>
-     <td><b>${fmt(prod.price||0)} ₸ / л</b></td>
-     <td>${esc(fmtDeg(prod.abv))}</td>
-     <td>${esc(fmtDeg(prod.og))}</td>
-    </tr>
-   `).join('')
-  :'<tr><td colspan="4">Сортов пива пока нет.</td></tr>';
-
- p.innerHTML=`
-  <h2>ПРАЙС-ЛИСТ НА ПИВО</h2>
-  <div class="mutedPrint">Актуально на: ${esc(new Date().toLocaleDateString('ru-RU'))}</div>
-  <table>
-   <thead>
-    <tr>
-     <th>Название сорта</th>
-     <th>Цена за 1 л</th>
-     <th>Крепость</th>
-     <th>Плотность</th>
-    </tr>
-   </thead>
-   <tbody>${rowsHtml}</tbody>
-  </table>
- `;
- const prevTitle=document.title;
- document.title=`Прайс_лист_${todayIso()}`;
- window.print();
- setTimeout(()=>{document.title=prevTitle;},1500);
-}
-$('downloadPricePdfBtn').onclick=downloadPriceListPdf;
-
-function getFilteredSalesStatsData(){
- const t=todayIso();
- let fromDate='0000-01-01';
- let toDate='9999-12-31';
- let periodLabel='За всё время';
-
- if(statPeriod==='day'){
-  fromDate=t; toDate=t; periodLabel=`За день (${fmtDateRu(t)})`;
- }else if(statPeriod==='week'){
-  fromDate=addDaysIso(-6); toDate=t; periodLabel=`За 7 дней (${fmtDateRu(fromDate)} – ${fmtDateRu(toDate)})`;
- }else if(statPeriod==='month'){
-  fromDate=addDaysIso(-29); toDate=t; periodLabel=`За 30 дней (${fmtDateRu(fromDate)} – ${fmtDateRu(toDate)})`;
- }else if(statPeriod==='custom'){
-  fromDate=$('statDateFrom').value||t;
-  toDate=$('statDateTo').value||t;
-  periodLabel=`За период (${fmtDateRu(fromDate)} – ${fmtDateRu(toDate)})`;
- }
-
- const ptFilter=$('statPointFilter').value||'all';
- const ptObj=ptFilter!=='all'?db.points.find(p=>String(p.id)===String(ptFilter)):null;
- const pointLabel=ptObj?ptObj.name:'Все торговые точки';
-
- const sales=db.ops.filter(o=>{
-  if(o.type!=='sale_return') return false;
-  if(ptFilter!=='all'&&String(o.pointId)!==String(ptFilter)) return false;
-  const d=parseOpIsoDate(o);
-  return d>=fromDate&&d<=toDate;
- });
-
- let totalLiters=0,totalAmount=0,totalPaid=0,totalDebt=0,totalKegs=0,totalRet=0,periodRepaid=0;
- let cashPaid=0,transferPaid=0;
- const byProd={};
-
- sales.forEach(o=>{
-  totalLiters+=Number(o.totalLiters||0);
-  totalAmount+=Number(o.totalAmount||0);
-  const paid=Number(o.paidAmount||0);
-  totalPaid+=paid;
-  if(o.payMethod==='Перевод') transferPaid+=paid;
-  else cashPaid+=paid;
-  totalDebt+=Number(o.debtAdded||0);
-  totalKegs+=getOpKegs30(o)+getOpKegs50(o);
-  totalRet+=Number(o.ret30||0)+Number(o.ret50||0);
-
-  (o.items||[]).forEach(it=>{
-   const key=it.productName||'Сорт';
-   if(!byProd[key]) byProd[key]={liters:0,amount:0,kegs:0};
-   byProd[key].liters+=Number(it.liters||0);
-   byProd[key].amount+=Number(it.subtotal||0);
-   byProd[key].kegs+=Number(it.k30||0)+Number(it.k50||0);
-  });
- });
-
- db.ops.forEach(o=>{
-  if(o.type!=='debt_pay') return;
-  if(ptFilter!=='all'&&String(o.pointId)!==String(ptFilter)) return;
-  const d=parseOpIsoDate(o);
-  if(d>=fromDate&&d<=toDate){
-   periodRepaid+=Number(o.amount||0);
-  }
- });
-
- const dmap=debtsByPoint();
- const currentDebtBalance=ptFilter!=='all'
-  ?Number(dmap[ptFilter]?.debt||0)
-  :Object.values(dmap).reduce((s,x)=>s+Number(x.debt||0),0);
-
- return {
-  periodLabel,pointLabel,sales,
-  totalLiters,totalAmount,totalPaid,totalDebt,periodRepaid,currentDebtBalance,totalKegs,totalRet,
-  cashPaid,transferPaid,byProd
- };
-}
-
-function downloadStatsPdfReport(){
- const st=getFilteredSalesStatsData();
- const p=$('printArea');
- p.className='report';
- const prodEntries=Object.entries(st.byProd).sort((a,b)=>b[1].liters-a[1].liters);
- const rowsHtml=prodEntries.length
-  ?prodEntries.map(([name,item])=>`
-    <tr>
-     <td><b>${esc(name)}</b></td>
-     <td>${item.kegs} шт.</td>
-     <td>${fmt(item.liters)} л</td>
-     <td><b>${money(item.amount)}</b></td>
-    </tr>
-   `).join('')
-  :'<tr><td colspan="4">За выбранный период продаж пива не было.</td></tr>';
-
- const opsRowsHtml=st.sales.length
-  ?st.sales.map(o=>{
-    const sorts=(o.items||[]).map(i=>`${esc(i.productName)} (${fmt(i.liters)} л)`).join(', ')||'Возврат тары';
-    return `
-     <tr>
-      <td>${esc(o.date)}</td>
-      <td><b>${esc(o.pointName)}</b></td>
-      <td>${sorts}</td>
-      <td>${fmt(o.totalLiters||0)} л</td>
-      <td>${money(o.totalAmount||0)}</td>
-      <td>${esc(o.payMethod||'')}${Number(o.debtAdded||0)>0?' (долг '+money(o.debtAdded)+')':''}</td>
-     </tr>
-    `;
-   }).join('')
-  :'<tr><td colspan="6">Операций отгрузки за выбранный период нет.</td></tr>';
-
- p.innerHTML=`
-  <h2>ОТЧЁТ ПО ПРОДАЖАМ — KEGCONTROL</h2>
-  <div class="mutedPrint">Сформирован: ${esc(new Date().toLocaleString('ru-RU'))} · Пользователь: ${esc(currentUser?.username||'')}</div>
-  <div class="line" style="margin-top:6px"><span>Период: <b>${esc(st.periodLabel)}</b></span><span>Точка: <b>${esc(st.pointLabel)}</b></span></div>
-  <div class="rep-grid">
-   <div class="rep-box"><div class="mutedPrint">Отгрузок</div><b>${st.sales.length} шт.</b></div>
-   <div class="rep-box"><div class="mutedPrint">Продано пива</div><b>${fmt(st.totalLiters)} л</b></div>
-   <div class="rep-box"><div class="mutedPrint">Выручка</div><b>${money(st.totalAmount)}</b></div>
-   <div class="rep-box"><div class="mutedPrint">Оплачено</div><b>${money(st.totalPaid)}</b><div class="mutedPrint">Нал: ${money(st.cashPaid)} · Пер.: ${money(st.transferPaid)}</div></div>
-   <div class="rep-box"><div class="mutedPrint">Ушло в долг (за период)</div><b>${money(st.totalDebt)}</b><div class="mutedPrint">Погашено: ${money(st.periodRepaid)} · Остаток: ${money(st.currentDebtBalance)}</div></div>
-   <div class="rep-box"><div class="mutedPrint">Кег отгр. / возвр.</div><b>${st.totalKegs} / ${st.totalRet} шт.</b></div>
-  </div>
-  <h3 style="margin:10px 0 4px;font-size:14px">Продажи по сортам пива</h3>
-  <table>
-   <thead><tr><th>Сорт</th><th>Кег</th><th>Литров</th><th>Сумма</th></tr></thead>
-   <tbody>${rowsHtml}</tbody>
-  </table>
-  <h3 style="margin:12px 0 4px;font-size:14px">Детализация отгрузок</h3>
-  <table>
-   <thead><tr><th>Дата</th><th>Точка</th><th>Позиции</th><th>Объём</th><th>Сумма</th><th>Оплата</th></tr></thead>
-   <tbody>${opsRowsHtml}</tbody>
-  </table>
- `;
-
- const safePt=st.pointLabel.replace(/[\\/:*?"<>|]+/g,'_').trim();
- const prevTitle=document.title;
- document.title=`Отчёт_${safePt}_${todayIso()}`;
- window.print();
- setTimeout(()=>{document.title=prevTitle;},1500);
-}
-$('downloadReportPdfBtn').onclick=downloadStatsPdfReport;
-
-/* ==================== ДОЛГИ И ПОГАШЕНИЕ ==================== */
-function updateDebtPointInfo(){
- const pid=Number($('debtPayPoint').value);
- const dmap=debtsByPoint();
- const cur=dmap[pid]?dmap[pid].debt:0;
- $('debtPointCurrentInfo').innerHTML=cur>0
-  ?`Текущий долг точки: <b style="color:var(--red)">${money(cur)}</b>`
-  :'У выбранной точки сейчас долга нет (0 ₸).';
-}
-$('debtPayPoint').onchange=updateDebtPointInfo;
-
-$('payAllPointDebtBtn').onclick=()=>{
- const pid=Number($('debtPayPoint').value);
- const dmap=debtsByPoint();
- const cur=dmap[pid]?dmap[pid].debt:0;
- if(cur<=0) return alert('У этой точки нет долга.');
- $('debtPayAmount').value=Math.round(cur);
-};
-
-$('saveDebtPayment').onclick=()=>{
- const pt=db.points.find(x=>x.id===Number($('debtPayPoint').value));
- const amount=Math.round(Number($('debtPayAmount').value||0));
- const note=$('debtPayNote').value.trim();
- if(!pt) return alert('Выберите торговую точку');
- if(amount<=0) return alert('Введите сумму погашения больше 0 ₸');
- const dmap=debtsByPoint();
- const cur=dmap[pt.id]?dmap[pt.id].debt:0;
- if(cur<=0) return alert('У этой точки нет активного долга.');
- if(amount>cur) return alert(`Сумма погашения (${money(amount)}) превышает долг точки (${money(cur)}).`);
-
- const now=new Date();
- db.ops.unshift({
-  id:uid(),
-  date:now.toLocaleString('ru-RU'),
-  isoDate:todayIso(),
-  type:'debt_pay',
-  author:currentUser?currentUser.username:'system',
-  pointId:pt.id,
-  pointName:pt.name,
-  amount,
-  note
- });
- $('debtPayAmount').value='';
- $('debtPayNote').value='';
- save();
- alert(`Погашение долга ${money(amount)} для «${pt.name}» записано!`);
-};
-
-/* ==================== ВАРКА ПИВА ИЗ СЫРЬЯ ==================== */
-function createRecipeRow(defaultRawId='',defaultQty=''){
- const row=document.createElement('div');
- row.className='recipe-row';
- const opts=db.raw.length
-  ?db.raw.map(r=>`<option value="${r.id}" ${Number(r.id)===Number(defaultRawId)?'selected':''}>${esc(r.name)} (ост. ${fmt(r.qty)} ${esc(r.unit)})</option>`).join('')
-  :'<option value="">— Сначала добавьте сырьё ниже —</option>';
-
- row.innerHTML=`
-  <div class="row" style="margin-bottom:4px">
-   <span style="font-size:12px;font-weight:700;color:var(--teal)">Ингредиент рецепта</span>
-   <button type="button" class="remove-row">Удалить</button>
-  </div>
-  <div class="twocol">
-   <div><label style="margin-top:2px">Сырьё</label><select class="rec-raw">${opts}</select></div>
-   <div><label style="margin-top:2px">Расход на варку</label><input class="rec-qty" type="number" min="0.01" step="0.01" value="${defaultQty}" placeholder="Например, 150"></div>
-  </div>
- `;
- row.querySelector('.remove-row').onclick=()=>row.remove();
- return row;
-}
-
-$('addRecipeRowBtn').onclick=()=>{
- if(!db.raw.length) return alert('Сначала добавьте сырьё в блоке «Сырьё и материалы» ниже на этой странице.');
- $('recipeRowsContainer').appendChild(createRecipeRow());
-};
-
-$('brewBeerName').oninput=()=>{
- const val=$('brewBeerName').value.trim().toLowerCase();
- if(!val) return;
- const existing=db.products.find(p=>p.name.toLowerCase()===val);
- if(existing){
-  if(!$('brewAbv').value&&existing.abv!==''&&existing.abv!==undefined) $('brewAbv').value=existing.abv;
-  if(!$('brewOg').value&&existing.og!==''&&existing.og!==undefined) $('brewOg').value=existing.og;
- }
-};
-
-$('doBrewBtn').onclick=()=>{
- const beerName=$('brewBeerName').value.trim();
- const outLiters=Number($('brewOutputLiters').value||0);
- const abvVal=$('brewAbv').value.trim();
- const ogVal=$('brewOg').value.trim();
- const note=$('brewNote').value.trim();
-
- if(!beerName) return alert('Укажите название сорта пива.');
- if(outLiters<=0) return alert('Укажите объём сваренного пива в литрах.');
-
- const recipeItems=[];
- const rawTotals={};
- document.querySelectorAll('#recipeRowsContainer .recipe-row').forEach(r=>{
-  const rawId=Number(r.querySelector('.rec-raw').value);
-  const rawObj=db.raw.find(x=>x.id===rawId);
-  const qty=Number(r.querySelector('.rec-qty').value||0);
-  if(rawObj&&qty>0){
-   recipeItems.push({rawId:rawObj.id,rawName:rawObj.name,unit:rawObj.unit,qty});
-   rawTotals[rawObj.id]=(rawTotals[rawObj.id]||0)+qty;
-  }
- });
-
- for(const [rid,needQty] of Object.entries(rawTotals)){
-  const rawObj=db.raw.find(x=>x.id===Number(rid));
-  if(!rawObj||needQty>Number(rawObj.qty||0)){
-   return alert(`Не хватает сырья «${rawObj?rawObj.name:''}» на складе (нужно ${fmt(needQty)} ${rawObj?rawObj.unit:''}, доступно ${fmt(rawObj?rawObj.qty:0)}).`);
-  }
- }
-
- for(const [rid,needQty] of Object.entries(rawTotals)){
-  const rawObj=db.raw.find(x=>x.id===Number(rid));
-  if(rawObj) rawObj.qty=Math.max(0,Number(rawObj.qty||0)-needQty);
- }
-
- let prod=db.products.find(p=>p.name.toLowerCase()===beerName.toLowerCase());
- if(!prod){
-  prod={id:uid(),name:beerName,qty:0,price:0,abv:abvVal,og:ogVal};
-  db.products.push(prod);
- }else{
-  if(abvVal!=='') prod.abv=abvVal;
-  if(ogVal!=='') prod.og=ogVal;
- }
- prod.qty=Number(prod.qty||0)+outLiters;
-
- const now=new Date();
- db.ops.unshift({
-  id:uid(),
-  date:now.toLocaleString('ru-RU'),
-  isoDate:todayIso(),
-  type:'brew',
-  author:currentUser?currentUser.username:'system',
-  productId:prod.id,
-  productName:prod.name,
-  liters:outLiters,
-  abv:abvVal!==''?abvVal:(prod.abv||''),
-  og:ogVal!==''?ogVal:(prod.og||''),
-  ingredients:recipeItems,
-  note
- });
-
- $('brewOutputLiters').value='';
- $('brewAbv').value='';
- $('brewOg').value='';
- $('brewNote').value='';
- $('recipeRowsContainer').innerHTML='';
- save();
- alert(`Варка «${prod.name}» (+${fmt(outLiters)} л) записана! Сырьё списано со склада.`);
-};
-
-/* ==================== СКЛАД И ТОЧКИ ==================== */
-$('setKegs').onclick=()=>{
- db.kegs30=Math.max(0,Math.floor(Number($('stock30').value||0)));
- db.kegs50=Math.max(0,Math.floor(Number($('stock50').value||0)));
- save();
-};
-
-$('addProduct').onclick=()=>{
- const name=$('newProduct').value.trim();
- const price=Math.max(0,Number($('newProductPrice').value||0));
- const abv=$('newProductAbv').value.trim();
- const og=$('newProductOg').value.trim();
- const qty=Math.max(0,Number($('newProductQty').value||0));
- if(!name) return alert('Введите название сорта пива');
- db.products.push({id:uid(),name,price,abv,og,qty});
- $('newProduct').value='';
- $('newProductPrice').value='';
- $('newProductAbv').value='';
- $('newProductOg').value='';
- $('newProductQty').value='';
- $('beerRowsContainer').innerHTML='';
- save();
-};
-
-window.updateProdPrice=(id,val)=>{
- const p=db.products.find(x=>x.id===id);
- if(!p) return;
- p.price=Math.max(0,Number(val||0));
- save();
-};
-
-window.editProductModal=id=>{
- const p=db.products.find(x=>x.id===id);
- if(!p) return;
- $('editModalTitle').textContent='✏️ Редактирование сорта пива';
- $('editModalBody').innerHTML=`
-  <label>Название сорта</label>
-  <input id="epProdName" value="${esc(p.name)}">
-  <div class="twocol">
-   <div><label>Цена за 1 литр, ₸</label><input id="epProdPrice" type="number" min="0" step="1" value="${p.price||0}"></div>
-   <div><label>Остаток на складе, л</label><input id="epProdQty" type="number" min="0" step="0.1" value="${p.qty||0}"></div>
-  </div>
-  <div class="twocol">
-   <div><label>Крепость (ABV), %</label><input id="epProdAbv" type="number" min="0" max="30" step="0.1" value="${esc(p.abv??'')}" placeholder="4.8"></div>
-   <div><label>Плотность (OG), %</label><input id="epProdOg" type="number" min="0" max="40" step="0.1" value="${esc(p.og??'')}" placeholder="12.0"></div>
-  </div>
-  <button type="button" class="primary" id="saveProdEditBtn">Сохранить сорт</button>
- `;
- $('editModal').classList.remove('hidden');
- $('saveProdEditBtn').onclick=()=>{
-  const n=$('epProdName').value.trim();
-  if(!n) return alert('Введите название сорта');
-  const oldName=p.name;
-  p.name=n;
-  p.price=Math.max(0,Number($('epProdPrice').value||0));
-  p.qty=Math.max(0,Number($('epProdQty').value||0));
-  p.abv=$('epProdAbv').value.trim();
-  p.og=$('epProdOg').value.trim();
-  if(oldName!==n){
-   db.ops.forEach(o=>{
-    if(o.productId===p.id&&o.productName) o.productName=n;
-    if(Array.isArray(o.items)){
-     o.items.forEach(it=>{if(it.productId===p.id) it.productName=n;});
-    }
-   });
-   db.plans.forEach(pl=>{
-    if(Array.isArray(pl.items)){
-     pl.items.forEach(it=>{if(it.productId===p.id) it.productName=n;});
-    }
-   });
-  }
-  $('beerRowsContainer').innerHTML='';
-  $('planRowsContainer').innerHTML='';
-  $('editModal').classList.add('hidden');
-  save();
- };
-};
-
-window.deleteProduct=id=>{
- const p=db.products.find(x=>x.id===id);
- if(!p) return;
- const usedInOps=db.ops.some(o=>
-  o.productId===id||(Array.isArray(o.items)&&o.items.some(it=>it.productId===id))
- );
- if(usedInOps){
-  return alert(`Сорт «${p.name}» уже фигурирует в операциях истории. Удалить его нельзя — можно обнулить остаток через кнопку «✏️».`);
- }
- if(!confirm(`Удалить сорт пива «${p.name}» со склада?`)) return;
- db.products=db.products.filter(x=>x.id!==id);
- db.plans.forEach(pl=>{
-  if(Array.isArray(pl.items)){
-   pl.items=pl.items.filter(it=>it.productId!==id);
-  }
- });
- $('beerRowsContainer').innerHTML='';
- $('planRowsContainer').innerHTML='';
- save();
-};
-
-$('addRaw').onclick=()=>{
- const name=$('newRaw').value.trim();
- if(!name) return;
- db.raw.push({id:uid(),name,unit:$('rawUnit').value,qty:Math.max(0,Number($('newRawQty').value||0))});
- $('newRaw').value='';
- $('newRawQty').value='';
- save();
-};
-
-$('otherType').onchange=()=>{
- const isRaw=$('otherType').value.startsWith('raw');
- $('otherBeer').classList.toggle('hidden',isRaw);
- $('otherRaw').classList.toggle('hidden',!isRaw);
-};
-
-$('saveOther').onclick=()=>{
- const t=$('otherType').value;
- if(t.startsWith('beer')){
-  const p=db.products.find(x=>x.id===Number($('otherProduct').value));
-  const q=Number($('otherBeerQty').value||0);
-  if(!p||q<=0) return alert('Выберите сорт и укажите литры');
-  if(t==='beer_out'&&q>p.qty) return alert('Недостаточно пива на складе');
-  p.qty+=t==='beer_in'?q:-q;
-  const now=new Date();
-  db.ops.unshift({id:uid(),date:now.toLocaleString('ru-RU'),isoDate:todayIso(),type:t,author:currentUser?.username,text:`${t==='beer_in'?'Приход пива':'Списание пива'}: ${p.name} (${fmt(q)} л)`});
-  $('otherBeerQty').value='';
- }else{
-  const r=db.raw.find(x=>x.id===Number($('otherRawSelect').value));
-  const q=Number($('otherRawQty').value||0);
-  if(!r||q<=0) return alert('Выберите сырьё и укажите количество');
-  if(t==='raw_out'&&q>r.qty) return alert('Недостаточно сырья на складе');
-  r.qty+=t==='raw_in'?q:-q;
-  const now=new Date();
-  db.ops.unshift({id:uid(),date:now.toLocaleString('ru-RU'),isoDate:todayIso(),type:t,author:currentUser?.username,text:`${t==='raw_in'?'Приход сырья':'Расход сырья'}: ${r.name} (${fmt(q)} ${r.unit})`});
-  $('otherRawQty').value='';
- }
- save();
-};
-
-$('addPoint').onclick=()=>{
- const name=$('newPoint').value.trim();
- const zone=$('newPointZone').value.trim();
- const phone=$('newPointPhone').value.trim();
- const addr=$('newPointAddr').value.trim();
- if(!name) return alert('Введите название точки');
- db.points.push({id:uid(),name,zone,phone,addr,createdAt:Date.now()});
- $('newPoint').value='';
- $('newPointZone').value='';
- $('newPointPhone').value='';
- $('newPointAddr').value='';
- save();
-};
-
-window.editPointModal=id=>{
- openPointMenuId=null;
- if(!hasAction('edit_points_plans')) return alert('У вашей роли нет прав на редактирование точек.');
- const pt=db.points.find(x=>x.id===id);
- if(!pt) return;
- $('editModalTitle').textContent='✏️ Редактирование торговой точки';
- $('editModalBody').innerHTML=`
-  <label>Название точки</label><input id="epName" value="${esc(pt.name)}">
-  <label>Район / маршрут</label><input id="epZone" value="${esc(pt.zone||'')}">
-  <label>Телефон</label><input id="epPhone" value="${esc(pt.phone||'')}">
-  <label>Адрес</label><input id="epAddr" value="${esc(pt.addr||'')}">
-  <button type="button" class="primary" id="savePointEditBtn">Сохранить изменения</button>
- `;
- $('editModal').classList.remove('hidden');
- $('savePointEditBtn').onclick=()=>{
-  const n=$('epName').value.trim();
-  if(!n) return alert('Название не может быть пустым');
-  pt.name=n;
-  pt.zone=$('epZone').value.trim();
-  pt.phone=$('epPhone').value.trim();
-  pt.addr=$('epAddr').value.trim();
-  $('editModal').classList.add('hidden');
-  save();
- };
-};
-
-/* ==================== РЕДАКТИРОВАНИЕ И УДАЛЕНИЕ ОПЕРАЦИЙ ==================== */
-function opToDateInput(op){
- const iso=parseOpIsoDate(op);
- return iso||todayIso();
-}
-
-function opToTimeInput(op){
- if(op.date){
-  const m=String(op.date).match(/(\d{1,2}):(\d{2})/);
-  if(m) return `${String(m[1]).padStart(2,'0')}:${m[2]}`;
- }
- const d=new Date();
- return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-}
-
-function applyEditedDateTime(op,dateVal,timeVal){
- const cleanDate=dateVal||parseOpIsoDate(op)||todayIso();
- const cleanTime=timeVal||opToTimeInput(op)||'12:00';
- const [y,m,d]=cleanDate.split('-');
- const [hh,mm]=cleanTime.split(':');
- op.isoDate=cleanDate;
- if(y&&m&&d){
-  op.date=`${d}.${m}.${y}, ${String(hh||'00').padStart(2,'0')}:${String(mm||'00').padStart(2,'0')}:00`;
- }
-}
-
-function revertOpEffects(op){
- if(op.type==='sale_return'){
-  (op.items||[]).forEach(item=>{
-   const prod=db.products.find(p=>p.id===item.productId)||db.products.find(p=>p.name===item.productName);
-   if(prod) prod.qty=Number(prod.qty||0)+Number(item.liters||0);
-  });
-  db.kegs30=Math.max(0,Number(db.kegs30||0)+getOpKegs30(op)-Number(op.ret30||0));
-  db.kegs50=Math.max(0,Number(db.kegs50||0)+getOpKegs50(op)-Number(op.ret50||0));
- }else if(op.type==='brew'){
-  const prod=db.products.find(p=>p.id===op.productId)||db.products.find(p=>p.name===op.productName);
-  if(prod) prod.qty=Math.max(0,Number(prod.qty||0)-Number(op.liters||0));
-  (op.ingredients||[]).forEach(ing=>{
-   const r=db.raw.find(x=>x.id===ing.rawId)||db.raw.find(x=>x.name===ing.rawName);
-   if(r) r.qty=Number(r.qty||0)+Number(ing.qty||0);
-  });
- }
-}
-
-window.deleteOp=id=>{
- if(!hasAction('edit_ops')) return alert('У вашей роли нет прав на удаление операций.');
- const idx=db.ops.findIndex(x=>x.id===id);
- if(idx===-1) return;
- const op=db.ops[idx];
- if(!confirm('Удалить эту операцию и откатить изменения по складу/кегам?')) return;
- revertOpEffects(op);
- db.ops.splice(idx,1);
- save();
-};
-
-window.openEditOp=id=>{
- if(!hasAction('edit_ops')) return alert('У вашей роли нет прав на редактирование операций.');
- const op=db.ops.find(x=>x.id===id);
- if(!op) return;
-
- const body=$('editModalBody');
- $('editModalTitle').textContent='✏️ Редактирование операции';
- const dateInputHtml=`
-  <div class="twocol">
-   <div><label>Дата операции</label><input id="edDate" type="date" value="${esc(opToDateInput(op))}"></div>
-   <div><label>Время операции</label><input id="edTime" type="time" value="${esc(opToTimeInput(op))}"></div>
-  </div>
- `;
-
- if(op.type==='sale_return'){
-  const ptOpts=db.points.map(p=>`<option value="${p.id}" ${p.id===op.pointId?'selected':''}>${esc(p.name)}</option>`).join('');
-  const itemsFields=(op.items||[]).map((it,idx)=>`
-   <div class="beer-row" data-idx="${idx}">
-    <div class="beer-row-title">${esc(it.productName)}</div>
-    <div class="threecol">
-     <div><label>Кег 30 л</label><input class="ed-k30" type="number" min="0" step="1" value="${it.k30||0}"></div>
-     <div><label>Кег 50 л</label><input class="ed-k50" type="number" min="0" step="1" value="${it.k50||0}"></div>
-     <div><label>Цена/л, ₸</label><input class="ed-price" type="number" min="0" step="1" value="${it.price||0}"></div>
-    </div>
-   </div>
-  `).join('');
-
-  body.innerHTML=`
-   ${dateInputHtml}
-   <label>Торговая точка</label><select id="edPoint">${ptOpts}</select>
-   ${itemsFields||'<div class="muted" style="margin-top:8px">Позиций отгрузки пива нет (только возврат тары).</div>'}
-   <div class="twocol">
-    <div><label>Возврат пустых 30 л</label><input id="edRet30" type="number" min="0" step="1" value="${op.ret30||0}"></div>
-    <div><label>Возврат пустых 50 л</label><input id="edRet50" type="number" min="0" step="1" value="${op.ret50||0}"></div>
-   </div>
-   <div class="twocol">
-    <div>
-     <label>Способ оплаты</label>
-     <select id="edPayMethod">
-      <option value="Наличные" ${(op.payMethod||'Наличные')==='Наличные'?'selected':''}>Наличные</option>
-      <option value="Перевод" ${op.payMethod==='Перевод'?'selected':''}>Перевод</option>
-      <option value="В долг" ${op.payMethod==='В долг'?'selected':''}>В долг</option>
-      <option value="Без оплаты" ${op.payMethod==='Без оплаты'?'selected':''}>Без оплаты</option>
-     </select>
-    </div>
-    <div><label>Оплачено по чеку, ₸</label><input id="edPaid" type="number" min="0" step="1" value="${op.paidAmount||0}"></div>
-   </div>
-   <label>Комментарий</label><input id="edNote" value="${esc(op.note||'')}">
-   <button type="button" class="primary" id="saveEditedOpBtn">Сохранить изменения</button>
-  `;
-
-  $('saveEditedOpBtn').onclick=()=>{
-   revertOpEffects(op);
-   applyEditedDateTime(op,$('edDate').value,$('edTime').value);
-
-   const pt=db.points.find(p=>p.id===Number($('edPoint').value));
-   if(pt){op.pointId=pt.id;op.pointName=pt.name;}
-
-   const itemDivs=body.querySelectorAll('.beer-row');
-   itemDivs.forEach(div=>{
-    const i=Number(div.dataset.idx);
-    const it=op.items[i];
-    it.k30=Math.max(0,Math.floor(Number(div.querySelector('.ed-k30').value||0)));
-    it.k50=Math.max(0,Math.floor(Number(div.querySelector('.ed-k50').value||0)));
-    it.liters=calcKegLiters(it.k30,it.k50);
-    it.price=Math.max(0,Number(div.querySelector('.ed-price').value||0));
-    it.subtotal=Math.round(it.liters*it.price);
-   });
-
-   op.totalK30=(op.items||[]).reduce((s,x)=>s+x.k30,0);
-   op.totalK50=(op.items||[]).reduce((s,x)=>s+x.k50,0);
-   op.totalLiters=(op.items||[]).reduce((s,x)=>s+x.liters,0);
-   op.totalAmount=(op.items||[]).reduce((s,x)=>s+x.subtotal,0);
-   op.ret30=Math.max(0,Math.floor(Number($('edRet30').value||0)));
-   op.ret50=Math.max(0,Math.floor(Number($('edRet50').value||0)));
-   op.payMethod=$('edPayMethod').value;
-   const paid=op.payMethod==='В долг'?0:Math.min(op.totalAmount,Math.max(0,Number($('edPaid').value||0)));
-   op.paidAmount=paid;
-   op.debtAdded=Math.max(0,op.totalAmount-paid);
-   op.payStatus=op.totalAmount===0?'Без оплаты':(op.debtAdded===0?'Оплачено':(paid>0?'Частично в долг':'В долг'));
-   op.note=$('edNote').value.trim();
-
-   (op.items||[]).forEach(item=>{
-    const prod=db.products.find(p=>p.id===item.productId)||db.products.find(p=>p.name===item.productName);
-    if(prod) prod.qty=Math.max(0,Number(prod.qty||0)-item.liters);
-   });
-   db.kegs30=Math.max(0,Number(db.kegs30||0)-op.totalK30+op.ret30);
-   db.kegs50=Math.max(0,Number(db.kegs50||0)-op.totalK50+op.ret50);
-
-   $('editModal').classList.add('hidden');
-   save();
-  };
- }else if(op.type==='debt_pay'){
-  body.innerHTML=`
-   ${dateInputHtml}
-   <div class="muted">Погашение долга (${esc(op.pointName)})</div>
-   <label>Сумма погашения, ₸</label><input id="edDebtAmt" type="number" min="1" step="1" value="${op.amount}">
-   <label>Комментарий</label><input id="edDebtNote" value="${esc(op.note||'')}">
-   <button type="button" class="primary" id="saveEditedDebtBtn">Сохранить</button>
-  `;
-  $('saveEditedDebtBtn').onclick=()=>{
-   applyEditedDateTime(op,$('edDate').value,$('edTime').value);
-   op.amount=Math.max(1,Math.round(Number($('edDebtAmt').value||0)));
-   op.note=$('edDebtNote').value.trim();
-   $('editModal').classList.add('hidden');
-   save();
-  };
- }else{
-  body.innerHTML=`
-   ${dateInputHtml}
-   <label>Описание / комментарий</label><input id="edSimpleText" value="${esc(op.text||op.note||'')}">
-   <button type="button" class="primary" id="saveSimpleEditBtn">Сохранить</button>
-  `;
-  $('saveSimpleEditBtn').onclick=()=>{
-   applyEditedDateTime(op,$('edDate').value,$('edTime').value);
-   const v=$('edSimpleText').value.trim();
-   if(op.text!==undefined) op.text=v;
-   else op.note=v;
-   $('editModal').classList.add('hidden');
-   save();
-  };
- }
-
- $('editModal').classList.remove('hidden');
-};
-$('closeEditModal').onclick=()=>$('editModal').classList.add('hidden');
-
-/* ==================== СТАТИСТИКА ПРОДАЖ ПО ПЕРИОДАМ ==================== */
-function parseOpIsoDate(op){
- if(op.isoDate) return op.isoDate;
- if(op.date){
-  const m=String(op.date).match(/(\d{2})\.(\d{2})\.(\d{4})/);
-  if(m) return `${m[3]}-${m[2]}-${m[1]}`;
- }
- return todayIso();
-}
-
-$('statPeriodBtns').onclick=e=>{
- const btn=e.target.closest('.period-btn');
- if(!btn) return;
- statPeriod=btn.dataset.period;
- document.querySelectorAll('#statPeriodBtns .period-btn').forEach(b=>b.classList.toggle('active',b===btn));
- $('statCustomDates').classList.toggle('hidden',statPeriod!=='custom');
- renderSalesStats();
-};
-$('statDateFrom').onchange=renderSalesStats;
-$('statDateTo').onchange=renderSalesStats;
-$('statPointFilter').onchange=renderSalesStats;
-$('histTypeFilter').onchange=renderHistoryList;
-
-function renderSalesStats(){
- const st=getFilteredSalesStatsData();
-
- $('statSummaryStrip').innerHTML=`
-  <div class="sum-box"><small>Отгрузок / накладных</small><b>${st.sales.length} шт.</b></div>
-  <div class="sum-box"><small>Продано пива</small><b>${fmt(st.totalLiters)} л</b></div>
-  <div class="sum-box"><small>Выручка (сумма)</small><b>${money(st.totalAmount)}</b></div>
-  <div class="sum-box"><small>Оплачено (Нал / Перевод)</small><b style="color:#6be0a9">${money(st.totalPaid)}</b><span class="muted">Нал: ${money(st.cashPaid)} · Пер.: ${money(st.transferPaid)}</span></div>
-  <div class="sum-box"><small>Ушло в долг (за период)</small><b style="color:var(--red)">${money(st.totalDebt)}</b><span class="muted">Погашено: ${money(st.periodRepaid)} · Остаток: <b>${money(st.currentDebtBalance)}</b></span></div>
-  <div class="sum-box"><small>Кег отгружено / возврат</small><b>${st.totalKegs} / ${st.totalRet} шт.</b></div>
- `;
-
- const prodEntries=Object.entries(st.byProd).sort((a,b)=>b[1].liters-a[1].liters);
- $('statByProductBox').innerHTML=prodEntries.length?`
-  <table class="prod-sales-table">
-   <thead><tr><th>Сорт пива</th><th>Кег</th><th>Литров</th><th>Сумма</th></tr></thead>
-   <tbody>
-    ${prodEntries.map(([name,item])=>`
-     <tr>
-      <td><b>${esc(name)}</b></td>
-      <td>${item.kegs} шт.</td>
-      <td>${fmt(item.liters)} л</td>
-      <td><b>${money(item.amount)}</b></td>
-     </tr>
-    `).join('')}
-   </tbody>
-  </table>
- `:'<div class="empty">За выбранный период продаж пива не было.</div>';
-}
-
-/* ==================== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ И РОЛЯМИ ==================== */
-function renderUsersAndRolesSettings(){
- if(!currentUser) return;
- if(currentUser.role==='driver'){
-  $('usersCard').classList.add('hidden');
-  $('rolesCard').classList.add('hidden');
-  return;
- }
- const canManage=hasAction('manage_users_roles');
- $('usersCard').classList.toggle('hidden',!canManage);
- $('rolesCard').classList.toggle('hidden',!canManage);
- if(!canManage) return;
-
- const roleIds=Object.keys(db.roles);
- const roleOptsHtml=roleIds.map(rid=>`<option value="${esc(rid)}">${esc(db.roles[rid].title)}</option>`).join('');
-
- const prevPwdUser=$('pwdTargetUser').value;
- $('pwdTargetUser').innerHTML=db.users.map(u=>{
-  const rTitle=getUserRoleObj(u).title;
-  return `<option value="${esc(u.username)}">${esc(u.username)} (${esc(rTitle)})</option>`;
- }).join('');
- if(prevPwdUser&&db.users.some(u=>u.username===prevPwdUser)){
-  $('pwdTargetUser').value=prevPwdUser;
- }else{
-  $('pwdTargetUser').value=currentUser.username;
- }
-
- const prevNewRole=$('newUserRole').value;
- $('newUserRole').innerHTML=roleOptsHtml;
- if(prevNewRole&&db.roles[prevNewRole]) $('newUserRole').value=prevNewRole;
- else if(db.roles.driver) $('newUserRole').value='driver';
-
- $('usersListBox').innerHTML=db.users.map(u=>{
-  const rTitle=getUserRoleObj(u).title;
-  const isMe=u.username===currentUser.username;
-  const isCoreAdmin=u.username==='admin1';
-  const canDel=!isMe&&!isCoreAdmin&&db.users.length>1;
-  return `
-   <div class="item">
-    <div class="row">
-     <div>
-      <b>${esc(u.username)}</b> ${isMe?'<span class="pill">Вы</span>':''}
-      <div class="muted">Роль: <b>${esc(rTitle)}</b></div>
-     </div>
-     <div style="display:flex;gap:6px;align-items:center">
-      <select style="width:auto;padding:6px 8px;font-size:12px" onchange="changeUserRole('${esc(u.username)}',this.value)" ${isCoreAdmin?'disabled':''}>
-       ${roleIds.map(rid=>`<option value="${esc(rid)}" ${u.role===rid?'selected':''}>${esc(db.roles[rid].title)}</option>`).join('')}
-      </select>
-      ${canDel?`<button type="button" class="danger sm-btn" onclick="deleteUserAccount('${esc(u.username)}')" title="Удалить пользователя">🗑️</button>`:''}
-     </div>
-    </div>
-   </div>
-  `;
- }).join('');
-
- const prevRoleEdit=$('roleEditorSelect').value;
- $('roleEditorSelect').innerHTML=roleOptsHtml;
- if(prevRoleEdit&&db.roles[prevRoleEdit]) $('roleEditorSelect').value=prevRoleEdit;
- else if(db.roles.driver) $('roleEditorSelect').value='driver';
-
- renderRoleEditorFields();
-}
-
-function renderRoleEditorFields(){
- const rid=$('roleEditorSelect').value;
- const role=db.roles[rid];
- if(!role) return;
- $('roleEditorTitle').value=role.title||'';
-
- $('roleTabsPermGrid').innerHTML=ALL_TABS.map(t=>{
-  const checked=(role.tabs||[]).includes(t.id);
-  const locked=rid==='owner'&&t.id==='settings';
-  return `
-   <label class="perm-check">
-    <input type="checkbox" class="role-tab-cb" value="${t.id}" ${checked?'checked':''} ${locked?'disabled':''}>
-    <span>${esc(t.label)}</span>
-   </label>
-  `;
- }).join('');
-
- $('roleActionsPermGrid').innerHTML=ALL_ACTIONS.map(a=>{
-  const checked=(role.actions||[]).includes(a.id);
-  const locked=rid==='owner'&&a.id==='manage_users_roles';
-  return `
-   <label class="perm-check">
-    <input type="checkbox" class="role-act-cb" value="${a.id}" ${checked?'checked':''} ${locked?'disabled':''}>
-    <span>${esc(a.label)}</span>
-   </label>
-  `;
- }).join('');
-
- const isBuiltIn=rid==='owner'||rid==='driver';
- $('deleteRoleBtn').classList.toggle('hidden',isBuiltIn);
-}
-
-$('roleEditorSelect').onchange=renderRoleEditorFields;
-
-$('saveChangedPwdBtn').onclick=()=>{
- if(!hasAction('manage_users_roles')) return alert('Нет прав на изменение паролей.');
- const targetLogin=$('pwdTargetUser').value;
- const newPass=$('pwdNewValue').value;
- if(!newPass||newPass.length<4) return alert('Введите новый пароль (минимум 4 символа).');
- const u=db.users.find(x=>x.username===targetLogin);
- if(!u) return alert('Пользователь не найден.');
- u.pass=newPass;
- $('pwdNewValue').value='';
- save();
- alert(`Пароль для пользователя «${u.username}» успешно изменён!`);
-};
-
-$('createUserBtn').onclick=()=>{
- if(!hasAction('manage_users_roles')) return alert('Нет прав на добавление пользователей.');
- const login=$('newUserLogin').value.trim();
- const pass=$('newUserPass').value;
- const role=$('newUserRole').value;
- if(!login) return alert('Введите логин нового пользователя.');
- if(!pass||pass.length<4) return alert('Введите пароль (минимум 4 символа).');
- if(db.users.some(u=>u.username.toLowerCase()===login.toLowerCase())){
-  return alert('Пользователь с таким логином уже существует.');
- }
- db.users.push({username:login,pass,role:db.roles[role]?role:'driver'});
- $('newUserLogin').value='';
- $('newUserPass').value='';
- save();
- renderUsersAndRolesSettings();
- alert(`Пользователь «${login}» добавлен!`);
-};
-
-window.changeUserRole=(username,newRole)=>{
- if(!hasAction('manage_users_roles')) return;
- const u=db.users.find(x=>x.username===username);
- if(!u||!db.roles[newRole]) return;
- u.role=newRole;
- save();
- if(currentUser&&currentUser.username===u.username){
-  applyAuth(u);
- }else{
-  renderUsersAndRolesSettings();
- }
-};
-
-window.deleteUserAccount=username=>{
- if(!hasAction('manage_users_roles')) return;
- if(username==='admin1'||(currentUser&&username===currentUser.username)) return;
- if(!confirm(`Удалить пользователя «${username}»?`)) return;
- db.users=db.users.filter(u=>u.username!==username);
- save();
- renderUsersAndRolesSettings();
-};
-
-$('saveRolePermBtn').onclick=()=>{
- if(!hasAction('manage_users_roles')) return alert('Нет прав на редактирование ролей.');
- const rid=$('roleEditorSelect').value;
- const role=db.roles[rid];
- if(!role) return;
- const title=$('roleEditorTitle').value.trim();
- if(!title) return alert('Укажите название роли.');
-
- const tabs=[];
- document.querySelectorAll('.role-tab-cb:checked').forEach(cb=>tabs.push(cb.value));
- if(rid==='owner'&&!tabs.includes('settings')) tabs.push('settings');
- if(rid==='driver'&&!tabs.includes('settings')) tabs.push('settings');
- if(!tabs.length) return alert('Для роли должна быть выбрана хотя бы одна вкладка.');
-
- const actions=[];
- document.querySelectorAll('.role-act-cb:checked').forEach(cb=>actions.push(cb.value));
- if(rid==='owner'&&!actions.includes('manage_users_roles')) actions.push('manage_users_roles');
-
- role.title=title;
- role.tabs=tabs;
- role.actions=actions;
-
- save();
- if(currentUser){
-  applyAuth(currentUser);
-  go('settings');
- }
- renderUsersAndRolesSettings();
- alert(`Права для роли «${title}» сохранены!`);
-};
-
-$('createNewRoleBtn').onclick=()=>{
- if(!hasAction('manage_users_roles')) return alert('Нет прав на создание ролей.');
- const title=prompt('Введите название новой роли (например: Кладовщик или Менеджер):');
- if(!title||!title.trim()) return;
- const cleanTitle=title.trim();
- const newId='role_'+Date.now();
- db.roles[newId]={
-  id:newId,
-  title:cleanTitle,
-  tabs:['home','plan','sale','debts','points'],
-  actions:[]
- };
- save();
- renderUsersAndRolesSettings();
- $('roleEditorSelect').value=newId;
- renderRoleEditorFields();
- alert(`Роль «${cleanTitle}» создана! Отметьте нужные вкладки и права ниже и нажмите «Сохранить права роли».`);
-};
-
-$('deleteRoleBtn').onclick=()=>{
- if(!hasAction('manage_users_roles')) return alert('Нет прав на удаление ролей.');
- const rid=$('roleEditorSelect').value;
- if(rid==='owner'||rid==='driver') return alert('Базовые роли удалить нельзя.');
- const role=db.roles[rid];
- if(!role) return;
- if(!confirm(`Удалить роль «${role.title}»? Все пользователи с этой ролью будут переведены на роль «Водитель».`)) return;
- db.users.forEach(u=>{if(u.role===rid) u.role='driver';});
- delete db.roles[rid];
- save();
- renderUsersAndRolesSettings();
-};
-
-/* ==================== НАСТРОЙКИ, ОБЛАКО, БЭКАП ==================== */
-$('saveClientIdBtn').onclick=()=>{
- const v=$('googleClientIdInput').value.trim();
- localStorage.setItem(CLIENT_ID_KEY,v);
- refreshDriveStatusUi();
- alert('Google Client ID сохранён на устройстве.');
-};
-$('connectGoogleDriveBtn').onclick=()=>connectGoogleDrive();
-$('syncNowBtn').onclick=()=>{
- if(hasValidDriveToken()) pullFromGoogleDrive(false);
- else connectGoogleDrive();
-};
-$('drivePushBtn').onclick=()=>{
- if(hasValidDriveToken()) pushToGoogleDrive(false);
- else connectGoogleDrive(()=>pushToGoogleDrive(false));
-};
-$('drivePullBtn').onclick=()=>{
- if(hasValidDriveToken()) pullFromGoogleDrive(false);
- else connectGoogleDrive();
-};
-
-$('exportJsonBtn').onclick=()=>{
- const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
- const a=document.createElement('a');
- a.href=URL.createObjectURL(blob);
- a.download=`kegcontrol_backup_${todayIso()}.json`;
- a.click();
-};
-$('importJsonBtn').onclick=()=>$('importJsonFile').click();
-$('importJsonFile').onchange=e=>{
- const file=e.target.files[0];
- if(!file) return;
- const reader=new FileReader();
- reader.onload=()=>{
-  try{
-   const imported=JSON.parse(reader.result);
-   if(!imported||typeof imported!=='object') throw new Error('Неверный формат');
-   db=normalizeDb(imported);
-   if(!db.updatedAt) db.updatedAt=Date.now();
-   persistLocalOnly();
-   if(currentUser){
-    const refreshed=db.users.find(u=>u.username===currentUser.username);
-    if(refreshed) currentUser=refreshed;
-    else{ logout(); return; }
-   }
-   applySettingsVisibilityForUser();
-   render();
-   if(hasValidDriveToken()) scheduleDrivePush();
-   alert('База успешно восстановлена из файла!');
-  }catch(err){
-   alert('Ошибка чтения файла резервной копии: '+err.message);
-  }
- };
- reader.readAsText(file);
-};
-
-$('resetAllBtn').onclick=()=>{
- if(!hasAction('manage_system')) return alert('У вашей роли нет прав на сброс базы.');
- if(!confirm('Точно сбросить все операции, планы и остатки? Пользователи, роли, точки и сорта сохранятся.')) return;
- db.kegs30=0;
- db.kegs50=0;
- db.products.forEach(p=>p.qty=0);
- db.raw.forEach(r=>r.qty=0);
- db.plans=[];
- db.ops=[];
- save();
-};
-
-/* ==================== ФОРМАТИРОВАНИЕ КАРТОЧКИ ОПЕРАЦИИ ==================== */
-function renderOpCard(o,allowManage){
- const manageBtns=allowManage?`
-  <div class="op-actions">
-   ${o.type==='sale_return'?`<button type="button" class="secondary sm-btn" onclick="reprintOp(${o.id})">🖨️ Чек</button><button type="button" class="wa-btn sm-btn" onclick="shareOpWhatsApp(${o.id})" title="Отправить PDF-чек в WhatsApp">${WHATSAPP_LOGO_SVG}<span>WhatsApp</span></button>`:''}
-   ${hasAction('edit_ops')?`<button type="button" class="warn sm-btn" onclick="openEditOp(${o.id})" title="Изменить операцию">✏️</button>`:''}
-   ${hasAction('edit_ops')?`<button type="button" class="danger sm-btn" onclick="deleteOp(${o.id})" title="Удалить операцию">🗑️</button>`:''}
-  </div>
- `:'';
-
- if(o.type==='sale_return'){
-  const lines=(o.items||[]).map(i=>`
-   <div class="op-line">
-    🍺 <b>${esc(i.productName)}</b> — <b>${Number(i.k30||0)+Number(i.k50||0)} кег (${fmt(i.liters)} л)</b> × ${fmt(i.price)} ₸ = <b>${money(i.subtotal)}</b>
-    <span class="muted">(30л: ${i.k30||0} шт., 50л: ${i.k50||0} шт.)</span>
-   </div>
-  `).join('');
-  const retLine=(o.ret30>0||o.ret50>0)
-   ?`<div class="op-line ret-line">↩️ Возврат пустых кег: <b>30 л — ${o.ret30} шт., 50 л — ${o.ret50} шт.</b></div>`
-   :'';
-  const debtLine=o.debtAdded>0
-   ?`<div class="op-line debt-line">⚠️ В долг по чеку: <b>${money(o.debtAdded)}</b> (оплачено ${money(o.paidAmount)} из ${money(o.totalAmount)})</div>`
-   :(o.totalAmount>0?`<div class="op-line">✅ Оплачено полностью: <b>${money(o.paidAmount)}</b></div>`:'');
-
-  return `
-   <div class="item">
-    <div class="row">
-     <div><b>${esc(o.pointName)}</b> <span class="muted">· ${esc(o.date)}</span></div>
-     <div style="display:flex;gap:4px;flex-wrap:wrap">
-      ${o.payMethod&&o.totalAmount>0?`<span class="pill pay-method">${esc(o.payMethod)}</span>`:''}
-      ${o.debtAdded>0?`<span class="pill debt">Долг +${money(o.debtAdded)}</span>`:`<span class="pill">Отгрузка / возврат</span>`}
-     </div>
-    </div>
-    <div class="op-lines">${lines}${retLine}${debtLine}</div>
-    ${o.note?`<div class="muted" style="margin-top:5px">Комментарий: ${esc(o.note)}</div>`:''}
-    ${o.author?`<div class="muted" style="margin-top:2px">Оформил: ${esc(o.author)}</div>`:''}
-    ${manageBtns}
-   </div>
-  `;
- }
- if(o.type==='brew'){
-  const ingText=(o.ingredients||[]).map(i=>`${esc(i.rawName)} (${fmt(i.qty)} ${esc(i.unit)})`).join(', ');
-  const specs=[
-   o.abv!==undefined&&o.abv!==null&&String(o.abv).trim()!==''?`Крепость: <b>${fmtDeg(o.abv)}</b>`:'',
-   o.og!==undefined&&o.og!==null&&String(o.og).trim()!==''?`Плотность: <b>${fmtDeg(o.og)}</b>`:''
-  ].filter(Boolean).join(' · ');
-  return `
-   <div class="item">
-    <div class="row">
-     <div><b>🍺 Варка: ${esc(o.productName)} (+${fmt(o.liters)} л)</b> <span class="muted">· ${esc(o.date)}</span></div>
-     <span class="pill">Варка пива</span>
-    </div>
-    <div class="op-lines">
-     <div class="op-line brew-line">Сварено и добавлено на склад: <b>+${fmt(o.liters)} л</b></div>
-     ${specs?`<div class="op-line">${specs}</div>`:''}
-     ${ingText?`<div class="op-line">Списано сырьё: ${ingText}</div>`:''}
-    </div>
-    ${o.note?`<div class="muted" style="margin-top:4px">Комментарий: ${esc(o.note)}</div>`:''}
-    ${manageBtns}
-   </div>
-  `;
- }
- if(o.type==='debt_pay'){
-  return `
-   <div class="item">
-    <div class="row">
-     <div><b>${esc(o.pointName)}</b> <span class="muted">· ${esc(o.date)}</span></div>
-     <span class="pill">Погашение долга</span>
-    </div>
-    <div class="op-lines">
-     <div class="op-line">💵 Погашен долг на сумму: <b>${money(o.amount)}</b></div>
-    </div>
-    ${o.note?`<div class="muted" style="margin-top:4px">Комментарий: ${esc(o.note)}</div>`:''}
-    ${manageBtns}
-   </div>
-  `;
- }
- return `
-  <div class="item">
-   <div class="row"><span>${esc(o.text)}</span><span class="muted">${esc(o.date)}</span></div>
-   ${manageBtns}
-  </div>
- `;
-}
-
-/* ==================== ОБЩИЙ РЕНДЕР ==================== */
-function renderHistoryList(){
- const filter=$('histTypeFilter').value||'all';
- const list=db.ops.filter(o=>{
-  if(filter==='all') return true;
-  if(filter==='stock_other') return o.type==='beer_in'||o.type==='beer_out'||o.type==='raw_in'||o.type==='raw_out';
-  return o.type===filter;
- });
- $('historyList').innerHTML=list.length
-  ?list.map(o=>renderOpCard(o,true)).join('')
-  :'<div class="empty">Операций по выбранному фильтру нет.</div>';
-}
-
-function render(){
- const kmap=kegsByPoint();
- const dmap=debtsByPoint();
- const smap=salesByPoint();
- const c30=Object.values(kmap).reduce((s,x)=>s+Math.max(0,Number(x.k30||0)),0);
- const c50=Object.values(kmap).reduce((s,x)=>s+Math.max(0,Number(x.k50||0)),0);
- const wh30=Number(db.kegs30||0);
- const wh50=Number(db.kegs50||0);
- const all30=wh30+c30;
- const all50=wh50+c50;
- const whKegs=wh30+wh50;
- const clKegs=c30+c50;
- const totalDebtAll=Object.values(dmap).reduce((s,x)=>s+Number(x.debt||0),0);
-
- $('mTotal').textContent=whKegs+clKegs;
- $('mTotalSplit').innerHTML=`30л: <b>${all30}</b> · 50л: <b>${all50}</b>`;
- $('mWarehouse').textContent=whKegs;
- $('mWarehouseSplit').innerHTML=`30л: <b>${wh30}</b> · 50л: <b>${wh50}</b>`;
- $('mClients').textContent=clKegs;
- $('mClientsSplit').innerHTML=`30л: <b>${c30}</b> · 50л: <b>${c50}</b>`;
- $('mBeer').textContent=fmt(db.products.reduce((s,p)=>s+Number(p.qty||0),0))+' л';
- $('mDebt').textContent=money(totalDebtAll);
- $('debtBadge').textContent=totalDebtAll>0?`(${fmt(totalDebtAll)} ₸)`:'';
-
- const t=todayIso();
- const duePlans=db.plans.filter(p=>p.status!=='done'&&p.date<=t);
- $('planBadge').textContent=duePlans.length?`(${duePlans.length})`:'';
- const banner=$('homePlanBanner');
- if(duePlans.length){
-  banner.classList.remove('hidden');
-  banner.innerHTML=`🚚 <b>Запланировано заявок на сегодня / просрочено: ${duePlans.length} шт.</b> — нажмите, чтобы открыть маршрутный лист.`;
- }else{
-  banner.classList.add('hidden');
- }
-
- $('stock30').value=db.kegs30;
- $('stock50').value=db.kegs50;
- $('kegStockSummary').innerHTML=`
-  <div class="item">Склад: <b>30 л — ${db.kegs30} шт.</b>, <b>50 л — ${db.kegs50} шт.</b></div>
-  <div class="item">У клиентов: <b>30 л — ${c30} шт.</b>, <b>50 л — ${c50} шт.</b></div>
- `;
-
- const prevSalePt=$('salePoint').value;
- const prevDebtPt=$('debtPayPoint').value;
- const prevPlanPt=$('planPoint').value;
- const prevStatPt=$('statPointFilter').value;
-
- const ptsOpts=db.points.map(p=>`<option value="${p.id}">${esc(p.name)}${p.zone?' ['+esc(p.zone)+']':''}</option>`).join('');
- $('salePoint').innerHTML=ptsOpts;
- $('debtPayPoint').innerHTML=ptsOpts;
- $('planPoint').innerHTML=ptsOpts;
- $('statPointFilter').innerHTML='<option value="all">Все торговые точки</option>'+ptsOpts;
-
- if(prevSalePt&&db.points.some(p=>String(p.id)===String(prevSalePt))) $('salePoint').value=prevSalePt;
- if(prevDebtPt&&db.points.some(p=>String(p.id)===String(prevDebtPt))) $('debtPayPoint').value=prevDebtPt;
- if(prevPlanPt&&db.points.some(p=>String(p.id)===String(prevPlanPt))) $('planPoint').value=prevPlanPt;
- if(prevStatPt) $('statPointFilter').value=prevStatPt;
-
- if(!$('planDate').value) $('planDate').value=todayIso();
- const curPlanPt=db.points.find(x=>x.id===Number($('planPoint').value));
- if(curPlanPt&&!$('planZoneOverride').value) $('planZoneOverride').value=curPlanPt.zone||'';
-
- $('otherProduct').innerHTML=db.products.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
- $('otherRawSelect').innerHTML=db.raw.map(r=>`<option value="${r.id}">${esc(r.name)} (${esc(r.unit)})</option>`).join('');
- $('brewBeerDatalist').innerHTML=db.products.map(p=>`<option value="${esc(p.name)}">`).join('');
-
- ensureAtLeastOneBeerRow();
- ensurePlanRow();
-
- $('productsList').innerHTML=db.products.map(p=>{
-  const specs=[
-   p.abv!==undefined&&p.abv!==null&&String(p.abv).trim()!==''?`Крепость: <b>${fmtDeg(p.abv)}</b>`:'',
-   p.og!==undefined&&p.og!==null&&String(p.og).trim()!==''?`Плотность: <b>${fmtDeg(p.og)}</b>`:''
-  ].filter(Boolean).join(' · ');
-  return `
-   <div class="item">
-    <div class="row">
-     <div>
-      <b>${esc(p.name)}</b>
-      <div class="muted">Остаток: <b>${fmt(p.qty)} л</b>${specs?` · ${specs}`:''}</div>
-     </div>
-     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-      <input type="number" min="0" step="1" value="${p.price||0}" style="width:88px;padding:6px 8px;text-align:right" onchange="updateProdPrice(${p.id},this.value)">
-      <span class="muted">₸/л</span>
-      <button type="button" class="warn sm-btn" onclick="editProductModal(${p.id})" title="Редактировать сорт">✏️</button>
-      <button type="button" class="danger sm-btn" onclick="deleteProduct(${p.id})" title="Удалить сорт">🗑️</button>
-     </div>
-    </div>
-   </div>
-  `;
- }).join('');
-
- $('rawList').innerHTML=db.raw.length
-  ?db.raw.map(r=>`<div class="item row"><span>${esc(r.name)}</span><b>${fmt(r.qty)} ${esc(r.unit)}</b></div>`).join('')
-  :'<div class="empty">Сырьё пока не добавлено.</div>';
-
- renderPointsList(kmap,dmap,smap);
-
- $('totalAllDebts').textContent=money(totalDebtAll);
- const debtors=Object.values(dmap).filter(x=>x.debt>0).sort((a,b)=>b.debt-a.debt);
- $('debtsByPointList').innerHTML=debtors.length
-  ?debtors.map(x=>`
-   <div class="item row">
-    <div><b>${esc(x.name)}</b> ${x.zone?`<span class="pill zone">${esc(x.zone)}</span>`:''}</div>
-    <span class="pill debt">${money(x.debt)}</span>
-   </div>
-  `).join('')
-  :'<div class="empty">Долгов нет. Все точки рассчитались!</div>';
- updateDebtPointInfo();
-
- const debtOps=db.ops.filter(o=>(o.type==='sale_return'&&Number(o.debtAdded||0)>0)||o.type==='debt_pay');
- $('debtHistoryList').innerHTML=debtOps.length
-  ?debtOps.map(o=>renderOpCard(o,true)).join('')
-  :'<div class="empty">Записей по долгам пока нет.</div>';
-
- $('recent').innerHTML=db.ops.length
-  ?db.ops.slice(0,5).map(o=>renderOpCard(o,true)).join('')
-  :'<div class="empty">Операций пока нет.</div>';
-
- renderPlans();
- renderSalesStats();
- renderHistoryList();
- initCardCollapseButtons();
-}
-
-/* ==================== СТАРТ СЕССИИ ==================== */
-$('planDate').value=todayIso();
-$('planFilterDate').value=todayIso();
-$('statDateFrom').value=addDaysIso(-6);
-$('statDateTo').value=todayIso();
-
-const savedLogin=localStorage.getItem(SESSION_KEY);
-if(savedLogin){
- const u=db.users.find(x=>x.username===savedLogin);
- if(u) applyAuth(u);
- else{
-  updateBioUi();
-  refreshDriveStatusUi();
- }
-}else{
- updateBioUi();
- refreshDriveStatusUi();
-}
-</script>
-</body>
-</html>
+ const zoneOpts='<option value="all">Все районы</
