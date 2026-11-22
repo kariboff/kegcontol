@@ -1,8 +1,34 @@
 <!doctype html>
 <html lang="ru">
-<head><link rel="manifest" href="./manifest.json">
+<head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1410"><title>KegControl 1.4 Cloud</title>
+<meta name="theme-color" content="#0b1410">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" id="pwaManifest">
+<title>KegControl 1.4 Cloud</title>
+<script>
+(()=>{
+ const svgIcon=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#0b1410"/><rect x="24" y="24" width="464" height="464" rx="92" fill="none" stroke="#229963" stroke-width="18"/><text x="256" y="325" font-size="250" text-anchor="middle">🍺</text></svg>`;
+ const iconUrl='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svgIcon);
+ const baseUrl=new URL('./',location.href).href;
+ const manifest={
+  name:'KegControl 1.4 Cloud',
+  short_name:'KegControl',
+  start_url:baseUrl,
+  scope:baseUrl,
+  display:'standalone',
+  background_color:'#0b130f',
+  theme_color:'#0b1410',
+  icons:[
+   {src:iconUrl,sizes:'192x192',type:'image/svg+xml',purpose:'any'},
+   {src:iconUrl,sizes:'512x512',type:'image/svg+xml',purpose:'any'}
+  ]
+ };
+ const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+ document.getElementById('pwaManifest').href=URL.createObjectURL(blob);
+})();
+</script>
 <style>
 :root{
  --bg:#0b130f;
@@ -927,7 +953,6 @@ async function bindBiometricForCurrentUser(){
 
   let cred=await navigator.credentials.create({publicKey:pubKey});
   if(!cred){
-   // Повторная попытка без ограничения platform на случай внешнего ключа/сканера
    const fallbackPubKey={...pubKey,authenticatorSelection:{userVerification:'required'}};
    cred=await navigator.credentials.create({publicKey:fallbackPubKey});
   }
@@ -3232,4 +3257,10 @@ $('reset').onclick=()=>{
 };
 
 applyAuthUI();
-</script><script>if("serviceWorker"in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));}</script></body></html>
+
+if('serviceWorker' in navigator){
+ window.addEventListener('load',()=>{
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+ });
+}
+</script></body></html>
