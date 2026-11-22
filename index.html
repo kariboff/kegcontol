@@ -138,6 +138,11 @@ input,select,textarea{width:100%;padding:10px 11px;border:1px solid var(--line);
 input::placeholder,textarea::placeholder{color:#667d72}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);background:#101e18;box-shadow:0 0 0 3px rgba(34,153,99,0.2)}
 
+.stepper-box{display:flex;align-items:stretch;gap:5px}
+.stepper-box input{flex:1 1 auto;min-width:0;text-align:center;font-weight:750;font-variant-numeric:tabular-nums;padding:9px 6px}
+.step-btn{flex:0 0 36px;padding:0;border-radius:10px;background:#182921;color:var(--ink);border:1px solid #2b4539;font-size:17px;font-weight:800;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.step-btn:hover{background:#213a2e;border-color:#3a5e4e;color:#78ebb5}
+
 .primary{background:var(--green);color:#f3fbf7;width:100%;margin-top:13px;font-weight:700;box-shadow:0 4px 12px rgba(34,153,99,0.25);border:1px solid #2db375}
 .primary:hover{background:#27ab6f}
 .secondary{background:#182921;color:#d6e8de;font-weight:600;border:1px solid #2b4539}
@@ -176,6 +181,9 @@ a{color:var(--blue)}
 
 .twocol{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .threecol{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+@media(max-width:600px){
+ .threecol{grid-template-columns:1fr}
+}
 .calc{background:#10241b;border:1px solid #224d39;border-left:4px solid var(--green);border-radius:12px;padding:12px;margin-top:10px}
 .calc strong{font-size:20px;color:#5ce0a3}
 .calc.debt-box{background:#2b1417;border:1px solid #5c272d;border-left:4px solid var(--red)}
@@ -395,11 +403,9 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 <div id="fromPlanBanner" class="notice info hidden"></div>
 <label>Торговая точка</label><select id="salePoint"></select>
 
-<div class="row" style="margin-top:12px">
-<h3 style="margin:0">Отгрузка пива по кегам (литраж считается автоматически)</h3>
-<button type="button" class="secondary sm-btn" id="addBeerRowBtn">+ Добавить сорт</button>
-</div>
+<h3 style="margin-top:12px">Отгрузка пива по кегам (литраж считается автоматически)</h3>
 <div id="beerRowsContainer" style="margin-top:8px"></div>
+<button type="button" class="secondary sm-btn" id="addBeerRowBtn" style="width:100%;margin-top:4px">+ Добавить сорт</button>
 
 <div id="saleFinancialBlock">
 <div class="calc">
@@ -411,8 +417,22 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 
 <h3>Возврат пустых кег с этой точки</h3>
 <div class="twocol">
-<div><label>30-литровые, шт.</label><input id="ret30" type="number" min="0" step="1" value="0"></div>
-<div><label>50-литровые, шт.</label><input id="ret50" type="number" min="0" step="1" value="0"></div>
+<div>
+ <label>30-литровые, шт.</label>
+ <div class="stepper-box">
+  <button type="button" class="step-btn" data-step-target="ret30" data-step-delta="-1" aria-label="Уменьшить возврат 30 л">−</button>
+  <input id="ret30" type="number" min="0" step="1" value="0">
+  <button type="button" class="step-btn" data-step-target="ret30" data-step-delta="1" aria-label="Увеличить возврат 30 л">+</button>
+ </div>
+</div>
+<div>
+ <label>50-литровые, шт.</label>
+ <div class="stepper-box">
+  <button type="button" class="step-btn" data-step-target="ret50" data-step-delta="-1" aria-label="Уменьшить возврат 50 л">−</button>
+  <input id="ret50" type="number" min="0" step="1" value="0">
+  <button type="button" class="step-btn" data-step-target="ret50" data-step-delta="1" aria-label="Увеличить возврат 50 л">+</button>
+ </div>
+</div>
 </div>
 
 <label>Ширина термочека / квитанции</label><select id="receiptWidth"><option value="58">58 мм</option><option value="80" selected>80 мм</option></select>
@@ -1974,8 +1994,22 @@ function createBeerRow(defaultProdId='',defaultK30=0,defaultK50=0,defaultPrice='
   <label>Сорт пива</label>
   <select class="row-prod">${opts}</select>
   <div class="threecol">
-   <div><label>Кег 30 л, шт.</label><input class="row-k30" type="number" min="0" step="1" value="${defaultK30}" placeholder="0"></div>
-   <div><label>Кег 50 л, шт.</label><input class="row-k50" type="number" min="0" step="1" value="${defaultK50}" placeholder="0"></div>
+   <div>
+    <label>Кег 30 л, шт.</label>
+    <div class="stepper-box">
+     <button type="button" class="step-btn row-k30-dec" aria-label="Уменьшить кеги 30 л">−</button>
+     <input class="row-k30" type="number" min="0" step="1" value="${defaultK30}" placeholder="0">
+     <button type="button" class="step-btn row-k30-inc" aria-label="Увеличить кеги 30 л">+</button>
+    </div>
+   </div>
+   <div>
+    <label>Кег 50 л, шт.</label>
+    <div class="stepper-box">
+     <button type="button" class="step-btn row-k50-dec" aria-label="Уменьшить кеги 50 л">−</button>
+     <input class="row-k50" type="number" min="0" step="1" value="${defaultK50}" placeholder="0">
+     <button type="button" class="step-btn row-k50-inc" aria-label="Увеличить кеги 50 л">+</button>
+    </div>
+   </div>
    <div><label>Цена за 1 л, ₸</label><input class="row-price price-input" type="number" min="0" step="1" value="${initPrice}"></div>
   </div>
   <div class="row-subtotal">
@@ -1986,6 +2020,20 @@ function createBeerRow(defaultProdId='',defaultK30=0,defaultK50=0,defaultPrice='
 
  const prodSel=row.querySelector('.row-prod');
  const priceInp=row.querySelector('.row-price');
+ const k30Inp=row.querySelector('.row-k30');
+ const k50Inp=row.querySelector('.row-k50');
+
+ const stepInp=(inp,delta)=>{
+  const next=Math.max(0,Math.floor(Number(inp.value||0))+delta);
+  inp.value=next;
+  updateSaleSummary();
+ };
+
+ row.querySelector('.row-k30-dec').onclick=()=>stepInp(k30Inp,-1);
+ row.querySelector('.row-k30-inc').onclick=()=>stepInp(k30Inp,1);
+ row.querySelector('.row-k50-dec').onclick=()=>stepInp(k50Inp,-1);
+ row.querySelector('.row-k50-inc').onclick=()=>stepInp(k50Inp,1);
+
  prodSel.onchange=()=>{
   const p=db.products.find(x=>x.id===Number(prodSel.value));
   if(p) priceInp.value=p.price||0;
@@ -1998,6 +2046,15 @@ function createBeerRow(defaultProdId='',defaultK30=0,defaultK50=0,defaultPrice='
  };
  return row;
 }
+
+document.querySelectorAll('.step-btn[data-step-target]').forEach(btn=>{
+ btn.onclick=()=>{
+  const inp=$(btn.dataset.stepTarget);
+  if(!inp) return;
+  const delta=Number(btn.dataset.stepDelta||0);
+  inp.value=Math.max(0,Math.floor(Number(inp.value||0))+delta);
+ };
+});
 
 function ensureAtLeastOneBeerRow(){
  const box=$('beerRowsContainer');
@@ -2743,7 +2800,7 @@ function getFilteredSalesStatsData(){
   return d>=fromDate&&d<=toDate;
  });
 
- let totalLiters=0,totalAmount=0,totalPaid=0,totalDebt=0,totalKegs=0,totalRet=0;
+ let totalLiters=0,totalAmount=0,totalPaid=0,totalDebt=0,totalKegs=0,totalRet=0,periodRepaid=0;
  let cashPaid=0,transferPaid=0;
  const byProd={};
 
@@ -2767,9 +2824,23 @@ function getFilteredSalesStatsData(){
   });
  });
 
+ db.ops.forEach(o=>{
+  if(o.type!=='debt_pay') return;
+  if(ptFilter!=='all'&&String(o.pointId)!==String(ptFilter)) return;
+  const d=parseOpIsoDate(o);
+  if(d>=fromDate&&d<=toDate){
+   periodRepaid+=Number(o.amount||0);
+  }
+ });
+
+ const dmap=debtsByPoint();
+ const currentDebtBalance=ptFilter!=='all'
+  ?Number(dmap[ptFilter]?.debt||0)
+  :Object.values(dmap).reduce((s,x)=>s+Number(x.debt||0),0);
+
  return {
   periodLabel,pointLabel,sales,
-  totalLiters,totalAmount,totalPaid,totalDebt,totalKegs,totalRet,
+  totalLiters,totalAmount,totalPaid,totalDebt,periodRepaid,currentDebtBalance,totalKegs,totalRet,
   cashPaid,transferPaid,byProd
  };
 }
@@ -2815,7 +2886,7 @@ function downloadStatsPdfReport(){
    <div class="rep-box"><div class="mutedPrint">Продано пива</div><b>${fmt(st.totalLiters)} л</b></div>
    <div class="rep-box"><div class="mutedPrint">Выручка</div><b>${money(st.totalAmount)}</b></div>
    <div class="rep-box"><div class="mutedPrint">Оплачено</div><b>${money(st.totalPaid)}</b><div class="mutedPrint">Нал: ${money(st.cashPaid)} · Пер.: ${money(st.transferPaid)}</div></div>
-   <div class="rep-box"><div class="mutedPrint">Ушло в долг</div><b>${money(st.totalDebt)}</b></div>
+   <div class="rep-box"><div class="mutedPrint">Ушло в долг (за период)</div><b>${money(st.totalDebt)}</b><div class="mutedPrint">Погашено: ${money(st.periodRepaid)} · Остаток: ${money(st.currentDebtBalance)}</div></div>
    <div class="rep-box"><div class="mutedPrint">Кег отгр. / возвр.</div><b>${st.totalKegs} / ${st.totalRet} шт.</b></div>
   </div>
   <h3 style="margin:10px 0 4px;font-size:14px">Продажи по сортам пива</h3>
@@ -3383,7 +3454,7 @@ function renderSalesStats(){
   <div class="sum-box"><small>Продано пива</small><b>${fmt(st.totalLiters)} л</b></div>
   <div class="sum-box"><small>Выручка (сумма)</small><b>${money(st.totalAmount)}</b></div>
   <div class="sum-box"><small>Оплачено (Нал / Перевод)</small><b style="color:#6be0a9">${money(st.totalPaid)}</b><span class="muted">Нал: ${money(st.cashPaid)} · Пер.: ${money(st.transferPaid)}</span></div>
-  <div class="sum-box"><small>Ушло в долг</small><b style="color:var(--red)">${money(st.totalDebt)}</b></div>
+  <div class="sum-box"><small>Ушло в долг (за период)</small><b style="color:var(--red)">${money(st.totalDebt)}</b><span class="muted">Погашено: ${money(st.periodRepaid)} · Остаток: <b>${money(st.currentDebtBalance)}</b></span></div>
   <div class="sum-box"><small>Кег отгружено / возврат</small><b>${st.totalKegs} / ${st.totalRet} шт.</b></div>
  `;
 
