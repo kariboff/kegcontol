@@ -781,43 +781,54 @@ const defaultData=()=>({
  ops:[]
 });
 
+function normalizeDb(rawObj){
+ const base=defaultData();
+ const merged={...base,...(rawObj&&typeof rawObj==='object'?rawObj:{})};
+ if(!Array.isArray(merged.users)||!merged.users.length) merged.users=base.users;
+ if(!merged.roles||typeof merged.roles!=='object'||!Object.keys(merged.roles).length) merged.roles=base.roles;
+ if(!Array.isArray(merged.plans)) merged.plans=[];
+ if(!Array.isArray(merged.ops)) merged.ops=[];
+ if(!Array.isArray(merged.raw)) merged.raw=[];
+ if(!Array.isArray(merged.points)) merged.points=[];
+ if(!Array.isArray(merged.products)) merged.products=[];
+
+ const oldRashid=merged.users.find(u=>u.username==='rashid');
+ if(oldRashid&&!merged.users.some(u=>u.username==='admin1')){
+  oldRashid.username='admin1';
+  oldRashid.pass='augusttime@!08';
+  oldRashid.role='owner';
+ }
+ if(!merged.users.some(u=>u.username==='admin1')){
+  merged.users.unshift({username:'admin1',pass:'augusttime@!08',role:'owner'});
+ }
+ if(!merged.roles.owner){
+  merged.roles.owner=JSON.parse(JSON.stringify(DEFAULT_ROLES.owner));
+ }
+ if(!merged.roles.driver){
+  merged.roles.driver=JSON.parse(JSON.stringify(DEFAULT_ROLES.driver));
+ }else if(!Array.isArray(merged.roles.driver.tabs)){
+  merged.roles.driver.tabs=['home','plan','sale','debts','points','settings'];
+ }else if(!merged.roles.driver.tabs.includes('settings')){
+  merged.roles.driver.tabs.push('settings');
+ }
+ merged.users=merged.users.map(u=>({
+  username:String(u.username||'').trim(),
+  pass:String(u.pass||''),
+  role:merged.roles[u.role]?u.role:(u.role==='owner'?'owner':'driver')
+ })).filter(u=>u.username);
+ merged.points=merged.points.map(p=>({zone:'',phone:'',addr:'',...p}));
+ merged.products=merged.products.map(p=>({qty:0,price:0,...p}));
+ merged.kegs30=Math.max(0,Number(merged.kegs30||0));
+ merged.kegs50=Math.max(0,Number(merged.kegs50||0));
+ merged.updatedAt=Number(merged.updatedAt||0);
+ return merged;
+}
+
 function loadLocal(){
  try{
   const parsed=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
   if(!parsed) return defaultData();
-  const base=defaultData();
-  const merged={...base,...parsed};
-  if(!Array.isArray(merged.users)||!merged.users.length) merged.users=base.users;
-  if(!merged.roles||typeof merged.roles!=='object'||!Object.keys(merged.roles).length) merged.roles=base.roles;
-  if(!Array.isArray(merged.plans)) merged.plans=[];
-
-  const oldRashid=merged.users.find(u=>u.username==='rashid');
-  if(oldRashid&&!merged.users.some(u=>u.username==='admin1')){
-   oldRashid.username='admin1';
-   oldRashid.pass='augusttime@!08';
-   oldRashid.role='owner';
-  }
-  if(!merged.users.some(u=>u.username==='admin1')){
-   merged.users.unshift({username:'admin1',pass:'augusttime@!08',role:'owner'});
-  }
-  if(!merged.roles.owner){
-   merged.roles.owner=JSON.parse(JSON.stringify(DEFAULT_ROLES.owner));
-  }
-  if(!merged.roles.driver){
-   merged.roles.driver=JSON.parse(JSON.stringify(DEFAULT_ROLES.driver));
-  }else if(!Array.isArray(merged.roles.driver.tabs)){
-   merged.roles.driver.tabs=['home','plan','sale','debts','points','settings'];
-  }else if(!merged.roles.driver.tabs.includes('settings')){
-   merged.roles.driver.tabs.push('settings');
-  }
-  merged.users=merged.users.map(u=>({
-   username:String(u.username||'').trim(),
-   pass:String(u.pass||''),
-   role:merged.roles[u.role]?u.role:(u.role==='owner'?'owner':'driver')
-  }));
-  merged.points=merged.points.map(p=>({zone:'',phone:'',addr:'',...p}));
-  merged.products=merged.products.map(p=>({price:0,...p}));
-  return merged;
+  return normalizeDb(parsed);
  }catch(e){
   return defaultData();
  }
@@ -930,9 +941,13 @@ function refreshDriveStatusUi(){
  }
 }
 
+function persistLocalOnly(){
+ localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
+}
+
 function save(skipDrivePush=false){
  db.updatedAt=Date.now();
- localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
+ persistLocalOnly();
  render();
  if(!skipDrivePush&&hasValidDriveToken()){
   scheduleDrivePush();
@@ -1241,19 +1256,16 @@ async function pullFromGoogleDrive(silent=false){
   if(!r.ok) throw new Error('Drive download failed '+r.status);
   const remoteData=await r.json();
   if(remoteData&&typeof remoteData==='object'){
-   if((remoteData.updatedAt||0)>=(db.updatedAt||0)||!db.updatedAt){
-    const base=defaultData();
-    db={...base,...remoteData};
-    if(!db.roles||typeof db.roles!=='object'||!Object.keys(db.roles).length) db.roles=base.roles;
-    if(!Array.isArray(db.users)||!db.users.length) db.users=base.users;
-    if(!Array.isArray(db.plans)) db.plans=[];
-    db.points=db.points.map(p=>({zone:'',phone:'',addr:'',...p}));
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
+   const normalizedRemote=normalizeDb(remoteData);
+   if((normalizedRemote.updatedAt||0)>=(db.updatedAt||0)||!db.updatedAt){
+    db=normalizedRemote;
+    persistLocalOnly();
     if(currentUser){
      const refreshed=db.users.find(u=>u.username===currentUser.username);
      if(refreshed) currentUser=refreshed;
      else{ logout(); return; }
     }
+    applySettingsVisibilityForUser();
     render();
     updateBioUi();
     refreshDriveStatusUi();
@@ -1418,15 +1430,38 @@ $('tabs').onclick=e=>{
 };
 
 /* ==================== РАСЧЁТ КЕГ И ДОЛГОВ ==================== */
+function getOpKegs30(op){
+ if(op.totalK30!==undefined&&op.totalK30!==null) return Number(op.totalK30||0);
+ if(op.k30!==undefined&&op.k30!==null) return Number(op.k30||0);
+ if(Array.isArray(op.items)) return op.items.reduce((s,i)=>s+Number(i.k30||0),0);
+ return 0;
+}
+
+function getOpKegs50(op){
+ if(op.totalK50!==undefined&&op.totalK50!==null) return Number(op.totalK50||0);
+ if(op.k50!==undefined&&op.k50!==null) return Number(op.k50||0);
+ if(Array.isArray(op.items)) return op.items.reduce((s,i)=>s+Number(i.k50||0),0);
+ return 0;
+}
+
 function kegsByPoint(){
  const map={};
- db.points.forEach(p=>map[p.id]={name:p.name,zone:p.zone||'',k30:0,k50:0});
+ db.points.forEach(p=>{
+  map[p.id]={id:p.id,name:p.name,zone:p.zone||'',k30:0,k50:0};
+ });
  db.ops.forEach(o=>{
-  if(!map[o.pointId]) map[o.pointId]={name:o.pointName||'Точка',zone:'',k30:0,k50:0};
-  if(o.type==='sale_return'){
-   map[o.pointId].k30+=(Number(o.k30||0)-Number(o.ret30||0));
-   map[o.pointId].k50+=(Number(o.k50||0)-Number(o.ret50||0));
+  if(o.type!=='sale_return') return;
+  let key=o.pointId;
+  if(!key&&o.pointName){
+   const foundPt=db.points.find(p=>p.name===o.pointName);
+   key=foundPt?foundPt.id:'name:'+o.pointName;
   }
+  if(!key) return;
+  if(!map[key]){
+   map[key]={id:key,name:o.pointName||'Точка',zone:'',k30:0,k50:0};
+  }
+  map[key].k30+=(getOpKegs30(o)-Number(o.ret30||0));
+  map[key].k50+=(getOpKegs50(o)-Number(o.ret50||0));
  });
  return map;
 }
@@ -1435,12 +1470,17 @@ function debtsByPoint(){
  const map={};
  db.points.forEach(p=>map[p.id]={pointId:p.id,name:p.name,zone:p.zone||'',debt:0});
  db.ops.forEach(o=>{
-  if(!o.pointId) return;
-  if(!map[o.pointId]) map[o.pointId]={pointId:o.pointId,name:o.pointName||'Точка',zone:'',debt:0};
+  let pid=o.pointId;
+  if(!pid&&o.pointName){
+   const foundPt=db.points.find(p=>p.name===o.pointName);
+   if(foundPt) pid=foundPt.id;
+  }
+  if(!pid) return;
+  if(!map[pid]) map[pid]={pointId:pid,name:o.pointName||'Точка',zone:'',debt:0};
   if(o.type==='sale_return'){
-   map[o.pointId].debt+=Number(o.debtAdded||0);
+   map[pid].debt+=Number(o.debtAdded||0);
   }else if(o.type==='debt_pay'){
-   map[o.pointId].debt-=Number(o.amount||0);
+   map[pid].debt-=Number(o.amount||0);
   }
  });
  Object.values(map).forEach(x=>{if(x.debt<0) x.debt=0;});
@@ -1501,8 +1541,8 @@ function getBeerRowsData(){
  document.querySelectorAll('#beerRowsContainer .beer-row').forEach(r=>{
   const prodId=Number(r.querySelector('.row-prod').value);
   const p=db.products.find(x=>x.id===prodId);
-  const k30=Math.max(0,Number(r.querySelector('.row-k30').value||0));
-  const k50=Math.max(0,Number(r.querySelector('.row-k50').value||0));
+  const k30=Math.max(0,Math.floor(Number(r.querySelector('.row-k30').value||0)));
+  const k50=Math.max(0,Math.floor(Number(r.querySelector('.row-k50').value||0)));
   const price=Math.max(0,Number(r.querySelector('.row-price').value||0));
   const liters=calcKegLiters(k30,k50);
   const subtotal=Math.round(liters*price);
@@ -1554,8 +1594,8 @@ function createPlanRow(defaultProdId='',defaultK30=0,defaultK50=0){
   </div>
  `;
  const upd=()=>{
-  const k30=Math.max(0,Number(row.querySelector('.p-row-k30').value||0));
-  const k50=Math.max(0,Number(row.querySelector('.p-row-k50').value||0));
+  const k30=Math.max(0,Math.floor(Number(row.querySelector('.p-row-k30').value||0)));
+  const k50=Math.max(0,Math.floor(Number(row.querySelector('.p-row-k50').value||0)));
   row.querySelector('.p-row-liters-text').textContent=`${fmt(calcKegLiters(k30,k50))} л`;
  };
  row.querySelectorAll('input').forEach(inp=>inp.oninput=upd);
@@ -1593,8 +1633,8 @@ $('savePlanBtn').onclick=()=>{
  const date=$('planDate').value;
  const time=$('planTime').value||'';
  const zone=($('planZoneOverride').value||(pt?pt.zone:'')||'Без района').trim();
- const ret30=Number($('planRet30').value||0);
- const ret50=Number($('planRet50').value||0);
+ const ret30=Math.max(0,Math.floor(Number($('planRet30').value||0)));
+ const ret50=Math.max(0,Math.floor(Number($('planRet50').value||0)));
  const note=$('planNote').value.trim();
 
  if(!pt) return alert('Выберите торговую точку');
@@ -1603,8 +1643,8 @@ $('savePlanBtn').onclick=()=>{
  const items=[];
  document.querySelectorAll('#planRowsContainer .beer-row').forEach(r=>{
   const p=db.products.find(x=>x.id===Number(r.querySelector('.p-row-prod').value));
-  const k30=Math.max(0,Number(r.querySelector('.p-row-k30').value||0));
-  const k50=Math.max(0,Number(r.querySelector('.p-row-k50').value||0));
+  const k30=Math.max(0,Math.floor(Number(r.querySelector('.p-row-k30').value||0)));
+  const k50=Math.max(0,Math.floor(Number(r.querySelector('.p-row-k50').value||0)));
   const liters=calcKegLiters(k30,k50);
   if(p&&(k30>0||k50>0)){
    items.push({productId:p.id,productName:p.name,liters,k30,k50,price:p.price||0});
@@ -2009,10 +2049,10 @@ function finalizeSaleOperation(opData){
 $('saveSale').onclick=()=>{
  const pt=db.points.find(x=>x.id===Number($('salePoint').value));
  const items=getBeerRowsData();
- const ret30=Number($('ret30').value||0);
- const ret50=Number($('ret50').value||0);
+ const ret30=Math.max(0,Math.floor(Number($('ret30').value||0)));
+ const ret50=Math.max(0,Math.floor(Number($('ret50').value||0)));
  const note=$('saleNote').value.trim();
- const width=$('receiptWidth').value;
+ const width=$('receiptWidth').value||'80';
 
  if(!pt) return alert('Выберите торговую точку');
  if(!items.length&&ret30===0&&ret50===0){
@@ -2037,6 +2077,17 @@ $('saveSale').onclick=()=>{
 
  if(totalK30>Number(db.kegs30||0)) return alert(`На складе только ${db.kegs30} кег по 30 л.`);
  if(totalK50>Number(db.kegs50||0)) return alert(`На складе только ${db.kegs50} кег по 50 л.`);
+
+ const kmap=kegsByPoint();
+ const ptKegs=kmap[pt.id]||{k30:0,k50:0};
+ const curPt30=Math.max(0,Number(ptKegs.k30||0));
+ const curPt50=Math.max(0,Number(ptKegs.k50||0));
+ if(ret30>curPt30+totalK30){
+  return alert(`Возврат 30 л (${ret30} шт.) больше, чем есть у точки с учётом отгрузки (${curPt30+totalK30} шт.).`);
+ }
+ if(ret50>curPt50+totalK50){
+  return alert(`Возврат 50 л (${ret50} шт.) больше, чем есть у точки с учётом отгрузки (${curPt50+totalK50} шт.).`);
+ }
 
  const draft={
   pointId:pt.id,
@@ -2118,11 +2169,11 @@ function printReceipt(op){
   <div class="line"><span>Точка:</span><b>${esc(op.pointName)}</b></div>
   <div class="rule"></div>
   ${itemsHtml}
-  ${op.items&&op.items.length?`<div class="line"><span>Всего кег отгружено:</span><span><b>${op.totalK30+op.totalK50} шт.</b> (30л:${op.totalK30}, 50л:${op.totalK50})</span></div>`:''}
+  ${op.items&&op.items.length?`<div class="line"><span>Всего кег отгружено:</span><span><b>${getOpKegs30(op)+getOpKegs50(op)} шт.</b> (30л:${getOpKegs30(op)}, 50л:${getOpKegs50(op)})</span></div>`:''}
   ${payBlock}
   <div class="rule"></div>
-  <div class="line"><span>Возврат пустых 30 л:</span><span><b>${op.ret30} шт.</b></span></div>
-  <div class="line"><span>Возврат пустых 50 л:</span><span><b>${op.ret50} шт.</b></span></div>
+  <div class="line"><span>Возврат пустых 30 л:</span><span><b>${op.ret30||0} шт.</b></span></div>
+  <div class="line"><span>Возврат пустых 50 л:</span><span><b>${op.ret50||0} шт.</b></span></div>
   ${op.note?`<div class="rule"></div><div>Комментарий: ${esc(op.note)}</div>`:''}
   <div class="rule"></div>
   <div class="line"><span><b>Остаток кег на точке:</b></span><span><b>${rem30+rem50} шт.</b></span></div>
@@ -2275,8 +2326,8 @@ $('doBrewBtn').onclick=()=>{
 
 /* ==================== СКЛАД И ТОЧКИ ==================== */
 $('setKegs').onclick=()=>{
- db.kegs30=Math.max(0,Number($('stock30').value||0));
- db.kegs50=Math.max(0,Number($('stock50').value||0));
+ db.kegs30=Math.max(0,Math.floor(Number($('stock30').value||0)));
+ db.kegs50=Math.max(0,Math.floor(Number($('stock50').value||0)));
  save();
 };
 
@@ -2382,8 +2433,8 @@ function revertOpEffects(op){
    const prod=db.products.find(p=>p.id===item.productId)||db.products.find(p=>p.name===item.productName);
    if(prod) prod.qty=Number(prod.qty||0)+Number(item.liters||0);
   });
-  db.kegs30=Math.max(0,Number(db.kegs30||0)+Number(op.totalK30||0)-Number(op.ret30||0));
-  db.kegs50=Math.max(0,Number(db.kegs50||0)+Number(op.totalK50||0)-Number(op.ret50||0));
+  db.kegs30=Math.max(0,Number(db.kegs30||0)+getOpKegs30(op)-Number(op.ret30||0));
+  db.kegs50=Math.max(0,Number(db.kegs50||0)+getOpKegs50(op)-Number(op.ret50||0));
  }else if(op.type==='brew'){
   const prod=db.products.find(p=>p.id===op.productId)||db.products.find(p=>p.name===op.productName);
   if(prod) prod.qty=Math.max(0,Number(prod.qty||0)-Number(op.liters||0));
@@ -2417,9 +2468,9 @@ window.openEditOp=id=>{
    <div class="beer-row" data-idx="${idx}">
     <div class="beer-row-title">${esc(it.productName)}</div>
     <div class="threecol">
-     <div><label>Кег 30 л</label><input class="ed-k30" type="number" min="0" step="1" value="${it.k30}"></div>
-     <div><label>Кег 50 л</label><input class="ed-k50" type="number" min="0" step="1" value="${it.k50}"></div>
-     <div><label>Цена/л, ₸</label><input class="ed-price" type="number" min="0" step="1" value="${it.price}"></div>
+     <div><label>Кег 30 л</label><input class="ed-k30" type="number" min="0" step="1" value="${it.k30||0}"></div>
+     <div><label>Кег 50 л</label><input class="ed-k50" type="number" min="0" step="1" value="${it.k50||0}"></div>
+     <div><label>Цена/л, ₸</label><input class="ed-price" type="number" min="0" step="1" value="${it.price||0}"></div>
     </div>
    </div>
   `).join('');
@@ -2458,8 +2509,8 @@ window.openEditOp=id=>{
    itemDivs.forEach(div=>{
     const i=Number(div.dataset.idx);
     const it=op.items[i];
-    it.k30=Math.max(0,Number(div.querySelector('.ed-k30').value||0));
-    it.k50=Math.max(0,Number(div.querySelector('.ed-k50').value||0));
+    it.k30=Math.max(0,Math.floor(Number(div.querySelector('.ed-k30').value||0)));
+    it.k50=Math.max(0,Math.floor(Number(div.querySelector('.ed-k50').value||0)));
     it.liters=calcKegLiters(it.k30,it.k50);
     it.price=Math.max(0,Number(div.querySelector('.ed-price').value||0));
     it.subtotal=Math.round(it.liters*it.price);
@@ -2469,8 +2520,8 @@ window.openEditOp=id=>{
    op.totalK50=(op.items||[]).reduce((s,x)=>s+x.k50,0);
    op.totalLiters=(op.items||[]).reduce((s,x)=>s+x.liters,0);
    op.totalAmount=(op.items||[]).reduce((s,x)=>s+x.subtotal,0);
-   op.ret30=Math.max(0,Number($('edRet30').value||0));
-   op.ret50=Math.max(0,Number($('edRet50').value||0));
+   op.ret30=Math.max(0,Math.floor(Number($('edRet30').value||0)));
+   op.ret50=Math.max(0,Math.floor(Number($('edRet50').value||0)));
    op.payMethod=$('edPayMethod').value;
    const paid=op.payMethod==='В долг'?0:Math.min(op.totalAmount,Math.max(0,Number($('edPaid').value||0)));
    op.paidAmount=paid;
@@ -2580,7 +2631,7 @@ function renderSalesStats(){
   if(o.payMethod==='Перевод') transferPaid+=paid;
   else cashPaid+=paid;
   totalDebt+=Number(o.debtAdded||0);
-  totalKegs+=Number(o.totalK30||0)+Number(o.totalK50||0);
+  totalKegs+=getOpKegs30(o)+getOpKegs50(o);
   totalRet+=Number(o.ret30||0)+Number(o.ret50||0);
 
   (o.items||[]).forEach(it=>{
@@ -2869,8 +2920,17 @@ $('importJsonFile').onchange=e=>{
   try{
    const imported=JSON.parse(reader.result);
    if(!imported||typeof imported!=='object') throw new Error('Неверный формат');
-   db={...defaultData(),...imported};
-   save();
+   db=normalizeDb(imported);
+   if(!db.updatedAt) db.updatedAt=Date.now();
+   persistLocalOnly();
+   if(currentUser){
+    const refreshed=db.users.find(u=>u.username===currentUser.username);
+    if(refreshed) currentUser=refreshed;
+    else{ logout(); return; }
+   }
+   applySettingsVisibilityForUser();
+   render();
+   if(hasValidDriveToken()) scheduleDrivePush();
    alert('База успешно восстановлена из файла!');
   }catch(err){
    alert('Ошибка чтения файла резервной копии: '+err.message);
@@ -2904,8 +2964,8 @@ function renderOpCard(o,allowManage){
  if(o.type==='sale_return'){
   const lines=(o.items||[]).map(i=>`
    <div class="op-line">
-    🍺 <b>${esc(i.productName)}</b> — <b>${i.k30+i.k50} кег (${fmt(i.liters)} л)</b> × ${fmt(i.price)} ₸ = <b>${money(i.subtotal)}</b>
-    <span class="muted">(30л: ${i.k30} шт., 50л: ${i.k50} шт.)</span>
+    🍺 <b>${esc(i.productName)}</b> — <b>${Number(i.k30||0)+Number(i.k50||0)} кег (${fmt(i.liters)} л)</b> × ${fmt(i.price)} ₸ = <b>${money(i.subtotal)}</b>
+    <span class="muted">(30л: ${i.k30||0} шт., 50л: ${i.k50||0} шт.)</span>
    </div>
   `).join('');
   const retLine=(o.ret30>0||o.ret50>0)
@@ -2987,11 +3047,11 @@ function renderHistoryList(){
 function render(){
  const kmap=kegsByPoint();
  const dmap=debtsByPoint();
- const c30=Object.values(kmap).reduce((s,x)=>s+Math.max(0,x.k30),0);
- const c50=Object.values(kmap).reduce((s,x)=>s+Math.max(0,x.k50),0);
+ const c30=Object.values(kmap).reduce((s,x)=>s+Math.max(0,Number(x.k30||0)),0);
+ const c50=Object.values(kmap).reduce((s,x)=>s+Math.max(0,Number(x.k50||0)),0);
  const whKegs=Number(db.kegs30||0)+Number(db.kegs50||0);
  const clKegs=c30+c50;
- const totalDebtAll=Object.values(dmap).reduce((s,x)=>s+x.debt,0);
+ const totalDebtAll=Object.values(dmap).reduce((s,x)=>s+Number(x.debt||0),0);
 
  $('mTotal').textContent=whKegs+clKegs;
  $('mWarehouse').textContent=whKegs;
@@ -3078,7 +3138,7 @@ function render(){
      </div>
      <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
       ${d>0?`<span class="pill debt">Долг: ${money(d)}</span>`:''}
-      <span class="pill">30л: ${Math.max(0,k.k30)} · 50л: ${Math.max(0,k.k50)}</span>
+      <span class="pill">30л: ${Math.max(0,Number(k.k30||0))} · 50л: ${Math.max(0,Number(k.k50||0))}</span>
       ${canEditPts?`<button type="button" class="secondary sm-btn" onclick="editPointModal(${p.id})">✏️</button>`:''}
      </div>
     </div>
