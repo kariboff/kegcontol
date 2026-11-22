@@ -72,12 +72,26 @@ button:active{transform:scale(0.985)}
 .tab:hover{color:var(--ink);border-color:#325042}
 .tab.active{background:var(--green);color:#f3fbf7;border-color:#2db375;box-shadow:0 2px 10px rgba(34,153,99,0.28)}
 
-.card{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--green);border-radius:16px;padding:14px;margin:12px 0;box-shadow:0 4px 16px rgba(0,0,0,0.28)}
+.card{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--green);border-radius:16px;padding:14px;margin:12px 0;box-shadow:0 4px 16px rgba(0,0,0,0.28);position:relative}
 .card.accent-blue{border-top-color:var(--blue)}
 .card.accent-amber{border-top-color:var(--amber)}
 .card.accent-teal{border-top-color:var(--teal)}
 .card.accent-purple{border-top-color:var(--purple)}
 .card.accent-red{border-top-color:var(--red)}
+
+.card-collapse-btn{position:absolute;top:10px;right:10px;width:28px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;background:#182921;color:var(--muted);border:1px solid #2a4438;font-size:13px;line-height:1;z-index:1}
+.card-collapse-btn:hover{color:var(--ink);background:#20362c;border-color:#38594a}
+.card.collapsed{padding-bottom:12px}
+.card.collapsed>:not(h2):not(.card-collapse-btn):not(.card-hdr-bar){display:none!important}
+.card.collapsed>h2,.card.collapsed>.card-hdr-bar{margin-bottom:0!important}
+.card>:not(.card-collapse-btn){padding-right:34px}
+.card>.card-hdr-bar{padding-right:36px}
+
+.sort-menu-wrap{position:relative;display:inline-block}
+.sort-popover{position:absolute;right:0;top:calc(100% + 6px);min-width:215px;background:#15241d;border:1px solid #2e4b3d;border-radius:12px;padding:5px;box-shadow:0 12px 30px rgba(0,0,0,0.55);z-index:15}
+.sort-option{width:100%;text-align:left;background:transparent;color:var(--ink);padding:8px 10px;border-radius:8px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sort-option:hover{background:#1d3228}
+.sort-option.active{background:var(--green-soft);color:#6be0a9}
 
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .metric{background:#101c17;border:1px solid var(--line);border-radius:13px;padding:11px 12px;position:relative;overflow:hidden}
@@ -307,7 +321,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 <!-- ПЛАНИРОВКА И МАРШРУТЫ ДОСТАВКИ -->
 <section id="plan" class="hidden">
 <div class="card accent-blue">
- <div class="row" style="flex-wrap:wrap">
+ <div class="row card-hdr-bar" style="flex-wrap:wrap">
   <h2 style="margin:0">🚚 Маршрутный лист и заявки</h2>
   <div style="display:flex;gap:6px;flex-wrap:wrap">
    <button type="button" class="primary sm-btn" style="margin-top:0;width:auto" id="openNewPlanModalBtn">➕ Новая заявка</button>
@@ -459,7 +473,19 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 <!-- ТОЧКИ -->
 <section id="points" class="hidden">
 <div class="card accent-purple">
-<h2>Торговые точки</h2>
+<div class="row card-hdr-bar">
+ <h2 style="margin:0">Торговые точки</h2>
+ <div class="sort-menu-wrap" id="pointsSortWrap">
+  <button type="button" class="secondary sm-btn" id="pointsSortBtn">🔃 <span id="pointsSortLabel">По имени</span></button>
+  <div class="sort-popover hidden" id="pointsSortMenu">
+   <button type="button" class="sort-option active" data-sort="name">По имени</button>
+   <button type="button" class="sort-option" data-sort="date">По дате</button>
+   <button type="button" class="sort-option" data-sort="sales">По количеству продаж</button>
+   <button type="button" class="sort-option" data-sort="kegs">По количеству кег</button>
+   <button type="button" class="sort-option" data-sort="debt">По количеству долга</button>
+  </div>
+ </div>
+</div>
 <div class="twocol">
  <div><label>Название новой точки</label><input id="newPoint" placeholder="Например, Бирмикс"></div>
  <div><label>Район / маршрут</label><input id="newPointZone" placeholder="Например, Центр / Трасса"></div>
@@ -499,8 +525,8 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 </div>
 
 <div class="card">
- <div class="row">
-  <h2>Журнал операций</h2>
+ <div class="row card-hdr-bar">
+  <h2 style="margin:0">Журнал операций</h2>
   <select id="histTypeFilter" style="width:auto;padding:6px 9px;font-size:13px">
    <option value="all">Все операции</option>
    <option value="sale_return">Отгрузки / возвраты</option>
@@ -783,8 +809,8 @@ const defaultData=()=>({
  ],
  raw:[],
  points:[
-  {id:1,name:'Точка 1',zone:'Центр',phone:'',addr:''},
-  {id:2,name:'Точка 2',zone:'Трасса',phone:'',addr:''}
+  {id:1,name:'Точка 1',zone:'Центр',phone:'',addr:'',createdAt:1},
+  {id:2,name:'Точка 2',zone:'Трасса',phone:'',addr:'',createdAt:2}
  ],
  plans:[],
  ops:[]
@@ -825,7 +851,7 @@ function normalizeDb(rawObj){
   pass:String(u.pass||''),
   role:merged.roles[u.role]?u.role:(u.role==='owner'?'owner':'driver')
  })).filter(u=>u.username);
- merged.points=merged.points.map(p=>({zone:'',phone:'',addr:'',...p}));
+ merged.points=merged.points.map((p,idx)=>({zone:'',phone:'',addr:'',createdAt:Number(p.createdAt||p.id||idx+1),...p}));
  merged.products=merged.products.map(p=>({qty:0,price:0,...p}));
  merged.kegs30=Math.max(0,Number(merged.kegs30||0));
  merged.kegs50=Math.max(0,Number(merged.kegs50||0));
@@ -863,6 +889,7 @@ let activeSalePlanId=null;
 let statPeriod='day';
 let planFilter='today';
 let pendingSaleDraft=null;
+let pointsSortBy='name';
 
 const $=id=>document.getElementById(id);
 const fmt=n=>(Math.round(Number(n||0)*100)/100).toLocaleString('ru-RU');
@@ -885,6 +912,26 @@ const fmtDateRu=(iso)=>{
 };
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>Date.now()+Math.floor(Math.random()*10000);
+
+/* ==================== СВОРАЧИВАНИЕ КАРТОЧЕК ==================== */
+function initCardCollapseButtons(){
+ document.querySelectorAll('.card').forEach(card=>{
+  if(card.querySelector('.card-collapse-btn')) return;
+  const btn=document.createElement('button');
+  btn.type='button';
+  btn.className='card-collapse-btn';
+  btn.title='Свернуть / развернуть карточку';
+  btn.textContent='▾';
+  btn.onclick=e=>{
+   e.stopPropagation();
+   const isCollapsed=card.classList.toggle('collapsed');
+   btn.textContent=isCollapsed?'▸':'▾';
+   btn.title=isCollapsed?'Развернуть карточку':'Свернуть карточку';
+  };
+  card.appendChild(btn);
+ });
+}
+initCardCollapseButtons();
 
 function getUserRoleObj(user=currentUser){
  if(!user) return DEFAULT_ROLES.driver;
@@ -1475,6 +1522,22 @@ function kegsByPoint(){
  return map;
 }
 
+function salesByPoint(){
+ const map={};
+ db.points.forEach(p=>{map[p.id]=0;});
+ db.ops.forEach(o=>{
+  if(o.type!=='sale_return') return;
+  let pid=o.pointId;
+  if(!pid&&o.pointName){
+   const foundPt=db.points.find(p=>p.name===o.pointName);
+   if(foundPt) pid=foundPt.id;
+  }
+  if(!pid) return;
+  map[pid]=(map[pid]||0)+Number(o.totalLiters||0);
+ });
+ return map;
+}
+
 function debtsByPoint(){
  const map={};
  db.points.forEach(p=>map[p.id]={pointId:p.id,name:p.name,zone:p.zone||'',debt:0});
@@ -1494,6 +1557,88 @@ function debtsByPoint(){
  });
  Object.values(map).forEach(x=>{if(x.debt<0) x.debt=0;});
  return map;
+}
+
+/* ==================== СОРТИРОВКА ТОЧЕК (ВСПЛЫВАЮЩЕЕ МЕНЮ) ==================== */
+const POINTS_SORT_TITLES={
+ name:'По имени',
+ date:'По дате',
+ sales:'По продажам',
+ kegs:'По кегам',
+ debt:'По долгу'
+};
+
+$('pointsSortBtn').onclick=e=>{
+ e.stopPropagation();
+ $('pointsSortMenu').classList.toggle('hidden');
+};
+
+$('pointsSortMenu').onclick=e=>{
+ const opt=e.target.closest('.sort-option');
+ if(!opt) return;
+ pointsSortBy=opt.dataset.sort||'name';
+ $('pointsSortLabel').textContent=POINTS_SORT_TITLES[pointsSortBy]||'По имени';
+ document.querySelectorAll('#pointsSortMenu .sort-option').forEach(b=>{
+  b.classList.toggle('active',b.dataset.sort===pointsSortBy);
+ });
+ $('pointsSortMenu').classList.add('hidden');
+ renderPointsList();
+};
+
+document.addEventListener('click',e=>{
+ const wrap=$('pointsSortWrap');
+ const menu=$('pointsSortMenu');
+ if(wrap&&menu&&!wrap.contains(e.target)){
+  menu.classList.add('hidden');
+ }
+});
+
+function renderPointsList(kmap=kegsByPoint(),dmap=debtsByPoint(),smap=salesByPoint()){
+ const canEditPts=hasAction('edit_points_plans');
+ const list=[...db.points];
+
+ list.sort((a,b)=>{
+  if(pointsSortBy==='name'){
+   return String(a.name||'').localeCompare(String(b.name||''),'ru',{sensitivity:'base'});
+  }
+  if(pointsSortBy==='date'){
+   return Number(b.createdAt||b.id||0)-Number(a.createdAt||a.id||0);
+  }
+  if(pointsSortBy==='sales'){
+   return Number(smap[b.id]||0)-Number(smap[a.id]||0);
+  }
+  if(pointsSortBy==='kegs'){
+   const ka=Math.max(0,Number(kmap[a.id]?.k30||0))+Math.max(0,Number(kmap[a.id]?.k50||0));
+   const kb=Math.max(0,Number(kmap[b.id]?.k30||0))+Math.max(0,Number(kmap[b.id]?.k50||0));
+   return kb-ka;
+  }
+  if(pointsSortBy==='debt'){
+   return Number(dmap[b.id]?.debt||0)-Number(dmap[a.id]?.debt||0);
+  }
+  return 0;
+ });
+
+ $('pointsList').innerHTML=list.length?list.map(p=>{
+  const k=kmap[p.id]||{k30:0,k50:0};
+  const d=dmap[p.id]?dmap[p.id].debt:0;
+  const sl=Number(smap[p.id]||0);
+  return `
+   <div class="item">
+    <div class="row">
+     <div>
+      <b>${esc(p.name)}</b> ${p.zone?`<span class="pill zone">${esc(p.zone)}</span>`:''}
+      ${p.addr||p.phone?`<div class="muted">${p.addr?'📍 '+esc(p.addr)+' ':''}${p.phone?'📞 '+esc(p.phone):''}</div>`:''}
+      <div class="muted">Продано: <b>${fmt(sl)} л</b></div>
+     </div>
+     <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+      ${d>0?`<span class="pill debt">Долг: ${money(d)}</span>`:''}
+      <span class="pill">30л: ${Math.max(0,Number(k.k30||0))} · 50л: ${Math.max(0,Number(k.k50||0))}</span>
+      ${canEditPts?`<button type="button" class="secondary sm-btn" onclick="editPointModal(${p.id})">✏️</button>`:''}
+     </div>
+    </div>
+   </div>
+  `;
+ }).join(''):'<div class="empty">Торговых точек пока нет.</div>';
 }
 
 /* ==================== СТРОКИ В ПРОДАЖЕ (ЛИТРАЖ СЧИТАЕТСЯ ПО КЕГАМ) ==================== */
@@ -2246,9 +2391,10 @@ $('saveDebtPayment').onclick=()=>{
  if(cur<=0) return alert('У этой точки нет активного долга.');
  if(amount>cur) return alert(`Сумма погашения (${money(amount)}) превышает долг точки (${money(cur)}).`);
 
+ const now=new Date();
  db.ops.unshift({
   id:uid(),
-  date:new Date().toLocaleString('ru-RU'),
+  date:now.toLocaleString('ru-RU'),
   isoDate:todayIso(),
   type:'debt_pay',
   author:currentUser?currentUser.username:'system',
@@ -2329,9 +2475,10 @@ $('doBrewBtn').onclick=()=>{
  }
  prod.qty=Number(prod.qty||0)+outLiters;
 
+ const now=new Date();
  db.ops.unshift({
   id:uid(),
-  date:new Date().toLocaleString('ru-RU'),
+  date:now.toLocaleString('ru-RU'),
   isoDate:todayIso(),
   type:'brew',
   author:currentUser?currentUser.username:'system',
@@ -2483,7 +2630,7 @@ $('addPoint').onclick=()=>{
  const phone=$('newPointPhone').value.trim();
  const addr=$('newPointAddr').value.trim();
  if(!name) return alert('Введите название точки');
- db.points.push({id:uid(),name,zone,phone,addr});
+ db.points.push({id:uid(),name,zone,phone,addr,createdAt:Date.now()});
  $('newPoint').value='';
  $('newPointZone').value='';
  $('newPointPhone').value='';
@@ -3174,6 +3321,7 @@ function renderHistoryList(){
 function render(){
  const kmap=kegsByPoint();
  const dmap=debtsByPoint();
+ const smap=salesByPoint();
  const c30=Object.values(kmap).reduce((s,x)=>s+Math.max(0,Number(x.k30||0)),0);
  const c50=Object.values(kmap).reduce((s,x)=>s+Math.max(0,Number(x.k50||0)),0);
  const whKegs=Number(db.kegs30||0)+Number(db.kegs50||0);
@@ -3254,26 +3402,7 @@ function render(){
   ?db.raw.map(r=>`<div class="item row"><span>${esc(r.name)}</span><b>${fmt(r.qty)} ${esc(r.unit)}</b></div>`).join('')
   :'<div class="empty">Сырьё пока не добавлено.</div>';
 
- const canEditPts=hasAction('edit_points_plans');
- $('pointsList').innerHTML=db.points.map(p=>{
-  const k=kmap[p.id]||{k30:0,k50:0};
-  const d=dmap[p.id]?dmap[p.id].debt:0;
-  return `
-   <div class="item">
-    <div class="row">
-     <div>
-      <b>${esc(p.name)}</b> ${p.zone?`<span class="pill zone">${esc(p.zone)}</span>`:''}
-      ${p.addr||p.phone?`<div class="muted">${p.addr?'📍 '+esc(p.addr)+' ':''}${p.phone?'📞 '+esc(p.phone):''}</div>`:''}
-     </div>
-     <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
-      ${d>0?`<span class="pill debt">Долг: ${money(d)}</span>`:''}
-      <span class="pill">30л: ${Math.max(0,Number(k.k30||0))} · 50л: ${Math.max(0,Number(k.k50||0))}</span>
-      ${canEditPts?`<button type="button" class="secondary sm-btn" onclick="editPointModal(${p.id})">✏️</button>`:''}
-     </div>
-    </div>
-   </div>
-  `;
- }).join('');
+ renderPointsList(kmap,dmap,smap);
 
  $('totalAllDebts').textContent=money(totalDebtAll);
  const debtors=Object.values(dmap).filter(x=>x.debt>0).sort((a,b)=>b.debt-a.debt);
@@ -3299,6 +3428,7 @@ function render(){
  renderPlans();
  renderSalesStats();
  renderHistoryList();
+ initCardCollapseButtons();
 }
 
 /* ==================== СТАРТ СЕССИИ ==================== */
