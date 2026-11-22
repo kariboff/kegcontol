@@ -1,0 +1,3235 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1410"><title>KegControl 1.4 Cloud</title>
+<style>
+:root{
+ --bg:#0b130f;
+ --card:#13201a;
+ --ink:#eaf3ed;
+ --muted:#93aba0;
+ --green:#229963;
+ --green-soft:#143626;
+ --line:#23382e;
+ --red:#ff6b6b;
+ --red-soft:#38181b;
+ --amber:#ffb03b;
+ --amber-soft:#382810;
+ --blue:#58a6ff;
+ --blue-soft:#132942;
+ --purple:#b48eff;
+ --purple-soft:#261a3d;
+ --teal:#38d1c9;
+ --teal-soft:#113231;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.38}
+
+/* Компактная верхняя шапка: логотип + блок пользователя в одном ряду */
+header{background:linear-gradient(90deg,#09120e 0%,#10241b 100%);color:var(--ink);padding:8px 12px;position:sticky;top:0;z-index:3;display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:48px;border-bottom:1px solid var(--line)}
+.hdr-brand{display:flex;align-items:center;gap:7px;min-width:0}
+.hdr-title{font-size:16px;font-weight:800;white-space:nowrap;line-height:1.1;letter-spacing:-0.01em;color:var(--ink)}
+.user-chip{display:flex;align-items:center;gap:6px;background:#162820;padding:4px 8px;border-radius:10px;border:1px solid #284437;flex-shrink:0}
+.user-chip b{font-size:12px;color:var(--ink);white-space:nowrap}
+.user-chip .role-tag{font-size:10px;padding:2px 6px;border-radius:6px;background:#1a7a4e;color:#eafff4;white-space:nowrap;font-weight:600}
+.user-chip .role-tag.driver{background:#1f4e73;color:#e4f2ff}
+.sync-pill{font-size:10px;padding:2px 7px;border-radius:99px;background:var(--green-soft);color:#8be3b8;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;font-weight:600;border:1px solid #22543c}
+.sync-pill.err{background:var(--red-soft);color:#ffa8a8;border-color:#61282d}
+.sync-pill.busy{background:var(--amber-soft);color:#ffd280;border-color:#664819}
+
+main{max-width:780px;margin:auto;padding:10px 12px 92px}
+.tabs{display:flex;gap:6px;overflow:auto;padding:8px 0;position:sticky;top:48px;background:var(--bg);z-index:2;scrollbar-width:none;border-bottom:1px solid var(--line)}
+.tabs::-webkit-scrollbar{display:none}
+button{border:0;border-radius:11px;padding:10px 12px;font:inherit;cursor:pointer;transition:transform .08s ease,opacity .15s ease,background-color .15s ease}
+button:active{transform:scale(0.985)}
+.tab{background:#14211b;color:var(--muted);white-space:nowrap;padding:8px 12px;font-size:14px;font-weight:600;border:1px solid var(--line)}
+.tab:hover{color:var(--ink);border-color:#325042}
+.tab.active{background:var(--green);color:#f3fbf7;border-color:#2db375;box-shadow:0 2px 10px rgba(34,153,99,0.28)}
+
+/* Разделение карточек по цветовой роли */
+.card{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--green);border-radius:16px;padding:14px;margin:12px 0;box-shadow:0 4px 16px rgba(0,0,0,0.28)}
+.card.accent-blue{border-top-color:var(--blue)}
+.card.accent-amber{border-top-color:var(--amber)}
+.card.accent-teal{border-top-color:var(--teal)}
+.card.accent-purple{border-top-color:var(--purple)}
+.card.accent-red{border-top-color:var(--red)}
+
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.metric{background:#101c17;border:1px solid var(--line);border-radius:13px;padding:11px 12px;position:relative;overflow:hidden}
+.metric.m-kegs{background:#0f1c29;border-color:#203a54;border-left:4px solid var(--blue)}
+.metric.m-wh{background:#0f2119;border-color:#1e4231;border-left:4px solid var(--green)}
+.metric.m-cl{background:#1a1428;border-color:#352754;border-left:4px solid var(--purple)}
+.metric.m-beer{background:#0e2121;border-color:#1c4240;border-left:4px solid var(--teal)}
+.metric small{color:var(--muted);font-weight:600;font-size:12px}
+.metric strong{display:block;font-size:24px;margin-top:3px;color:var(--ink)}
+.metric.debt-metric{background:var(--red-soft);border:1px solid #572529;border-left:4px solid var(--red)}
+.metric.debt-metric strong{color:var(--red)}
+
+h2{font-size:18px;margin:2px 0 12px;color:var(--ink);letter-spacing:-0.01em}
+h3{font-size:15px;margin:14px 0 7px;color:#cfe0d7}
+label{display:block;color:var(--muted);font-size:12px;margin:10px 0 5px;font-weight:600}
+input,select,textarea{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:#0e1914;color:var(--ink);font:inherit}
+input::placeholder,textarea::placeholder{color:#667d72}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);background:#101e18;box-shadow:0 0 0 3px rgba(34,153,99,0.2)}
+
+.primary{background:var(--green);color:#f3fbf7;width:100%;margin-top:13px;font-weight:700;box-shadow:0 4px 12px rgba(34,153,99,0.25);border:1px solid #2db375}
+.primary:hover{background:#27ab6f}
+.secondary{background:#182921;color:#d6e8de;font-weight:600;border:1px solid #2b4539}
+.secondary:hover{background:#1e3329}
+.danger{background:var(--red-soft);color:var(--red);font-weight:650;border:1px solid #5c272c}
+.danger:hover{background:#451c20}
+.warn{background:var(--amber-soft);color:var(--amber);font-weight:650;border:1px solid #634618}
+.warn:hover{background:#453112}
+.blue-btn{background:var(--blue-soft);color:var(--blue);font-weight:700;border:1px solid #23476e}
+.blue-btn:hover{background:#183454}
+.sm-btn{padding:6px 10px;font-size:13px;border-radius:9px}
+
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.muted{color:var(--muted);font-size:12px}
+code{background:#0e1914;color:#a7e3c5;padding:1px 5px;border-radius:5px;border:1px solid var(--line)}
+a{color:var(--blue)}
+
+.pill{font-size:11px;background:var(--green-soft);color:#6be0a9;padding:4px 8px;border-radius:99px;white-space:nowrap;font-weight:650;border:1px solid #21523b}
+.pill.debt{background:var(--red-soft);color:var(--red);font-weight:750;border-color:#5e282d}
+.pill.ret{background:var(--blue-soft);color:var(--blue);font-weight:750;border-color:#23476e}
+.pill.zone{background:var(--purple-soft);color:var(--purple);font-weight:700;border-color:#442f6e}
+.pill.plan-due{background:var(--amber-soft);color:var(--amber);font-weight:750;border-color:#664819}
+.pill.plan-over{background:var(--red-soft);color:var(--red);font-weight:750;border-color:#5e282d}
+.pill.pay-method{background:var(--teal-soft);color:var(--teal);font-weight:700;border-color:#1d5451}
+
+.item{padding:11px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border:0}
+.empty{color:var(--muted);padding:16px;text-align:center;background:#0e1914;border-radius:12px;border:1px dashed #283f34}
+.hidden{display:none!important}
+
+.notice{background:var(--amber-soft);border:1px solid #5c4116;border-left:4px solid var(--amber);border-radius:11px;padding:10px 12px;font-size:12px;color:#ffd896;margin:10px 0}
+.notice.info{background:var(--blue-soft);border-color:#214369;border-left-color:var(--blue);color:#b7d9ff}
+.notice.alert-banner{background:#3b290e;border:1px solid #755017;border-left:4px solid var(--amber);color:#ffe0a3;cursor:pointer}
+
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.threecol{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.calc{background:#10241b;border:1px solid #224d39;border-left:4px solid var(--green);border-radius:12px;padding:12px;margin-top:10px}
+.calc strong{font-size:20px;color:#5ce0a3}
+.calc.debt-box{background:#2b1417;border:1px solid #5c272d;border-left:4px solid var(--red)}
+.calc.debt-box strong{color:var(--red)}
+.calc.paid-box{background:#10241b;border:1px solid #224d39;border-left:4px solid var(--green)}
+
+footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:8px 12px calc(8px + env(safe-area-inset-bottom));text-align:center;color:var(--muted);font-size:11px}
+
+/* Планировка и маршруты */
+.route-group{border:1px solid #263d32;border-left:4px solid var(--purple);border-radius:14px;padding:11px 12px;margin:12px 0;background:#0f1a15}
+.route-group-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-bottom:8px;margin-bottom:9px;border-bottom:1px solid var(--line)}
+.route-group-title{font-weight:800;font-size:15px;color:#cfb5ff}
+.order-card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:12px;padding:10px 12px;margin-bottom:9px;box-shadow:0 2px 8px rgba(0,0,0,0.22)}
+.order-card:last-child{margin-bottom:0}
+.order-card.overdue{border-left:4px solid var(--red);background:#1c1113;border-color:#4d2328}
+.order-card.today{border-left:4px solid var(--amber);background:#1c180f;border-color:#4d3b17}
+.order-card.done{opacity:0.72;background:#101b16;border-left-color:#52695e}
+.quick-days{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.quick-days button{padding:5px 10px;font-size:12px;background:#172720;color:#cbe0d5;border-radius:8px;font-weight:600;border:1px solid #294237}
+.quick-days button:hover{background:#1e332a}
+
+/* Фильтры периода в истории */
+.period-btns{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.period-btn{padding:6px 11px;font-size:12px;border-radius:9px;background:#16251e;color:#b8cfc4;font-weight:650;border:1px solid var(--line)}
+.period-btn:hover{color:var(--ink);border-color:#325042}
+.period-btn.active{background:var(--green);color:#f3fbf7;border-color:#2db375}
+.summary-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px;margin:10px 0}
+.sum-box{background:#0f1b16;border:1px solid var(--line);border-top:3px solid var(--teal);border-radius:11px;padding:9px 10px}
+.sum-box small{color:var(--muted);font-size:11px;display:block;font-weight:600}
+.sum-box b{font-size:15px;margin-top:2px;display:block;color:var(--ink)}
+.prod-sales-table{width:100%;border-collapse:collapse;margin-top:6px;font-size:13px}
+.prod-sales-table th,.prod-sales-table td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left;color:var(--ink)}
+.prod-sales-table th{color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;background:#0e1914}
+
+/* Строки рецепта варки пива */
+.recipe-row{background:#0f1b16;border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:11px;padding:9px 10px;margin-bottom:8px}
+
+/* Экран авторизации */
+#authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(circle at top,#173326 0%,#080e0b 100%)}
+.auth-card{background:var(--card);width:100%;max-width:420px;border-radius:20px;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,0.65);border:1px solid #253c31}
+.auth-logo{font-size:26px;font-weight:800;color:var(--ink);text-align:center}
+.auth-sub{text-align:center;color:var(--muted);font-size:13px;margin:4px 0 16px}
+
+/* Карточка позиции сорта в продаже */
+.beer-row{background:#0f1b16;border:1px solid var(--line);border-left:3px solid var(--green);border-radius:12px;padding:11px;margin-bottom:10px;position:relative}
+.beer-row-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.beer-row-title{font-weight:750;font-size:13px;color:#4fd194}
+.remove-row{background:var(--red-soft);color:var(--red);padding:4px 9px;font-size:12px;border-radius:8px;font-weight:650;border:1px solid #5e282d}
+.row-subtotal{margin-top:8px;padding-top:7px;border-top:1px dashed #263d32;display:flex;justify-content:space-between;font-size:13px;color:#c3d8ce}
+
+.keg-number{font-weight:850;font-size:16px;color:var(--ink)}
+.keg-line{display:flex;justify-content:space-between;gap:8px;padding:5px 0}
+.op-lines{margin-top:8px;display:grid;gap:5px}
+.op-line{font-size:13px;padding:6px 9px;background:#0e1914;border-radius:8px;border-left:3px solid #3c594b;color:#dcebe3}
+.op-line b{font-weight:800;color:var(--ink)}
+.op-line.debt-line{background:#291316;color:#ff9e9e;border-left-color:var(--red)}
+.op-line.debt-line b{color:#ffc2c2}
+.op-line.ret-line{background:#102236;color:#9ccaff;border-left-color:var(--blue)}
+.op-line.ret-line b{color:#cce4ff}
+.op-line.brew-line{background:#0f261b;color:#82e6b8;border-left-color:var(--green)}
+.op-line.brew-line b{color:#b8f5d8}
+.op-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.price-input{font-variant-numeric:tabular-nums}
+.quick-pay-btns{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.quick-pay-btns button{padding:7px 11px;font-size:13px;background:#172720;color:#cfe4da;border-radius:9px;font-weight:650;border:1px solid #294237}
+.quick-pay-btns button:hover{background:#1e332a}
+
+/* Кнопки выбора способа оплаты во всплывающем окне */
+.pay-methods-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.pay-method-btn{padding:11px 8px;border:2px solid var(--line);background:#0e1914;color:var(--muted);border-radius:12px;font-weight:750;font-size:13px;text-align:center}
+.pay-method-btn:hover{color:var(--ink);border-color:#345445}
+.pay-method-btn.active{border-color:var(--green);background:var(--green-soft);color:#6be0a9}
+.pay-method-btn.active.debt-mode{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+
+/* Кнопка входа по отпечатку (WebAuthn) */
+.bio-btn{width:100%;margin-top:10px;background:linear-gradient(135deg,#143828 0%,#1c4a35 100%);color:#78ebb5;font-weight:750;border:1px solid #2b694d;box-shadow:0 4px 14px rgba(20,92,58,0.28);display:flex;align-items:center;justify-content:center;gap:8px}
+.bio-btn:hover{background:linear-gradient(135deg,#184431 0%,#225940 100%);color:#9cf5cb}
+
+/* Модальное окно */
+.modal-backdrop{position:fixed;inset:0;background:rgba(4,9,7,0.78);backdrop-filter:blur(3px);z-index:20;display:flex;align-items:flex-end;justify-content:center;padding:10px}
+@media(min-width:600px){.modal-backdrop{align-items:center}}
+.modal-box{background:var(--card);color:var(--ink);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:18px;padding:16px;box-shadow:0 18px 45px rgba(0,0,0,0.65);border:1px solid var(--line);border-top:4px solid var(--green)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:10px}
+
+#printArea{display:none}
+@media print{
+ @page{margin:3mm;size:auto}
+ body{background:#fff!important;color:#000!important;font:12px Arial,sans-serif!important}
+ body>*:not(#printArea){display:none!important}
+ #printArea{display:block!important;width:52mm;margin:0 auto;padding:0;color:#000}
+ #printArea.wide{width:72mm}
+ #printArea h2{font-size:16px;text-align:center;margin:0 0 5px}
+ #printArea .center{text-align:center}
+ #printArea .rule{border-top:1px dashed #000;margin:6px 0}
+ #printArea .line{display:flex;justify-content:space-between;gap:5px;margin:3px 0}
+ #printArea .subline{font-size:11px;padding-left:6px;margin:1px 0 4px}
+ #printArea .big{font-size:15px;font-weight:bold}
+ #printArea .mutedPrint{font-size:10px}
+}
+</style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+<!-- ЭКРАН АВТОРИЗАЦИИ -->
+<div id="authScreen">
+ <div class="auth-card">
+  <div class="auth-logo">🍺 KegControl Cloud</div>
+  <div class="auth-sub">Учёт пивоварни, заявок, кег и расчётов · v1.4</div>
+
+  <div id="loginBox">
+   <label>Логин</label>
+   <input id="loginUser" placeholder="Например, rashid или driver" autocomplete="username">
+   <label>Пароль</label>
+   <input id="loginPass" type="password" placeholder="Введите пароль" autocomplete="current-password">
+   <button class="primary" id="doLoginBtn">Войти в систему</button>
+   <button type="button" class="bio-btn hidden" id="bioLoginBtn">👆 Войти по отпечатку</button>
+   <div id="loginError" class="muted" style="color:var(--red);margin-top:8px;text-align:center"></div>
+
+   <div class="notice info" id="bioAuthHint" style="margin-top:12px">
+    <b>👆 Вход по отпечатку / биометрии:</b> работает через встроенный сканер устройства (Touch ID, Face ID, отпечаток Android / Windows Hello) и привязывается к конкретному аккаунту на этом устройстве. Вход по логину и паролю остаётся основным запасным способом и нужен для первичной привязки отпечатка.
+   </div>
+
+   <div class="notice" style="margin-top:10px">
+    <b>Аккаунты по умолчанию:</b><br>
+    • Владелец (полные права): логин <code>rashid</code>, пароль <code>1234</code><br>
+    • Водитель (без редактирования): логин <code>driver</code>, пароль <code>1111</code><br>
+    <span class="muted">Пароли и новые аккаунты можно изменить в разделе «Настройки».</span>
+   </div>
+
+   <div style="margin-top:12px;border-top:1px solid var(--line);padding-top:10px">
+    <button type="button" class="blue-btn" style="width:100%" id="loginDrivePullBtn">☁️ Загрузить базу из Google Drive перед входом</button>
+    <div class="muted" style="margin-top:5px;text-align:center">Если вы входите с нового телефона, сначала подтяните общую базу из Google Drive.</div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- ОСНОВНОЙ ИНТЕРФЕЙС ПРИЛОЖЕНИЯ -->
+<div id="appShell" class="hidden">
+<header>
+ <div class="hdr-brand">
+  <span class="hdr-title">🍺 KegControl</span>
+  <span id="syncStatusPill" class="sync-pill">Локально</span>
+ </div>
+ <div class="user-chip">
+  <b id="hdrUserName">Рашид</b>
+  <span id="hdrUserRole" class="role-tag">Владелец</span>
+  <button type="button" class="secondary sm-btn" style="padding:4px 7px;font-size:11px;line-height:1" id="syncNowBtn" title="Синхронизировать с Google Drive">🔄</button>
+  <button type="button" class="danger sm-btn" style="padding:4px 7px;font-size:11px;line-height:1" id="logoutBtn" title="Выйти">Выход</button>
+ </div>
+</header>
+<main>
+<nav class="tabs" id="tabs">
+<button class="tab active" data-page="home">Обзор</button>
+<button class="tab" data-page="plan">Планировка <span id="planBadge"></span></button>
+<button class="tab" data-page="sale">Продажа / Возврат</button>
+<button class="tab" data-page="debts">Долги <span id="debtBadge"></span></button>
+<button class="tab" data-page="stock">Склад</button>
+<button class="tab" data-page="points">Точки</button>
+<button class="tab" data-page="history">История</button>
+<button class="tab" data-page="settings">Настройки & Облако</button>
+</nav>
+
+<!-- ОБЗОР -->
+<section id="home">
+<div id="homePlanBanner" class="notice alert-banner hidden" onclick="go('plan')"></div>
+
+<div class="grid">
+<div class="metric m-kegs"><small>Всего кег</small><strong id="mTotal">0</strong></div>
+<div class="metric m-wh"><small>На складе</small><strong id="mWarehouse">0</strong></div>
+<div class="metric m-cl"><small>У клиентов</small><strong id="mClients">0</strong></div>
+<div class="metric m-beer"><small>Пиво на складе</small><strong id="mBeer">0 л</strong></div>
+</div>
+<div class="metric debt-metric" style="margin-top:10px;cursor:pointer" onclick="go('debts')">
+<div class="row"><div><small>Общий долг точек</small><strong id="mDebt">0 ₸</strong></div><span class="pill debt">Открыть долги →</span></div>
+</div>
+<div class="card accent-blue"><h2>Тара на складе</h2><div id="homeKegs"></div></div>
+<div class="card accent-teal"><h2>Последние операции</h2><div id="recent" class="empty">Операций пока нет.</div></div>
+<div class="notice" id="roleNotice"></div>
+</section>
+
+<!-- ПЛАНИРОВКА И МАРШРУТЫ ДОСТАВКИ -->
+<section id="plan" class="hidden">
+<div class="card accent-purple">
+ <h2>📅 Новая заявка (план отгрузки)</h2>
+ <div class="twocol">
+  <div>
+   <label>Торговая точка</label>
+   <select id="planPoint"></select>
+  </div>
+  <div>
+   <label>Дата доставки</label>
+   <input type="date" id="planDate">
+  </div>
+ </div>
+ <div class="quick-days" id="quickPlanDays">
+  <button type="button" data-offset="0">Сегодня</button>
+  <button type="button" data-offset="1">Завтра</button>
+  <button type="button" data-weekday="3">Ближ. среда</button>
+  <button type="button" data-weekday="5">Ближ. пятница</button>
+ </div>
+
+ <div class="twocol">
+  <div>
+   <label>Время напоминания (необяз.)</label>
+   <input type="time" id="planTime" value="08:30">
+  </div>
+  <div>
+   <label>Район / маршрут (берётся из точки)</label>
+   <input id="planZoneOverride" placeholder="Например, Верх города">
+  </div>
+ </div>
+
+ <div class="row" style="margin-top:12px">
+  <h3 style="margin:0">Что заказала точка</h3>
+  <button type="button" class="secondary sm-btn" id="addPlanRowBtn">+ Добавить сорт</button>
+ </div>
+ <div id="planRowsContainer" style="margin-top:8px"></div>
+
+ <div class="twocol">
+  <div><label>Забрать пустых 30 л, шт.</label><input id="planRet30" type="number" min="0" step="1" value="0"></div>
+  <div><label>Забрать пустых 50 л, шт.</label><input id="planRet50" type="number" min="0" step="1" value="0"></div>
+ </div>
+ <label>Комментарий к заявке</label>
+ <input id="planNote" placeholder="Например, позвонить за 30 минут, оплата наличными">
+ <button type="button" class="primary" id="savePlanBtn">Сохранить заявку в план</button>
+ <div class="notice info">Заявка не списывает пиво и кеги со склада заранее. Когда водитель или вы поедете на развоз, нажмите <b>«Оформить отгрузку»</b> прямо в карточке заявки — все данные перенесутся в продажу в 1 клик.</div>
+</div>
+
+<div class="card accent-blue">
+ <div class="row">
+  <h2>🚚 Маршрутный лист и заявки</h2>
+  <button type="button" class="blue-btn sm-btn" id="enableNotifBtn" title="Включить системные уведомления браузера">🔔 Напоминания</button>
+ </div>
+
+ <div class="period-btns" id="planFilterBtns">
+  <button type="button" class="period-btn active" data-pfilter="today">Сегодня + просроч.</button>
+  <button type="button" class="period-btn" data-pfilter="tomorrow">Завтра</button>
+  <button type="button" class="period-btn" data-pfilter="upcoming">Все активные</button>
+  <button type="button" class="period-btn" data-pfilter="date">Выбрать дату</button>
+  <button type="button" class="period-btn" data-pfilter="done">Выполненные</button>
+ </div>
+
+ <div id="planPickDateWrap" class="twocol hidden" style="margin-bottom:8px">
+  <div><label style="margin-top:4px">Дата маршрута</label><input type="date" id="planFilterDate"></div>
+  <div>
+   <label style="margin-top:4px">Район / маршрут</label>
+   <select id="planFilterZone"><option value="all">Все районы</option></select>
+  </div>
+ </div>
+
+ <div id="planZoneFilterSingle" style="margin-bottom:8px">
+  <label style="margin-top:4px">Фильтр по району / маршруту</label>
+  <select id="planFilterZoneMain"><option value="all">Все районы</option></select>
+ </div>
+
+ <div class="summary-strip" id="planSummaryStrip"></div>
+ <div id="planListContainer"></div>
+</div>
+</section>
+
+<!-- ПРОДАЖА / ВОЗВРАТ КЕГ -->
+<section id="sale" class="hidden">
+<div class="card"><h2>Отгрузка пива и возврат кег</h2>
+<div id="fromPlanBanner" class="notice info hidden"></div>
+<label>Торговая точка</label><select id="salePoint"></select>
+
+<div class="row" style="margin-top:12px">
+<h3 style="margin:0">Отгрузка пива (необязательно, если только возврат)</h3>
+<button type="button" class="secondary sm-btn" id="addBeerRowBtn">+ Добавить сорт</button>
+</div>
+<div id="beerRowsContainer" style="margin-top:8px"></div>
+
+<div id="saleFinancialBlock">
+<div class="calc">
+<div class="row"><span>Всего кег к отгрузке:</span><b id="saleTotalKegs">0 шт. (30 л: 0, 50 л: 0)</b></div>
+<div class="row" style="margin-top:4px"><span>Общий объём:</span><b id="saleLiters">0 л</b></div>
+<div class="row" style="margin-top:6px;padding-top:6px;border-top:1px solid #224d39"><span>Итого к оплате:</span><strong id="saleAmount">0 ₸</strong></div>
+</div>
+</div>
+
+<h3>Возврат пустых кег с этой точки</h3>
+<div class="twocol">
+<div><label>30-литровые, шт.</label><input id="ret30" type="number" min="0" step="1" value="0"></div>
+<div><label>50-литровые, шт.</label><input id="ret50" type="number" min="0" step="1" value="0"></div>
+</div>
+
+<label>Ширина термочека / квитанции</label><select id="receiptWidth"><option value="58">58 мм</option><option value="80">80 мм</option></select>
+<label>Комментарий / накладная</label><input id="saleNote" placeholder="Необязательно">
+<button class="primary" id="saveSale">Оформить и перейти к оплате →</button>
+<div class="notice info">При нажатии на кнопку откроется <b>окно оплаты</b> (наличные, перевод или в долг). При сохранении PDF имя файла формируется автоматически с названием точки и датой.</div>
+</div></section>
+
+<!-- ДОЛГИ -->
+<section id="debts" class="hidden">
+<div class="card accent-red">
+<h2>Долги торговых точек</h2>
+<div class="metric debt-metric" style="margin-bottom:12px">
+<small>Итого задолженность по всем точкам</small>
+<strong id="totalAllDebts">0 ₸</strong>
+</div>
+<div id="debtsByPointList" class="empty">Долгов нет. Все точки рассчитались!</div>
+</div>
+
+<div class="card accent-amber">
+<h2>Внести оплату долга</h2>
+<label>Торговая точка</label><select id="debtPayPoint"></select>
+<div class="muted" id="debtPointCurrentInfo" style="margin-top:5px"></div>
+<label>Сумма погашения, ₸</label>
+<input id="debtPayAmount" class="price-input" type="number" min="1" step="1" placeholder="Например, 15000">
+<div class="quick-pay-btns">
+<button type="button" id="payAllPointDebtBtn">Закрыть весь долг точки</button>
+</div>
+<label>Комментарий (наличные / перевод)</label><input id="debtPayNote" placeholder="Например, перевод Kaspi">
+<button class="primary" id="saveDebtPayment">Записать погашение долга</button>
+</div>
+
+<div class="card accent-blue">
+<h2>История долгов и погашений</h2>
+<div id="debtHistoryList" class="empty">Записей по долгам пока нет.</div>
+</div>
+</section>
+
+<!-- СКЛАД -->
+<section id="stock" class="hidden">
+<!-- СВАРИТЬ ПИВО ИЗ РЕЦЕПТА -->
+<div class="card accent-amber">
+<h2>🍺 Сварить пиво (из рецепта сырья)</h2>
+<div class="twocol">
+ <div>
+  <label>Сорт пива (существующий или новый)</label>
+  <input id="brewBeerName" list="brewBeerDatalist" placeholder="Например, Светлый лагер">
+  <datalist id="brewBeerDatalist"></datalist>
+ </div>
+ <div>
+  <label>Сварено готового пива, литров</label>
+  <input id="brewOutputLiters" type="number" min="0.1" step="0.1" placeholder="Например, 1000">
+ </div>
+</div>
+
+<div class="row" style="margin-top:12px">
+ <h3 style="margin:0">Рецепт (сырьё на варку)</h3>
+ <button type="button" class="secondary sm-btn" id="addRecipeRowBtn">+ Добавить сырьё</button>
+</div>
+<div id="recipeRowsContainer" style="margin-top:8px"></div>
+
+<label>Комментарий к варке</label>
+<input id="brewNote" placeholder="Номер варки, плотность OG, партия и т.д.">
+<button type="button" class="primary" id="doBrewBtn">Сварить пиво (списать сырьё и добавить литры)</button>
+<div class="notice info">При варке указанное сырьё автоматически списывается со склада, а готовые литры добавляются на остаток выбранного сорта пива (если сорта ещё нет — он создаётся автоматически).</div>
+</div>
+
+<div class="card accent-blue"><h2>Учёт кег по объёму</h2>
+<div class="twocol">
+<div><label>30-литровые на складе, шт.</label><input id="stock30" type="number" min="0" step="1"></div>
+<div><label>50-литровые на складе, шт.</label><input id="stock50" type="number" min="0" step="1"></div>
+</div>
+<button class="secondary" id="setKegs" style="width:100%;margin-top:10px">Сохранить начальный остаток</button>
+<div id="kegStockSummary"></div>
+</div>
+
+<div class="card">
+<h2>Пиво на складе и прайс-лист</h2>
+<div class="twocol">
+ <div><label>Название сорта</label><input id="newProduct" placeholder="Например, Немецкое"></div>
+ <div><label>Цена за 1 литр, ₸</label><input id="newProductPrice" class="price-input" type="number" min="0" step="1" placeholder="Например, 660"></div>
+</div>
+<label>Начальный остаток, литров</label>
+<input id="newProductQty" type="number" min="0" step="0.1" placeholder="0">
+<button class="secondary" id="addProduct" style="width:100%;margin-top:9px">Добавить сорт и цену</button>
+<div id="productsList" style="margin-top:8px"></div>
+</div>
+
+<div class="card accent-teal"><h2>Сырьё и материалы</h2><label>Название</label><input id="newRaw" placeholder="Например, солод Pilsner"><div class="twocol"><div><label>Единица</label><select id="rawUnit"><option>кг</option><option>шт.</option><option>л</option><option>уп.</option></select></div><div><label>Начальный остаток</label><input id="newRawQty" type="number" min="0" step="0.01"></div></div><button class="secondary" id="addRaw" style="width:100%;margin-top:9px">Добавить сырьё</button><div id="rawList"></div></div>
+<div class="card accent-purple"><h2>Приход / расход пива и сырья</h2><label>Операция</label><select id="otherType"><option value="beer_in">Приход пива (л)</option><option value="beer_out">Списание пива (л)</option><option value="raw_in">Приход сырья</option><option value="raw_out">Расход сырья</option></select><div id="otherBeer"><label>Сорт</label><select id="otherProduct"></select><label>Литров</label><input id="otherBeerQty" type="number" min="0.1" step="0.1"></div><div id="otherRaw" class="hidden"><label>Сырьё</label><select id="otherRawSelect"></select><label>Количество</label><input id="otherRawQty" type="number" min="0.01" step="0.01"></div><button class="secondary" id="saveOther" style="width:100%;margin-top:10px">Сохранить</button></div>
+</section>
+
+<!-- ТОЧКИ -->
+<section id="points" class="hidden">
+<div class="card accent-purple">
+<h2>Торговые точки</h2>
+<div class="twocol">
+ <div><label>Название новой точки</label><input id="newPoint" placeholder="Например, Бирмикс"></div>
+ <div>
+  <label>Район / маршрут</label>
+  <input id="newPointZone" list="zonesDatalist" placeholder="Например, Верх города">
+  <datalist id="zonesDatalist"></datalist>
+ </div>
+</div>
+<div class="twocol">
+ <div><label>Адрес точки</label><input id="newPointAddr" placeholder="Например, ул. Абая, 45"></div>
+ <div><label>Контакт (телефон / имя)</label><input id="newPointContact" placeholder="Например, +7 777 ... / Артём"></div>
+</div>
+<label>Примечание по точке</label><input id="newPointNote" placeholder="График приёмки, охладитель и т.д.">
+<button class="secondary" id="addPoint" style="width:100%;margin-top:9px">Добавить точку</button>
+<div id="pointsList"></div>
+</div>
+</section>
+
+<!-- ИСТОРИЯ -->
+<section id="history" class="hidden">
+<div class="card accent-teal">
+<div class="row"><h2>История и аналитика продаж</h2><button class="secondary sm-btn" id="exportCsv">Экспорт CSV</button></div>
+
+<div class="period-btns" id="periodBtns">
+ <button type="button" class="period-btn active" data-period="all">Всё время</button>
+ <button type="button" class="period-btn" data-period="week">За неделю</button>
+ <button type="button" class="period-btn" data-period="month">За месяц</button>
+ <button type="button" class="period-btn" data-period="year">За год</button>
+ <button type="button" class="period-btn" data-period="custom">Свой период</button>
+</div>
+
+<div id="customPeriodWrap" class="twocol hidden" style="margin-bottom:8px">
+ <div><label style="margin-top:4px">Дата с</label><input type="date" id="histDateFrom"></div>
+ <div><label style="margin-top:4px">Дата по</label><input type="date" id="histDateTo"></div>
+</div>
+
+<div class="twocol">
+ <div>
+  <label style="margin-top:4px">Тип операций</label>
+  <select id="histTypeFilter">
+   <option value="all">Все операции</option>
+   <option value="sales">Только продажи и возвраты кег</option>
+   <option value="brew">Только варки пива</option>
+   <option value="debt_pay">Только оплаты долгов</option>
+   <option value="stock_other">Приход / списание склада</option>
+  </select>
+ </div>
+ <div>
+  <label style="margin-top:4px">Торговая точка</label>
+  <select id="histPointFilter">
+   <option value="all">Все точки</option>
+  </select>
+ </div>
+</div>
+
+<div class="summary-strip" id="historySummaryStrip"></div>
+
+<div class="card accent-blue" style="background:#0f1b26;margin:12px 0;padding:11px">
+ <h3 style="margin:0 0 6px">Продано товаров (сортов и объёмов) за период</h3>
+ <div id="historyProductBreakdown"></div>
+</div>
+
+<div class="notice" id="historyRoleHint" style="margin-top:6px"></div>
+<div id="historyList" class="empty">История пуста.</div>
+</div>
+</section>
+
+<!-- НАСТРОЙКИ И ОБЛАКО -->
+<section id="settings" class="hidden">
+<div class="card accent-blue">
+<h2>☁️ Синхронизация с Google Drive</h2>
+<p class="muted">База данных автоматически сохраняется в JSON-файл <code>kegcontrol_cloud_db.json</code> на вашем Google Диске и синхронизируется между устройствами владельца и водителя.</p>
+<label>Google OAuth Client ID</label>
+<input id="gdriveClientId" placeholder="Вставьте ваш Client ID (xxxx.apps.googleusercontent.com)">
+<div class="row" style="margin-top:10px">
+ <label style="margin:0;display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink)">
+  <input type="checkbox" id="gdriveAutoSync" style="width:auto"> Автосинхронизация при каждом изменении
+ </label>
+</div>
+<div class="twocol" style="margin-top:10px">
+ <button type="button" class="blue-btn" id="gdriveConnectBtn">Подключить Google Drive</button>
+ <button type="button" class="secondary" id="gdrivePullBtn">Скачать из Drive</button>
+</div>
+<button type="button" class="primary" id="gdrivePushBtn" style="margin-top:8px">Сохранить базу в Google Drive сейчас</button>
+<div id="gdriveInfo" class="muted" style="margin-top:8px">Статус: не подключено.</div>
+<div class="notice info" style="margin-top:10px">
+ <b>Как получить Client ID за 2 минуты:</b><br>
+ 1. Откройте <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a> → создайте проект → включите <b>Google Drive API</b>.<br>
+ 2. В разделе <b>Credentials → Create Credentials → OAuth client ID</b> выберите <i>Web application</i> и добавьте URL вашего приложения в <i>Authorized JavaScript origins</i>.<br>
+ 3. Скопируйте полученный <b>Client ID</b> выше. Один и тот же Google-аккаунт (или общий доступ к файлу) обеспечит мгновенный обмен данными.
+</div>
+</div>
+
+<div class="card accent-purple" id="usersAdminCard">
+<h2>👥 Пользователи и пароли</h2>
+<p class="muted">Управление аккаунтами доступно только владельцу (<b>Рашид</b>). Изменения сохраняются в общую базу и синхронизируются с Google Drive.</p>
+<div id="usersList"></div>
+<h3>Добавить / обновить пользователя</h3>
+<div class="twocol">
+ <div><label>Логин (латиницей)</label><input id="newAccLogin" placeholder="Например, driver2"></div>
+ <div><label>Имя в чеках</label><input id="newAccName" placeholder="Например, Алексей"></div>
+</div>
+<div class="twocol">
+ <div><label>Пароль</label><input id="newAccPass" placeholder="Новый пароль"></div>
+ <div><label>Роль</label><select id="newAccRole"><option value="driver">Водитель (без редактирования)</option><option value="owner">Владелец (полные права)</option></select></div>
+</div>
+<button type="button" class="secondary" id="saveAccBtn" style="width:100%;margin-top:10px">Сохранить пользователя</button>
+</div>
+
+<div class="card accent-teal" id="biometricsCard">
+<h2>👆 Вход по отпечатку (биометрия устройства)</h2>
+<p class="muted">Биометрический ключ привязывается к текущему аккаунту только на этом устройстве и не передаётся в общую базу Google Drive.</p>
+<div id="bioEnvStatus" class="notice info" style="margin-top:8px"></div>
+<button type="button" class="bio-btn" id="bindBioBtn">👆 Привязать отпечаток для текущего аккаунта</button>
+<h3 style="margin-top:14px">Привязанные ключи на этом устройстве</h3>
+<div id="bioKeysList" class="empty">На этом устройстве биометрические ключи ещё не привязаны.</div>
+</div>
+
+<div class="card accent-amber">
+<h2>Локальная резервная копия</h2>
+<button class="secondary" id="backup" style="width:100%">Скачать файл резервной копии (.json)</button>
+<button class="secondary" id="restoreBtn" style="width:100%;margin-top:8px">Загрузить резервную копию из файла</button>
+<input id="restoreFile" type="file" accept="application/json" class="hidden">
+<button class="danger" id="reset" style="width:100%;margin-top:14px">Очистить локальную базу</button>
+</div>
+</section>
+</main>
+</div>
+
+<!-- ВСПЛЫВАЮЩЕЕ ОКНО ОПЛАТЫ ПРИ ПРОДАЖЕ -->
+<div id="paymentModal" class="modal-backdrop hidden">
+ <div class="modal-box">
+  <div class="modal-head">
+   <h2 style="margin:0">💳 Оплата по отгрузке</h2>
+   <button type="button" class="secondary sm-btn" onclick="closePaymentModal()">✕</button>
+  </div>
+  <div id="payModalSummary"></div>
+
+  <label style="margin-top:12px">Способ оплаты</label>
+  <div class="pay-methods-grid" id="payMethodBtns">
+   <button type="button" class="pay-method-btn active" data-method="cash">💵 Наличные</button>
+   <button type="button" class="pay-method-btn" data-method="transfer">📲 Перевод</button>
+   <button type="button" class="pay-method-btn" data-method="debt">📝 В долг</button>
+  </div>
+
+  <div id="payAmountInputWrap">
+   <label>Оплачено сейчас, ₸</label>
+   <input id="modalPaidInput" class="price-input" type="number" min="0" step="1" style="font-size:18px;font-weight:700">
+   <div class="quick-pay-btns">
+    <button type="button" id="modalPayFullBtn">100% (вся сумма)</button>
+    <button type="button" id="modalPayHalfBtn">50%</button>
+    <button type="button" id="modalPayZeroBtn">0 ₸ (в долг)</button>
+   </div>
+  </div>
+
+  <div class="calc debt-box" id="modalDebtBox" style="margin-top:12px">
+   <div class="row"><span>Остаток в долг по чеку:</span><strong id="modalDebtVal">0 ₸</strong></div>
+   <div class="muted" id="modalDebtHint" style="margin-top:4px"></div>
+  </div>
+
+  <button type="button" class="primary" id="confirmSalePaymentBtn">Подтвердить и провести продажу</button>
+ </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ (ОПЕРАЦИИ / ТОЧКИ / ЗАЯВКИ / ЦЕНЫ) -->
+<div id="editModal" class="modal-backdrop hidden">
+ <div class="modal-box">
+  <div class="modal-head">
+   <h2 style="margin:0" id="editModalTitle">Редактирование</h2>
+   <button type="button" class="secondary sm-btn" onclick="closeEditModal()">✕</button>
+  </div>
+  <div id="editModalBody"></div>
+ </div>
+</div>
+
+<div id="printArea"></div>
+<footer>KegControl 1.4 Cloud · комфортный дизайн и имя PDF-чека по точке и дате</footer>
+
+<script>
+const $=id=>document.getElementById(id);
+const KEY='kegcontrol_cloud_v1';
+const LEGACY_KEY='kegcontrol_v2';
+const CFG_KEY='kegcontrol_gdrive_cfg';
+const SESSION_KEY='kegcontrol_session';
+const BIO_KEY='kegcontrol_biometrics_v1';
+
+const DEFAULT_USERS=[
+ {login:'rashid',pass:'1234',name:'Рашид',role:'owner'},
+ {login:'driver',pass:'1111',name:'Водитель',role:'driver'}
+];
+
+function createEmptyDb(){
+ return {
+  updatedAt:new Date().toISOString(),
+  kegs:{30:0,50:0},
+  points:[{name:'Бирмикс',zone:'',address:'',contact:'',note:''}],
+  products:[],
+  raw:[],
+  ops:[],
+  plans:[],
+  pointKegs:{},
+  pointDebts:{},
+  users:JSON.parse(JSON.stringify(DEFAULT_USERS))
+ };
+}
+
+function normalizePointsList(rawPoints){
+ if(!Array.isArray(rawPoints) || !rawPoints.length) return [{name:'Бирмикс',zone:'',address:'',contact:'',note:''}];
+ return rawPoints.map(p=>{
+  if(typeof p==='string') return {name:p,zone:'',address:'',contact:'',note:''};
+  return {
+   name:String(p?.name||'').trim(),
+   zone:String(p?.zone||'').trim(),
+   address:String(p?.address||'').trim(),
+   contact:String(p?.contact||'').trim(),
+   note:String(p?.note||'').trim()
+  };
+ }).filter(p=>p.name);
+}
+
+function normalizeProductsList(rawProducts){
+ if(!Array.isArray(rawProducts)) return [];
+ return rawProducts.map(p=>({
+  name:String(p?.name||'').trim(),
+  qty:Number(p?.qty||0),
+  price:Math.max(0,Number(p?.price||0))
+ })).filter(p=>p.name);
+}
+
+let db=(()=>{
+ const cur=JSON.parse(localStorage.getItem(KEY)||'null');
+ if(cur && cur.kegs) return cur;
+ const leg=JSON.parse(localStorage.getItem(LEGACY_KEY)||'null');
+ if(leg && leg.kegs){
+  return {
+   updatedAt:new Date().toISOString(),
+   kegs:leg.kegs||{30:0,50:0},
+   points:normalizePointsList(leg.points),
+   products:normalizeProductsList(leg.products),
+   raw:leg.raw||[],
+   ops:leg.ops||[],
+   plans:[],
+   pointKegs:leg.pointKegs||{},
+   pointDebts:leg.pointDebts||{},
+   users:JSON.parse(JSON.stringify(DEFAULT_USERS))
+  };
+ }
+ return createEmptyDb();
+})();
+
+db.points=normalizePointsList(db.points);
+db.products=normalizeProductsList(db.products);
+if(!db.pointDebts) db.pointDebts={};
+if(!db.pointKegs) db.pointKegs={};
+if(!Array.isArray(db.plans)) db.plans=[];
+if(!Array.isArray(db.users)||!db.users.length) db.users=JSON.parse(JSON.stringify(DEFAULT_USERS));
+
+function getProductPrice(name){
+ const p=db.products.find(x=>x.name===name);
+ return p?Math.max(0,Number(p.price||0)):0;
+}
+function getPointNames(){return db.points.map(p=>p.name)}
+function getPointObj(name){return db.points.find(p=>p.name===name)||{name,zone:'',address:'',contact:'',note:''}}
+function getAllZones(){
+ const set=new Set();
+ db.points.forEach(p=>{if(p.zone) set.add(p.zone)});
+ db.plans.forEach(pl=>{if(pl.zone) set.add(pl.zone)});
+ return Array.from(set).sort((a,b)=>a.localeCompare(b,'ru'));
+}
+
+let gdriveCfg=JSON.parse(localStorage.getItem(CFG_KEY)||'null')||{clientId:'',autoSync:true,fileId:'',lastSync:''};
+let currentUser=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');
+let gdriveToken=null;
+let tokenClient=null;
+
+function isOwner(){return currentUser && currentUser.role==='owner'}
+function getPointDebt(point){return Math.max(0, Number(db.pointDebts[point]||0))}
+function getTotalDebt(){return Object.values(db.pointDebts).reduce((s,v)=>s+Math.max(0,Number(v||0)),0)}
+
+/* ====== WEBAUTHN БИОМЕТРИЯ (ОТПЕЧАТОК / TOUCH ID / FACE ID / WINDOWS HELLO) ====== */
+let bioCredentials=loadBioCredentials();
+
+function loadBioCredentials(){
+ try{
+  const raw=JSON.parse(localStorage.getItem(BIO_KEY)||'[]');
+  return Array.isArray(raw)?raw:[];
+ }catch{
+  return [];
+ }
+}
+
+function saveBioCredentials(){
+ localStorage.setItem(BIO_KEY,JSON.stringify(bioCredentials));
+}
+
+function bufToBase64Url(buf){
+ const bytes=new Uint8Array(buf);
+ let bin='';
+ for(let i=0;i<bytes.length;i++) bin+=String.fromCharCode(bytes[i]);
+ return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+function base64UrlToBuf(b64url){
+ const b64=String(b64url||'').replace(/-/g,'+').replace(/_/g,'/');
+ const pad='='.repeat((4-b64.length%4)%4);
+ const bin=atob(b64+pad);
+ const bytes=new Uint8Array(bin.length);
+ for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+ return bytes.buffer;
+}
+
+function randomChallenge(len=32){
+ const arr=new Uint8Array(len);
+ crypto.getRandomValues(arr);
+ return arr.buffer;
+}
+
+function checkWebAuthnAvailability(){
+ const hasCreds=typeof window.PublicKeyCredential!=='undefined' && navigator.credentials && typeof navigator.credentials.create==='function' && typeof navigator.credentials.get==='function';
+ const isLocalhost=['localhost','127.0.0.1','[::1]'].includes(window.location.hostname);
+ const isSecure=window.isSecureContext || isLocalhost;
+ if(!hasCreds){
+  return {ok:false,reason:'Этот браузер не поддерживает WebAuthn (PublicKeyCredential / navigator.credentials). Используйте вход по логину и паролю.'};
+ }
+ if(!isSecure){
+  return {ok:false,reason:`Биометрия (WebAuthn) блокируется при открытии по протоколу ${window.location.protocol || 'незащищённому адресу'}. Откройте приложение по https:// или localhost, либо используйте вход по логину и паролю.`};
+ }
+ return {ok:true,reason:'Сканер устройства (Touch ID / Face ID / отпечаток / Windows Hello) доступен.'};
+}
+
+function describeBioError(err,action='проверке биометрии'){
+ const msg=String(err?.message||'');
+ if(err?.name==='NotAllowedError'){
+  return `Запрос биометрии отклонён или время ожидания истекло при ${action}. Попробуйте снова и подтвердите отпечаток / сканирование.`;
+ }
+ if(err?.name==='InvalidStateError'){
+  return 'Этот биометрический ключ уже зарегистрирован на данном устройстве.';
+ }
+ if(err?.name==='NotSupportedError'){
+  return 'Устройство или браузер не поддерживает этот тип биометрического ключа в текущем контексте.';
+ }
+ if(err?.name==='SecurityError'){
+  return `Ограничение безопасности браузера (часто возникает при открытии через file:// или без https://). Для биометрии нужен https:// или localhost. (${msg})`;
+ }
+ return `Не удалось выполнить биометрию при ${action}: ${msg || err?.name || 'неизвестная ошибка'}.`;
+}
+
+function getValidBioCredentials(){
+ const userLogins=new Set((db.users||[]).map(u=>String(u.login||'').toLowerCase()));
+ return bioCredentials.filter(k=>k && k.credentialId && userLogins.has(String(k.userLogin||'').toLowerCase()));
+}
+
+function renderBiometricsUI(){
+ const avail=checkWebAuthnAvailability();
+ const validKeys=getValidBioCredentials();
+
+ const bioLoginBtn=$('bioLoginBtn');
+ if(bioLoginBtn){
+  bioLoginBtn.classList.toggle('hidden',!(avail.ok && validKeys.length>0));
+ }
+
+ const envBox=$('bioEnvStatus');
+ if(envBox){
+  envBox.className=avail.ok?'notice info':'notice';
+  envBox.innerHTML=`<b>Состояние WebAuthn:</b> ${esc(avail.reason)}`;
+ }
+
+ const bindBtn=$('bindBioBtn');
+ if(bindBtn){
+  bindBtn.disabled=!avail.ok || !currentUser;
+  bindBtn.style.opacity=(!avail.ok || !currentUser)?'0.55':'1';
+ }
+
+ const listEl=$('bioKeysList');
+ if(!listEl) return;
+ if(!validKeys.length){
+  listEl.className='empty';
+  listEl.textContent='На этом устройстве биометрические ключи ещё не привязаны.';
+  return;
+ }
+ listEl.className='';
+ listEl.innerHTML=validKeys.map(k=>{
+  const userObj=db.users.find(u=>u.login.toLowerCase()===String(k.userLogin||'').toLowerCase());
+  const displayName=userObj?userObj.name:k.userName||k.userLogin;
+  const createdStr=k.createdAt?new Date(k.createdAt).toLocaleString('ru-RU'):'—';
+  return `<div class="item row">
+   <div>
+    <b>${esc(displayName)}</b> <span class="muted">(${esc(k.userLogin)})</span>
+    <div class="muted">Привязан: ${esc(createdStr)} · ID: <code>${esc(String(k.credentialId).slice(0,12))}…</code></div>
+   </div>
+   <button type="button" class="danger sm-btn" onclick="deleteBioCredential('${esc(k.credentialId)}')">Удалить</button>
+  </div>`;
+ }).join('');
+}
+
+window.deleteBioCredential=credId=>{
+ if(!confirm('Удалить этот биометрический ключ с текущего устройства? Вход по паролю сохранится.')) return;
+ bioCredentials=bioCredentials.filter(k=>k.credentialId!==credId);
+ saveBioCredentials();
+ renderBiometricsUI();
+};
+
+async function bindBiometricForCurrentUser(){
+ if(!currentUser){
+  return alert('Сначала войдите в свой аккаунт по логину и паролю.');
+ }
+ const avail=checkWebAuthnAvailability();
+ if(!avail.ok){
+  return alert(avail.reason);
+ }
+ try{
+  const rpId=window.location.hostname || 'localhost';
+  const userIdBytes=new TextEncoder().encode(`${currentUser.login}:${Date.now()}`);
+  const pubKey={
+   challenge:randomChallenge(32),
+   rp:{name:'KegControl 1.4 Cloud',id:rpId},
+   user:{
+    id:userIdBytes,
+    name:currentUser.login,
+    displayName:`${currentUser.name} (${currentUser.login})`
+   },
+   pubKeyCredParams:[
+    {type:'public-key',alg:-7},
+    {type:'public-key',alg:-257}
+   ],
+   authenticatorSelection:{
+    authenticatorAttachment:'platform',
+    userVerification:'required',
+    residentKey:'preferred'
+   },
+   timeout:60000,
+   attestation:'none'
+  };
+
+  let cred=await navigator.credentials.create({publicKey:pubKey});
+  if(!cred){
+   // Повторная попытка без ограничения platform на случай внешнего ключа/сканера
+   const fallbackPubKey={...pubKey,authenticatorSelection:{userVerification:'required'}};
+   cred=await navigator.credentials.create({publicKey:fallbackPubKey});
+  }
+  if(!cred) return alert('Создание биометрического ключа не завершено.');
+
+  const credentialId=bufToBase64Url(cred.rawId);
+  bioCredentials=bioCredentials.filter(k=>k.credentialId!==credentialId);
+  bioCredentials.unshift({
+   credentialId,
+   userLogin:currentUser.login,
+   userName:currentUser.name,
+   createdAt:new Date().toISOString()
+  });
+  saveBioCredentials();
+  renderBiometricsUI();
+  alert(`Отпечаток / биометрия привязаны к аккаунту «${currentUser.name}» на этом устройстве.`);
+ }catch(err){
+  alert(describeBioError(err,'привязке отпечатка'));
+ }
+}
+
+async function loginWithBiometrics(){
+ $('loginError').textContent='';
+ const avail=checkWebAuthnAvailability();
+ if(!avail.ok){
+  $('loginError').textContent=avail.reason;
+  return;
+ }
+ const validKeys=getValidBioCredentials();
+ if(!validKeys.length){
+  $('loginError').textContent='На этом устройстве нет привязанных отпечатков. Войдите по логину и паролю и привяжите отпечаток в разделе «Настройки & Облако».';
+  renderBiometricsUI();
+  return;
+ }
+ try{
+  const rpId=window.location.hostname || 'localhost';
+  const allowCredentials=validKeys.map(k=>({
+   type:'public-key',
+   id:base64UrlToBuf(k.credentialId)
+  }));
+
+  const assertion=await navigator.credentials.get({
+   publicKey:{
+    challenge:randomChallenge(32),
+    rpId,
+    allowCredentials,
+    userVerification:'required',
+    timeout:60000
+   }
+  });
+  if(!assertion) return;
+
+  const matchedId=bufToBase64Url(assertion.rawId);
+  const record=validKeys.find(k=>k.credentialId===matchedId);
+  if(!record){
+   $('loginError').textContent='Ключ не распознан на этом устройстве. Войдите по логину и паролю.';
+   return;
+  }
+
+  const foundUser=db.users.find(u=>u.login.toLowerCase()===String(record.userLogin||'').toLowerCase());
+  if(!foundUser){
+   bioCredentials=bioCredentials.filter(k=>k.credentialId!==matchedId);
+   saveBioCredentials();
+   renderBiometricsUI();
+   $('loginError').textContent='Привязанный пользователь больше не найден в базе. Войдите по логину и паролю.';
+   return;
+  }
+
+  currentUser={login:foundUser.login,name:foundUser.name,role:foundUser.role};
+  sessionStorage.setItem(SESSION_KEY,JSON.stringify(currentUser));
+  applyAuthUI();
+ }catch(err){
+  $('loginError').textContent=describeBioError(err,'входе по отпечатку');
+ }
+}
+
+if($('bioLoginBtn')) $('bioLoginBtn').onclick=loginWithBiometrics;
+if($('bindBioBtn')) $('bindBioBtn').onclick=bindBiometricForCurrentUser;
+
+function setSyncBadge(text,cls=''){
+ const el=$('syncStatusPill');
+ if(!el) return;
+ el.textContent=text;
+ el.className='sync-pill'+(cls?' '+cls:'');
+}
+
+function save(triggerCloud=true){
+ db.updatedAt=new Date().toISOString();
+ localStorage.setItem(KEY,JSON.stringify(db));
+ render();
+ if(triggerCloud && gdriveCfg.autoSync && gdriveToken){
+  pushToGoogleDrive(true);
+ }
+}
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fmt(n){return Number(n||0).toLocaleString('ru-RU')}
+
+function localDateStr(d=new Date()){
+ const y=d.getFullYear();
+ const m=String(d.getMonth()+1).padStart(2,'0');
+ const day=String(d.getDate()).padStart(2,'0');
+ return `${y}-${m}-${day}`;
+}
+
+function formatRuDate(ymd){
+ if(!ymd) return '';
+ const [y,m,d]=ymd.split('-').map(Number);
+ const dt=new Date(y,m-1,d);
+ const days=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+ return `${String(d).padStart(2,'0')}.${String(m).padStart(2,'0')}.${y} (${days[dt.getDay()]})`;
+}
+
+/* ====== АВТОРИЗАЦИЯ ====== */
+function applyAuthUI(){
+ if(!currentUser){
+  $('authScreen').classList.remove('hidden');
+  $('appShell').classList.add('hidden');
+  renderBiometricsUI();
+  return;
+ }
+ $('authScreen').classList.add('hidden');
+ $('appShell').classList.remove('hidden');
+ $('hdrUserName').textContent=currentUser.name;
+ $('hdrUserRole').textContent=isOwner()?'Владелец':'Водитель';
+ $('hdrUserRole').className='role-tag'+(isOwner()?'':' driver');
+ $('usersAdminCard').classList.toggle('hidden',!isOwner());
+ render();
+ checkPlanReminders();
+}
+
+$('doLoginBtn').onclick=()=>{
+ const login=$('loginUser').value.trim().toLowerCase();
+ const pass=$('loginPass').value;
+ const found=db.users.find(u=>u.login.toLowerCase()===login && u.pass===pass);
+ if(!found){
+  $('loginError').textContent='Неверный логин или пароль.';
+  return;
+ }
+ $('loginError').textContent='';
+ $('loginPass').value='';
+ currentUser={login:found.login,name:found.name,role:found.role};
+ sessionStorage.setItem(SESSION_KEY,JSON.stringify(currentUser));
+ applyAuthUI();
+};
+
+$('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')$('doLoginBtn').click()});
+
+$('logoutBtn').onclick=()=>{
+ currentUser=null;
+ sessionStorage.removeItem(SESSION_KEY);
+ applyAuthUI();
+};
+
+/* ====== GOOGLE DRIVE СИНХРОНИЗАЦИЯ ====== */
+const DRIVE_FILENAME='kegcontrol_cloud_db.json';
+const DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file';
+
+function saveDriveCfg(){
+ localStorage.setItem(CFG_KEY,JSON.stringify(gdriveCfg));
+}
+
+function ensureTokenClient(callback){
+ const cid=($('gdriveClientId')?.value||gdriveCfg.clientId||'').trim();
+ if(!cid){
+  alert('Сначала укажите Google OAuth Client ID в разделе «Настройки & Облако».');
+  return null;
+ }
+ gdriveCfg.clientId=cid;
+ saveDriveCfg();
+ if(!window.google || !google.accounts || !google.accounts.oauth2){
+  alert('Библиотека Google Identity Services ещё не загрузилась. Проверьте подключение к интернету.');
+  return null;
+ }
+ tokenClient=google.accounts.oauth2.initTokenClient({
+  client_id:cid,
+  scope:DRIVE_SCOPE,
+  callback:resp=>{
+   if(resp.error){
+    setSyncBadge('Ошибка Drive','err');
+    alert('Ошибка авторизации Google: '+resp.error);
+    return;
+   }
+   gdriveToken=resp.access_token;
+   if(callback) callback(gdriveToken);
+  }
+ });
+ return tokenClient;
+}
+
+async function findDriveFileId(token){
+ if(gdriveCfg.fileId){
+  const check=await fetch(`https://www.googleapis.com/drive/v3/files/${gdriveCfg.fileId}?fields=id,trashed`,{
+   headers:{Authorization:'Bearer '+token}
+  });
+  if(check.ok){
+   const meta=await check.json();
+   if(!meta.trashed) return gdriveCfg.fileId;
+  }
+ }
+ const q=encodeURIComponent(`name='${DRIVE_FILENAME}' and trashed=false`);
+ const res=await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name,modifiedTime)`,{
+  headers:{Authorization:'Bearer '+token}
+ });
+ if(!res.ok) throw new Error('Не удалось выполнить поиск файла в Google Drive');
+ const data=await res.json();
+ if(data.files && data.files.length){
+  gdriveCfg.fileId=data.files[0].id;
+  saveDriveCfg();
+  return gdriveCfg.fileId;
+ }
+ return null;
+}
+
+async function pullFromGoogleDrive(silent=false){
+ const run=async token=>{
+  try{
+   setSyncBadge('Загрузка...','busy');
+   const fileId=await findDriveFileId(token);
+   if(!fileId){
+    setSyncBadge('Drive: новый','');
+    if(!silent) alert('Файл базы в Google Drive ещё не создан. Нажмите «Сохранить базу в Google Drive сейчас», чтобы создать его.');
+    return;
+   }
+   const res=await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,{
+    headers:{Authorization:'Bearer '+token}
+   });
+   if(!res.ok) throw new Error('Ошибка чтения файла из Google Drive');
+   const remoteDb=await res.json();
+   if(!remoteDb || !remoteDb.kegs) throw new Error('Некорректный формат базы в Google Drive');
+
+   remoteDb.points=normalizePointsList(remoteDb.points);
+   remoteDb.products=normalizeProductsList(remoteDb.products);
+   if(!remoteDb.pointDebts) remoteDb.pointDebts={};
+   if(!remoteDb.pointKegs) remoteDb.pointKegs={};
+   if(!Array.isArray(remoteDb.plans)) remoteDb.plans=[];
+   if(!Array.isArray(remoteDb.users)||!remoteDb.users.length) remoteDb.users=JSON.parse(JSON.stringify(DEFAULT_USERS));
+
+   db=remoteDb;
+   localStorage.setItem(KEY,JSON.stringify(db));
+   gdriveCfg.lastSync=new Date().toLocaleString('ru-RU');
+   saveDriveCfg();
+   setSyncBadge('Drive OK','');
+   render();
+   if(!silent) alert('База данных успешно загружена из Google Drive!');
+  }catch(err){
+   setSyncBadge('Ошибка Drive','err');
+   if(!silent) alert('Ошибка синхронизации: '+err.message);
+  }
+ };
+
+ if(gdriveToken) return run(gdriveToken);
+ const tc=ensureTokenClient(run);
+ if(tc) tc.requestAccessToken({prompt:silent?'':'consent'});
+}
+
+async function pushToGoogleDrive(silent=false){
+ const run=async token=>{
+  try{
+   setSyncBadge('Сохранение...','busy');
+   let fileId=await findDriveFileId(token);
+   const content=JSON.stringify(db,null,2);
+   const metadata={name:DRIVE_FILENAME,mimeType:'application/json'};
+
+   const boundary='-------314159265358979323846';
+   const delimiter='\r\n--'+boundary+'\r\n';
+   const closeDelim='\r\n--'+boundary+'--';
+   const body=delimiter+
+    'Content-Type: application/json; charset=UTF-8\r\n\r\n'+
+    JSON.stringify(metadata)+
+    delimiter+
+    'Content-Type: application/json\r\n\r\n'+
+    content+
+    closeDelim;
+
+   const url=fileId
+    ? `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`
+    : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`;
+   const method=fileId?'PATCH':'POST';
+
+   const res=await fetch(url,{
+    method,
+    headers:{
+     Authorization:'Bearer '+token,
+     'Content-Type':'multipart/related; boundary="'+boundary+'"'
+    },
+    body
+   });
+   if(!res.ok) throw new Error('Не удалось записать файл в Google Drive');
+   const savedMeta=await res.json();
+   if(savedMeta.id){
+    gdriveCfg.fileId=savedMeta.id;
+   }
+   gdriveCfg.lastSync=new Date().toLocaleString('ru-RU');
+   saveDriveCfg();
+   setSyncBadge('Drive OK','');
+   renderDriveStatus();
+   if(!silent) alert('База данных успешно сохранена в Google Drive!');
+  }catch(err){
+   setSyncBadge('Ошибка Drive','err');
+   if(!silent) alert('Ошибка сохранения в Drive: '+err.message);
+  }
+ };
+
+ if(gdriveToken) return run(gdriveToken);
+ const tc=ensureTokenClient(run);
+ if(tc) tc.requestAccessToken({prompt:silent?'':'consent'});
+}
+
+function renderDriveStatus(){
+ if($('gdriveClientId')) $('gdriveClientId').value=gdriveCfg.clientId||'';
+ if($('gdriveAutoSync')) $('gdriveAutoSync').checked=!!gdriveCfg.autoSync;
+ if($('gdriveInfo')){
+  $('gdriveInfo').innerHTML=gdriveToken
+   ? `Статус: <b style="color:#5ce0a3">подключено</b> · Последняя синхронизация: <b>${esc(gdriveCfg.lastSync||'только что')}</b>`
+   : `Статус: <b>ожидает подключения</b>${gdriveCfg.lastSync?` · Последняя синхронизация: ${esc(gdriveCfg.lastSync)}`:''}`;
+ }
+}
+
+$('gdriveConnectBtn').onclick=()=>{
+ const tc=ensureTokenClient(async token=>{
+  setSyncBadge('Drive OK','');
+  renderDriveStatus();
+  await pullFromGoogleDrive(false);
+ });
+ if(tc) tc.requestAccessToken({prompt:'consent'});
+};
+$('gdrivePullBtn').onclick=()=>pullFromGoogleDrive(false);
+$('gdrivePushBtn').onclick=()=>pushToGoogleDrive(false);
+$('syncNowBtn').onclick=()=>pullFromGoogleDrive(false);
+$('loginDrivePullBtn').onclick=()=>{
+ if(!gdriveCfg.clientId){
+  const cid=prompt('Введите Google OAuth Client ID для подключения к общей базе:');
+  if(!cid) return;
+  gdriveCfg.clientId=cid.trim();
+  saveDriveCfg();
+ }
+ pullFromGoogleDrive(false);
+};
+$('gdriveAutoSync').onchange=()=>{
+ gdriveCfg.autoSync=$('gdriveAutoSync').checked;
+ saveDriveCfg();
+};
+$('gdriveClientId').onchange=()=>{
+ gdriveCfg.clientId=$('gdriveClientId').value.trim();
+ saveDriveCfg();
+};
+
+/* ====== НАВИГАЦИЯ ====== */
+function go(p){
+ document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));
+ $(p).classList.remove('hidden');
+ document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.page===p));
+ render();
+}
+$('tabs').onclick=e=>{let b=e.target.closest('[data-page]');if(b)go(b.dataset.page)};
+
+function totalClient(size){return Object.values(db.pointKegs).reduce((s,v)=>s+(v[size]||0),0)}
+function totalKegs(size){return (db.kegs[size]||0)+totalClient(size)}
+function addOp(type,desc,qty,user,note,extra={}){
+ db.ops.unshift({id:'KC-'+Date.now(),date:new Date().toISOString(),type,desc,qty,user,note:note||'',...extra});
+}
+function fillSelect(id,arr,placeholder='Выберите…'){
+ const el=$(id); if(!el)return;
+ const prev=el.value;
+ el.innerHTML=`<option value="">${placeholder}</option>`+arr.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+ if(arr.includes(prev)) el.value=prev;
+}
+
+/* ====== РЕДАКТИРОВАНИЕ ЦЕНЫ СОРТА НА СКЛАДЕ ====== */
+window.openEditProductModal=idx=>{
+ const p=db.products[idx];
+ if(!p) return;
+ $('editModal').classList.remove('hidden');
+ $('editModalTitle').textContent=`Сорт пива: ${p.name}`;
+ $('editModalBody').innerHTML=`
+  <label>Название сорта</label>
+  <input id="edProdName" value="${esc(p.name)}">
+  <label>Цена за 1 литр, ₸ (подставляется автоматически при продаже)</label>
+  <input id="edProdPrice" type="number" min="0" step="1" value="${p.price||0}">
+  <div class="muted" style="margin-top:6px">Текущий остаток на складе: <b>${p.qty.toFixed(1)} л</b></div>
+  <button type="button" class="primary" onclick="saveEditedProduct(${idx})">Сохранить цену и название</button>
+ `;
+};
+
+window.saveEditedProduct=idx=>{
+ const p=db.products[idx];
+ if(!p) return;
+ const newName=$('edProdName').value.trim();
+ const newPrice=Math.max(0,Number($('edProdPrice').value)||0);
+ if(!newName) return alert('Укажите название сорта.');
+ if(newName!==p.name && db.products.some((x,i)=>i!==idx && x.name.toLowerCase()===newName.toLowerCase())){
+  return alert('Сорт с таким названием уже существует.');
+ }
+ p.name=newName;
+ p.price=newPrice;
+ closeEditModal();
+ save();
+};
+
+/* ====== ПЛАНИРОВКА ЗАЯВОК И МАРШРУТОВ ====== */
+let planRows=[{product:'',out30:0,out50:0,liters:0,price:''}];
+let planFilter='today';
+let activePlanFulfillId=null;
+
+(()=>{
+ const tmr=new Date();
+ tmr.setDate(tmr.getDate()+1);
+ if($('planDate')) $('planDate').value=localDateStr(tmr);
+ if($('planFilterDate')) $('planFilterDate').value=localDateStr(new Date());
+})();
+
+$('planPoint').onchange=()=>{
+ const pt=getPointObj($('planPoint').value);
+ $('planZoneOverride').value=pt.zone||'';
+};
+
+$('quickPlanDays').onclick=e=>{
+ const btn=e.target.closest('button');
+ if(!btn) return;
+ const now=new Date();
+ if(btn.dataset.offset!==undefined){
+  const d=new Date(now);
+  d.setDate(d.getDate()+Number(btn.dataset.offset));
+  $('planDate').value=localDateStr(d);
+ }else if(btn.dataset.weekday!==undefined){
+  const target=Number(btn.dataset.weekday);
+  const d=new Date(now);
+  let diff=(target-d.getDay()+7)%7;
+  if(diff===0) diff=7;
+  d.setDate(d.getDate()+diff);
+  $('planDate').value=localDateStr(d);
+ }
+};
+
+function renderPlanRows(){
+ const cont=$('planRowsContainer');
+ if(!cont) return;
+ const prodOpts=`<option value="">Выберите сорт пива…</option>`+db.products.map(p=>`<option value="${esc(p.name)}">${esc(p.name)} (${p.qty.toFixed(1)} л · ${fmt(p.price)} ₸/л)</option>`).join('');
+ cont.innerHTML=planRows.map((r,idx)=>{
+  const calcL=r.out30*30+r.out50*50;
+  return `<div class="beer-row">
+   <div class="beer-row-head">
+    <span class="beer-row-title">Позиция заявки #${idx+1}</span>
+    ${planRows.length>1?`<button type="button" class="remove-row" onclick="removePlanRow(${idx})">Удалить</button>`:''}
+   </div>
+   <select class="pl-prod" data-idx="${idx}">${prodOpts}</select>
+   <div class="threecol" style="margin-top:6px">
+    <div><label style="margin-top:2px">Кег 30 л, шт.</label><input type="number" min="0" step="1" class="pl-30" data-idx="${idx}" value="${r.out30}"></div>
+    <div><label style="margin-top:2px">Кег 50 л, шт.</label><input type="number" min="0" step="1" class="pl-50" data-idx="${idx}" value="${r.out50}"></div>
+    <div><label style="margin-top:2px">Цена/л, ₸</label><input type="number" min="0" step="1" class="pl-pr price-input" data-idx="${idx}" placeholder="Авто" value="${r.price}"></div>
+   </div>
+   <div class="row-subtotal">
+    <span>Объём: <b>${calcL} л</b></span>
+    <span>Ориентир: <b>${fmt(calcL*(Number(r.price)||0))} ₸</b></span>
+   </div>
+  </div>`;
+ }).join('');
+
+ cont.querySelectorAll('.pl-prod').forEach(sel=>{
+  const i=Number(sel.dataset.idx);
+  if(planRows[i].product) sel.value=planRows[i].product;
+  sel.onchange=()=>{
+   planRows[i].product=sel.value;
+   const stockPrice=getProductPrice(sel.value);
+   if(stockPrice>0) planRows[i].price=stockPrice;
+   renderPlanRows();
+  };
+ });
+ cont.querySelectorAll('.pl-30').forEach(inp=>{
+  const i=Number(inp.dataset.idx);
+  inp.oninput=()=>{planRows[i].out30=Math.max(0,Math.floor(Number(inp.value)||0));renderPlanRows()};
+ });
+ cont.querySelectorAll('.pl-50').forEach(inp=>{
+  const i=Number(inp.dataset.idx);
+  inp.oninput=()=>{planRows[i].out50=Math.max(0,Math.floor(Number(inp.value)||0));renderPlanRows()};
+ });
+ cont.querySelectorAll('.pl-pr').forEach(inp=>{
+  const i=Number(inp.dataset.idx);
+  inp.oninput=()=>{planRows[i].price=inp.value;renderPlanRows()};
+ });
+}
+
+window.removePlanRow=idx=>{
+ if(planRows.length<=1) return;
+ planRows.splice(idx,1);
+ renderPlanRows();
+};
+
+$('addPlanRowBtn').onclick=()=>{
+ planRows.push({product:'',out30:0,out50:0,liters:0,price:''});
+ renderPlanRows();
+};
+
+$('savePlanBtn').onclick=()=>{
+ const point=$('planPoint').value;
+ const deliveryDate=$('planDate').value;
+ const reminderTime=$('planTime').value||'';
+ const zoneInput=$('planZoneOverride').value.trim();
+ const ret30=Math.max(0,Math.floor(Number($('planRet30').value)||0));
+ const ret50=Math.max(0,Math.floor(Number($('planRet50').value)||0));
+ const note=$('planNote').value.trim();
+
+ if(!point) return alert('Выберите торговую точку.');
+ if(!deliveryDate) return alert('Укажите дату доставки.');
+
+ const items=[];
+ for(let i=0;i<planRows.length;i++){
+  const r=planRows[i];
+  const liters=r.out30*30+r.out50*50;
+  const price=Math.max(0,Number(r.price)||getProductPrice(r.product)||0);
+  if(!r.product && liters===0) continue;
+  if(!r.product && liters>0) return alert(`В позиции #${i+1} указаны кеги, но не выбран сорт пива.`);
+  if(r.product && liters===0) return alert(`Укажите количество кег 30 л или 50 л для «${r.product}».`);
+  items.push({product:r.product,out30:r.out30,out50:r.out50,liters,price});
+ }
+
+ if(items.length===0 && ret30+ret50===0){
+  return alert('Добавьте хотя бы одну позицию пива или возврат пустых кег.');
+ }
+
+ const ptObj=getPointObj(point);
+ const finalZone=zoneInput || ptObj.zone || '';
+ if(zoneInput && !ptObj.zone){
+  ptObj.zone=zoneInput;
+ }
+
+ db.plans.push({
+  id:'PLN-'+Date.now(),
+  createdAt:new Date().toISOString(),
+  createdBy:currentUser?currentUser.name:'Система',
+  point,
+  zone:finalZone,
+  deliveryDate,
+  reminderTime,
+  items,
+  ret30,
+  ret50,
+  note,
+  status:'pending',
+  notified:false
+ });
+
+ planRows=[{product:'',out30:0,out50:0,liters:0,price:''}];
+ $('planRet30').value=0;
+ $('planRet50').value=0;
+ $('planNote').value='';
+ save();
+ alert(`Заявка для «${point}» на ${formatRuDate(deliveryDate)} сохранена!`);
+};
+
+$('planFilterBtns').onclick=e=>{
+ const btn=e.target.closest('.period-btn');
+ if(!btn) return;
+ planFilter=btn.dataset.pfilter;
+ document.querySelectorAll('#planFilterBtns .period-btn').forEach(b=>b.classList.toggle('active',b.dataset.pfilter===planFilter));
+ $('planPickDateWrap').classList.toggle('hidden',planFilter!=='date');
+ $('planZoneFilterSingle').classList.toggle('hidden',planFilter==='date');
+ renderPlanSection();
+};
+
+$('planFilterDate').onchange=renderPlanSection;
+$('planFilterZone').onchange=e=>{
+ $('planFilterZoneMain').value=e.target.value;
+ renderPlanSection();
+};
+$('planFilterZoneMain').onchange=e=>{
+ $('planFilterZone').value=e.target.value;
+ renderPlanSection();
+};
+
+function renderPlanSection(){
+ if(!$('planListContainer')) return;
+ const todayStr=localDateStr(new Date());
+ const tmrDate=new Date(); tmrDate.setDate(tmrDate.getDate()+1);
+ const tmrStr=localDateStr(tmrDate);
+
+ const selectedZone=planFilter==='date'?$('planFilterZone').value:$('planFilterZoneMain').value;
+
+ let list=db.plans.filter(pl=>{
+  const ptZone=pl.zone || getPointObj(pl.point).zone || 'Без района';
+  if(selectedZone!=='all' && ptZone!==selectedZone) return false;
+
+  if(planFilter==='done') return pl.status==='done';
+  if(pl.status==='done') return false;
+
+  if(planFilter==='today') return pl.deliveryDate<=todayStr;
+  if(planFilter==='tomorrow') return pl.deliveryDate===tmrStr;
+  if(planFilter==='date'){
+   const target=$('planFilterDate').value;
+   return !target || pl.deliveryDate===target;
+  }
+  return true;
+ });
+
+ list.sort((a,b)=>(a.deliveryDate+(a.reminderTime||'')).localeCompare(b.deliveryDate+(b.reminderTime||'')));
+
+ let need30=0, need50=0, needLiters=0, pickRet30=0, pickRet50=0;
+ const byBeer={};
+ list.forEach(pl=>{
+  pickRet30+=Number(pl.ret30||0);
+  pickRet50+=Number(pl.ret50||0);
+  (pl.items||[]).forEach(it=>{
+   need30+=Number(it.out30||0);
+   need50+=Number(it.out50||0);
+   const l=Number(it.liters||0);
+   needLiters+=l;
+   byBeer[it.product]=(byBeer[it.product]||0)+l;
+  });
+ });
+
+ const beerSummaryText=Object.entries(byBeer).map(([k,v])=>`${k}: ${v} л`).join(', ');
+ $('planSummaryStrip').innerHTML=`
+  <div class="sum-box"><small>Заявок в списке</small><b>${list.length} шт.</b></div>
+  <div class="sum-box"><small>Загрузить в машину</small><b>${need30+need50} кег (${needLiters} л)</b></div>
+  <div class="sum-box"><small>По таре (отгр / забр)</small><b>30л: ${need30}/${pickRet30} · 50л: ${need50}/${pickRet50}</b></div>
+  ${beerSummaryText?`<div class="sum-box" style="grid-column:1/-1"><small>Итого по сортам на погрузку</small><b>${esc(beerSummaryText)}</b></div>`:''}
+ `;
+
+ if(!list.length){
+  $('planListContainer').innerHTML='<div class="empty">По выбранному фильтру заявок нет.</div>';
+  return;
+ }
+
+ const groups={};
+ list.forEach(pl=>{
+  const z=pl.zone || getPointObj(pl.point).zone || 'Без района';
+  if(!groups[z]) groups[z]=[];
+  groups[z].push(pl);
+ });
+
+ $('planListContainer').innerHTML=Object.entries(groups).map(([zoneName,orders])=>{
+  let z30=0,z50=0,zL=0;
+  orders.forEach(o=>(o.items||[]).forEach(it=>{z30+=it.out30||0;z50+=it.out50||0;zL+=it.liters||0}));
+
+  const cardsHtml=orders.map(pl=>{
+   const ptObj=getPointObj(pl.point);
+   const isOver=pl.status!=='done' && pl.deliveryDate<todayStr;
+   const isToday=pl.status!=='done' && pl.deliveryDate===todayStr;
+   const cardCls='order-card'+(pl.status==='done'?' done':(isOver?' overdue':(isToday?' today':'')));
+
+   const itemsLines=(pl.items||[]).map(it=>{
+    const pr=Number(it.price)||getProductPrice(it.product)||0;
+    return `<div>🍺 <b>${esc(it.product)}</b>: 30 л × <b>${it.out30}</b>, 50 л × <b>${it.out50}</b> (<b>${it.liters} л</b>${pr?` × ${fmt(pr)} ₸`:''})</div>`;
+   }).join('');
+   const retLine=(pl.ret30>0 || pl.ret50>0)?`<div class="muted" style="margin-top:3px">🔄 Забрать пустых: 30 л — <b>${pl.ret30}</b> шт., 50 л — <b>${pl.ret50}</b> шт.</div>`:'';
+
+   const statusPill=pl.status==='done'
+    ? `<span class="pill">✓ Выполнена</span>`
+    : (isOver?`<span class="pill plan-over">Просрочено: ${formatRuDate(pl.deliveryDate)}</span>`
+      :(isToday?`<span class="pill plan-due">Сегодня${pl.reminderTime?' в '+pl.reminderTime:''}</span>`
+        :`<span class="pill">${formatRuDate(pl.deliveryDate)}${pl.reminderTime?' · '+pl.reminderTime:''}</span>`));
+
+   return `<div class="${cardCls}">
+    <div class="row">
+     <b>${esc(pl.point)}</b>
+     ${statusPill}
+    </div>
+    ${ptObj.address?`<div class="muted" style="margin-top:3px">📍 ${esc(ptObj.address)}</div>`:''}
+    ${ptObj.contact?`<div class="muted" style="margin-top:2px">📞 ${esc(ptObj.contact)}</div>`:''}
+    <div style="margin-top:6px;font-size:13px">${itemsLines}</div>
+    ${retLine}
+    ${pl.note?`<div class="muted" style="margin-top:4px">💬 ${esc(pl.note)}</div>`:''}
+    <div class="op-actions">
+     ${pl.status!=='done'?`<button type="button" class="primary sm-btn" style="width:auto;margin-top:0" onclick="fulfillPlanOrder('${pl.id}')">🚚 Оформить отгрузку</button>`:''}
+     <button type="button" class="warn sm-btn" onclick="openEditPlanModal('${pl.id}')">✏️ Изменить</button>
+     <button type="button" class="danger sm-btn" onclick="deletePlanOrder('${pl.id}')">Удалить</button>
+    </div>
+   </div>`;
+  }).join('');
+
+  return `<div class="route-group">
+   <div class="route-group-head">
+    <span class="route-group-title">🗺️ ${esc(zoneName)}</span>
+    <span class="muted">Точек: <b>${orders.length}</b> · <b>${z30+z50} кег</b> (${zL} л)</span>
+   </div>
+   ${cardsHtml}
+  </div>`;
+ }).join('');
+}
+
+window.fulfillPlanOrder=id=>{
+ const pl=db.plans.find(x=>x.id===id);
+ if(!pl) return;
+ activePlanFulfillId=id;
+ go('sale');
+ $('salePoint').value=pl.point;
+ if(pl.items && pl.items.length){
+  saleRows=pl.items.map(it=>({
+   product:it.product,
+   out30:Number(it.out30||0),
+   out50:Number(it.out50||0),
+   price:Number(it.price)||getProductPrice(it.product)||''
+  }));
+ }else{
+  saleRows=[{product:'',out30:0,out50:0,price:''}];
+ }
+ $('ret30').value=Number(pl.ret30||0);
+ $('ret50').value=Number(pl.ret50||0);
+ $('saleNote').value=pl.note||'';
+ $('fromPlanBanner').classList.remove('hidden');
+ $('fromPlanBanner').innerHTML=`📋 Заполнено по заявке для <b>${esc(pl.point)}</b> на ${formatRuDate(pl.deliveryDate)}. Нажмите кнопку ниже для выбора способа оплаты. <button type="button" class="secondary sm-btn" style="margin-left:6px" onclick="cancelPlanFulfill()">Отвязать</button>`;
+ renderSaleRows();
+};
+
+window.cancelPlanFulfill=()=>{
+ activePlanFulfillId=null;
+ $('fromPlanBanner').classList.add('hidden');
+};
+
+window.deletePlanOrder=id=>{
+ if(!confirm('Удалить эту заявку из планировки?')) return;
+ const idx=db.plans.findIndex(x=>x.id===id);
+ if(idx!==-1){
+  db.plans.splice(idx,1);
+  save();
+ }
+};
+
+window.openEditPlanModal=id=>{
+ const pl=db.plans.find(x=>x.id===id);
+ if(!pl) return;
+ $('editModal').classList.remove('hidden');
+ $('editModalTitle').textContent=`Редактирование заявки: ${pl.point}`;
+ const ptOpts=getPointNames().map(p=>`<option value="${esc(p)}" ${p===pl.point?'selected':''}>${esc(p)}</option>`).join('');
+ const firstItem=(pl.items&&pl.items[0])||{product:'',out30:0,out50:0,price:''};
+ const prodOpts=`<option value="">Выберите сорт…</option>`+db.products.map(p=>`<option value="${esc(p.name)}" ${p.name===firstItem.product?'selected':''}>${esc(p.name)}</option>`).join('');
+
+ $('editModalBody').innerHTML=`
+  <label>Торговая точка</label>
+  <select id="edPlPoint">${ptOpts}</select>
+  <div class="twocol">
+   <div><label>Дата доставки</label><input type="date" id="edPlDate" value="${pl.deliveryDate}"></div>
+   <div><label>Время напоминания</label><input type="time" id="edPlTime" value="${pl.reminderTime||''}"></div>
+  </div>
+  <label>Район / маршрут</label>
+  <input id="edPlZone" value="${esc(pl.zone||'')}">
+  <label>Основной сорт (или отредактируйте при отгрузке)</label>
+  <select id="edPlProd">${prodOpts}</select>
+  <div class="threecol">
+   <div><label>30 л, шт.</label><input type="number" min="0" step="1" id="edPl30" value="${firstItem.out30||0}"></div>
+   <div><label>50 л, шт.</label><input type="number" min="0" step="1" id="edPl50" value="${firstItem.out50||0}"></div>
+   <div><label>Цена/л, ₸</label><input type="number" min="0" step="1" id="edPlPr" value="${firstItem.price||''}"></div>
+  </div>
+  <div class="twocol">
+   <div><label>Возврат 30 л</label><input type="number" min="0" step="1" id="edPlRet30" value="${pl.ret30||0}"></div>
+   <div><label>Возврат 50 л</label><input type="number" min="0" step="1" id="edPlRet50" value="${pl.ret50||0}"></div>
+  </div>
+  <label>Статус</label>
+  <select id="edPlStatus">
+   <option value="pending" ${pl.status!=='done'?'selected':''}>Запланирована (активна)</option>
+   <option value="done" ${pl.status==='done'?'selected':''}>Выполнена</option>
+  </select>
+  <label>Комментарий</label>
+  <input id="edPlNote" value="${esc(pl.note||'')}">
+  <button type="button" class="primary" onclick="saveEditedPlan('${pl.id}')">Сохранить заявку</button>
+ `;
+};
+
+window.saveEditedPlan=id=>{
+ const pl=db.plans.find(x=>x.id===id);
+ if(!pl) return;
+ pl.point=$('edPlPoint').value;
+ pl.deliveryDate=$('edPlDate').value;
+ pl.reminderTime=$('edPlTime').value;
+ pl.zone=$('edPlZone').value.trim();
+ pl.ret30=Math.max(0,Math.floor(Number($('edPlRet30').value)||0));
+ pl.ret50=Math.max(0,Math.floor(Number($('edPlRet50').value)||0));
+ pl.status=$('edPlStatus').value;
+ pl.note=$('edPlNote').value.trim();
+
+ const prod=$('edPlProd').value;
+ const o30=Math.max(0,Math.floor(Number($('edPl30').value)||0));
+ const o50=Math.max(0,Math.floor(Number($('edPl50').value)||0));
+ const pr=Math.max(0,Number($('edPlPr').value)||getProductPrice(prod)||0);
+ if(prod && (o30+o50>0)){
+  const rest=(pl.items||[]).slice(1);
+  pl.items=[{product:prod,out30:o30,out50:o50,liters:o30*30+o50*50,price:pr},...rest];
+ }
+ closeEditModal();
+ save();
+};
+
+/* ====== НАПОМИНАНИЯ ПО ЗАЯВКАМ ====== */
+$('enableNotifBtn').onclick=async ()=>{
+ if(!('Notification' in window)) return alert('Ваш браузер не поддерживает системные уведомления, но напоминания всегда видны на главном экране «Обзор».');
+ const perm=await Notification.requestPermission();
+ if(perm==='granted'){
+  new Notification('KegControl: напоминания включены',{body:'Вы будете получать уведомления о запланированных доставках.'});
+ }else{
+  alert('Разрешение на уведомления не выдано. Напоминания будут отображаться баннером на вкладке «Обзор».');
+ }
+};
+
+function checkPlanReminders(){
+ if(!currentUser) return;
+ const now=new Date();
+ const todayStr=localDateStr(now);
+ const hhmm=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+
+ let changed=false;
+ db.plans.forEach(pl=>{
+  if(pl.status==='done' || pl.notified) return;
+  const dueDateReached=pl.deliveryDate<todayStr || (pl.deliveryDate===todayStr && (!pl.reminderTime || hhmm>=pl.reminderTime));
+  if(dueDateReached){
+   pl.notified=true;
+   changed=true;
+   if('Notification' in window && Notification.permission==='granted'){
+    const liters=(pl.items||[]).reduce((s,i)=>s+(i.liters||0),0);
+    new Notification(`🚚 Доставка: ${pl.point}`,{
+     body:`План на ${formatRuDate(pl.deliveryDate)} · ${liters} л`
+    });
+   }
+  }
+ });
+ if(changed){
+  localStorage.setItem(KEY,JSON.stringify(db));
+ }
+}
+setInterval(checkPlanReminders,60000);
+
+/* ====== ВАРКА ПИВА ИЗ РЕЦЕПТА ====== */
+let recipeRows=[{rawName:'',qty:''}];
+
+function renderRecipeRows(){
+ const cont=$('recipeRowsContainer');
+ if(!cont) return;
+ const rawOpts=`<option value="">Выберите сырьё…</option>`+db.raw.map(r=>`<option value="${esc(r.name)}">${esc(r.name)} (ост: ${r.qty.toFixed(2)} ${esc(r.unit)})</option>`).join('');
+ cont.innerHTML=recipeRows.map((row,idx)=>{
+  const rObj=db.raw.find(x=>x.name===row.rawName);
+  const unitLabel=rObj?rObj.unit:'ед.';
+  return `<div class="recipe-row">
+   <div class="row" style="margin-bottom:4px">
+    <span class="muted" style="font-weight:700">Компонент #${idx+1}</span>
+    ${recipeRows.length>1?`<button type="button" class="remove-row" onclick="removeRecipeRow(${idx})">Удалить</button>`:''}
+   </div>
+   <div class="twocol">
+    <div><label style="margin-top:2px">Сырьё</label><select class="rc-raw" data-idx="${idx}">${rawOpts}</select></div>
+    <div><label style="margin-top:2px">Расход (${esc(unitLabel)})</label><input type="number" min="0.01" step="0.01" class="rc-qty" data-idx="${idx}" placeholder="0" value="${row.qty}"></div>
+   </div>
+  </div>`;
+ }).join('');
+
+ cont.querySelectorAll('.rc-raw').forEach(sel=>{
+  const i=Number(sel.dataset.idx);
+  if(recipeRows[i].rawName) sel.value=recipeRows[i].rawName;
+  sel.onchange=()=>{recipeRows[i].rawName=sel.value;renderRecipeRows()};
+ });
+ cont.querySelectorAll('.rc-qty').forEach(inp=>{
+  const i=Number(inp.dataset.idx);
+  inp.oninput=()=>{recipeRows[i].qty=inp.value};
+ });
+}
+
+window.removeRecipeRow=idx=>{
+ if(recipeRows.length<=1) return;
+ recipeRows.splice(idx,1);
+ renderRecipeRows();
+};
+
+$('addRecipeRowBtn').onclick=()=>{
+ recipeRows.push({rawName:'',qty:''});
+ renderRecipeRows();
+};
+
+$('doBrewBtn').onclick=()=>{
+ const beerName=$('brewBeerName').value.trim();
+ const outLiters=Number($('brewOutputLiters').value);
+ const note=$('brewNote').value.trim();
+ const user=currentUser?currentUser.name:'Система';
+
+ if(!beerName) return alert('Укажите название сорта пива.');
+ if(!Number.isFinite(outLiters) || outLiters<=0) return alert('Укажите объём сваренного пива в литрах (больше 0).');
+
+ const usedIngredients=[];
+ const neededByRaw={};
+
+ for(let i=0;i<recipeRows.length;i++){
+  const rRow=recipeRows[i];
+  const q=Number(rRow.qty);
+  if(!rRow.rawName && (!rRow.qty || q===0)) continue;
+  if(!rRow.rawName) return alert(`В компоненте рецепта #${i+1} укажите сырьё.`);
+  if(!Number.isFinite(q) || q<=0) return alert(`Укажите расход больше 0 для сырья «${rRow.rawName}».`);
+  const stockItem=db.raw.find(x=>x.name===rRow.rawName);
+  if(!stockItem) return alert(`Сырьё «${rRow.rawName}» не найдено на складе.`);
+  neededByRaw[rRow.rawName]=(neededByRaw[rRow.rawName]||0)+q;
+  usedIngredients.push({name:rRow.rawName,qty:q,unit:stockItem.unit});
+ }
+
+ for(const [rawName,needQty] of Object.entries(neededByRaw)){
+  const item=db.raw.find(x=>x.name===rawName);
+  if(!item || item.qty<needQty){
+   const avail=item?item.qty.toFixed(2):'0.00';
+   const unit=item?item.unit:'';
+   return alert(`Недостаточно сырья «${rawName}». На складе ${avail} ${unit}, нужно ${needQty} ${unit}.`);
+  }
+ }
+
+ for(const [rawName,needQty] of Object.entries(neededByRaw)){
+  const item=db.raw.find(x=>x.name===rawName);
+  item.qty-=needQty;
+ }
+
+ let beer=db.products.find(p=>p.name.toLowerCase()===beerName.toLowerCase());
+ if(beer){
+  beer.qty+=outLiters;
+ }else{
+  beer={name:beerName,qty:outLiters,price:0};
+  db.products.push(beer);
+ }
+
+ const ingSummary=usedIngredients.map(x=>`${x.name}: ${x.qty} ${x.unit}`).join(', ');
+ addOp(
+  'brew',
+  `Варка пива «${beer.name}» (+${outLiters} л)`,
+  `+${outLiters} л`+(ingSummary?` · Сырьё: ${ingSummary}`:''),
+  user,
+  note,
+  {
+   brew:{
+    beerName:beer.name,
+    liters:outLiters,
+    ingredients:usedIngredients
+   }
+  }
+ );
+
+ $('brewBeerName').value='';
+ $('brewOutputLiters').value='';
+ $('brewNote').value='';
+ recipeRows=[{rawName:'',qty:''}];
+ save();
+ alert(`Варка завершена! Добавлено ${outLiters} л «${beer.name}», сырьё списано со склада.`);
+};
+
+/* ====== МУЛЬТИ-СОРТА В ПРОДАЖЕ (АВТО-ЦЕНА СО СКЛАДА) ====== */
+let saleRows=[{product:'',out30:0,out50:0,price:''}];
+
+function renderSaleRows(){
+ const container=$('beerRowsContainer');
+ const prodOpts=`<option value="">— Без отгрузки пива —</option>`+db.products.map(p=>`<option value="${esc(p.name)}">${esc(p.name)} (${p.qty.toFixed(1)} л · ${fmt(p.price)} ₸/л)</option>`).join('');
+ container.innerHTML=saleRows.map((r,idx)=>{
+  const liters=r.out30*30+r.out50*50;
+  const sub=liters*(Number(r.price)||0);
+  return `<div class="beer-row" data-idx="${idx}">
+   <div class="beer-row-head">
+    <span class="beer-row-title">Позиция #${idx+1}</span>
+    ${saleRows.length>1?`<button type="button" class="remove-row" onclick="removeSaleRow(${idx})">Удалить</button>`:''}
+   </div>
+   <label style="margin-top:4px">Сорт пива</label>
+   <select class="sr-prod" data-idx="${idx}">${prodOpts}</select>
+   <div class="threecol" style="margin-top:4px">
+    <div><label>30 л, шт.</label><input type="number" min="0" step="1" class="sr-30" data-idx="${idx}" value="${r.out30}"></div>
+    <div><label>50 л, шт.</label><input type="number" min="0" step="1" class="sr-50" data-idx="${idx}" value="${r.out50}"></div>
+    <div><label>Цена/л, ₸</label><input type="number" min="0" step="1" class="sr-price price-input" data-idx="${idx}" placeholder="Авто" value="${r.price}"></div>
+   </div>
+   <div class="row-subtotal">
+    <span>Объём: <b>${liters} л</b></span>
+    <span>Сумма: <b>${fmt(sub)} ₸</b></span>
+   </div>
+  </div>`;
+ }).join('');
+
+ container.querySelectorAll('.sr-prod').forEach(sel=>{
+  const i=Number(sel.dataset.idx);
+  if(saleRows[i].product) sel.value=saleRows[i].product;
+  sel.onchange=()=>{
+   saleRows[i].product=sel.value;
+   const stockPrice=getProductPrice(sel.value);
+   if(stockPrice>0) saleRows[i].price=stockPrice;
+   renderSaleRows();
+  };
+ });
+ container.querySelectorAll('.sr-30').forEach(inp=>{
+  const i=Number(inp.dataset.idx);
+  inp.oninput=()=>{saleRows[i].out30=Math.max(0,Math.floor(Number(inp.value)||0));updateSaleRowSub(i);updateSaleTotals()};
+ });
+ container.querySelectorAll('.sr-50').forEach(inp=>{
+  const i=Number(inp.dataset.idx);
+  inp.oninput=()=>{saleRows[i].out50=Math.max(0,Math.floor(Number(inp.value)||0));updateSaleRowSub(i);updateSaleTotals()};
+ });
+ container.querySelectorAll('.sr-price').forEach(inp=>{
+  const i=Number(inp.dataset.idx);
+  inp.oninput=()=>{saleRows[i].price=inp.value;updateSaleRowSub(i);updateSaleTotals()};
+ });
+ updateSaleTotals();
+}
+
+function updateSaleRowSub(i){
+ const rowEl=$('beerRowsContainer').querySelector(`.beer-row[data-idx="${i}"]`);
+ if(!rowEl)return;
+ const r=saleRows[i];
+ const liters=r.out30*30+r.out50*50;
+ const sub=liters*(Number(r.price)||0);
+ const subEl=rowEl.querySelector('.row-subtotal');
+ if(subEl) subEl.innerHTML=`<span>Объём: <b>${liters} л</b></span><span>Сумма: <b>${fmt(sub)} ₸</b></span>`;
+}
+
+window.removeSaleRow=idx=>{
+ if(saleRows.length<=1)return;
+ saleRows.splice(idx,1);
+ renderSaleRows();
+};
+
+$('addBeerRowBtn').onclick=()=>{
+ saleRows.push({product:'',out30:0,out50:0,price:''});
+ renderSaleRows();
+};
+
+function calcSaleSummary(){
+ let total30=0,total50=0,totalLiters=0,totalAmount=0;
+ saleRows.forEach(r=>{
+  const l=r.out30*30+r.out50*50;
+  const p=Math.max(0,Number(r.price)||0);
+  total30+=r.out30;
+  total50+=r.out50;
+  totalLiters+=l;
+  totalAmount+=l*p;
+ });
+ return {total30,total50,totalLiters,totalAmount};
+}
+
+function updateSaleTotals(){
+ const {total30,total50,totalLiters,totalAmount}=calcSaleSummary();
+ const isReturnOnly=(total30+total50===0 && totalLiters===0);
+ $('saleFinancialBlock').classList.toggle('hidden',isReturnOnly);
+ $('saveSale').textContent=isReturnOnly?'Провести возврат кег':'Оформить и перейти к оплате →';
+
+ $('saleTotalKegs').textContent=`${total30+total50} шт. (30 л: ${total30}, 50 л: ${total50})`;
+ $('saleLiters').textContent=`${totalLiters} л`;
+ $('saleAmount').textContent=`${fmt(totalAmount)} ₸`;
+}
+
+/* ====== ВСПЛЫВАЮЩЕЕ ОКНО ОПЛАТЫ ПРИ ПРОДАЖЕ ====== */
+let pendingSaleDraft=null;
+let selectedPayMethod='cash';
+
+const PAY_METHOD_LABELS={
+ cash:'Наличные',
+ transfer:'Перевод',
+ debt:'В долг'
+};
+
+function openPaymentModal(draft){
+ pendingSaleDraft=draft;
+ selectedPayMethod='cash';
+ $('paymentModal').classList.remove('hidden');
+
+ const linesHtml=draft.activeRows.map(it=>`<div class="row" style="font-size:13px;padding:2px 0"><span>${esc(it.product)} (${it.liters} л × ${fmt(it.price)} ₸)</span><b>${fmt(it.amount)} ₸</b></div>`).join('');
+ $('payModalSummary').innerHTML=`
+  <div style="background:#0f1b16;border-radius:12px;padding:10px;border:1px solid var(--line)">
+   <div class="row"><span>Точка:</span><b>${esc(draft.point)}</b></div>
+   <div style="margin:6px 0;padding:6px 0;border-top:1px dashed #263d32;border-bottom:1px dashed #263d32">
+    ${linesHtml}
+   </div>
+   <div class="row"><span>К оплате по чеку:</span><strong style="font-size:20px;color:#5ce0a3">${fmt(draft.totalAmount)} ₸</strong></div>
+  </div>
+ `;
+
+ $('modalPaidInput').value=draft.totalAmount;
+ setModalPayMethod('cash');
+}
+
+window.closePaymentModal=()=>{
+ $('paymentModal').classList.add('hidden');
+ pendingSaleDraft=null;
+};
+
+function setModalPayMethod(method){
+ selectedPayMethod=method;
+ document.querySelectorAll('#payMethodBtns .pay-method-btn').forEach(btn=>{
+  const active=btn.dataset.method===method;
+  btn.classList.toggle('active',active);
+  btn.classList.toggle('debt-mode',active && method==='debt');
+ });
+
+ if(!pendingSaleDraft) return;
+ if(method==='debt'){
+  $('modalPaidInput').value=0;
+  $('payAmountInputWrap').classList.add('hidden');
+ }else{
+  $('payAmountInputWrap').classList.remove('hidden');
+  if(Number($('modalPaidInput').value)===0){
+   $('modalPaidInput').value=pendingSaleDraft.totalAmount;
+  }
+ }
+ updateModalDebtCalc();
+}
+
+function updateModalDebtCalc(){
+ if(!pendingSaleDraft) return;
+ const total=pendingSaleDraft.totalAmount;
+ const paid=selectedPayMethod==='debt'?0:Math.max(0,Number($('modalPaidInput').value)||0);
+ const debt=Math.max(0,total-paid);
+ $('modalDebtVal').textContent=`${fmt(debt)} ₸`;
+ const box=$('modalDebtBox');
+ if(debt>0){
+  box.className='calc debt-box';
+  $('modalDebtHint').textContent=`В долг точки «${pendingSaleDraft.point}» запишется ${fmt(debt)} ₸.`;
+ }else{
+  box.className='calc paid-box';
+  $('modalDebtHint').textContent=`Чек оплачен полностью (${PAY_METHOD_LABELS[selectedPayMethod]}), долг не образуется.`;
+ }
+}
+
+$('payMethodBtns').onclick=e=>{
+ const btn=e.target.closest('.pay-method-btn');
+ if(btn) setModalPayMethod(btn.dataset.method);
+};
+$('modalPaidInput').oninput=updateModalDebtCalc;
+$('modalPayFullBtn').onclick=()=>{
+ if(!pendingSaleDraft) return;
+ $('modalPaidInput').value=pendingSaleDraft.totalAmount;
+ updateModalDebtCalc();
+};
+$('modalPayHalfBtn').onclick=()=>{
+ if(!pendingSaleDraft) return;
+ $('modalPaidInput').value=Math.round(pendingSaleDraft.totalAmount/2);
+ updateModalDebtCalc();
+};
+$('modalPayZeroBtn').onclick=()=>{
+ setModalPayMethod('debt');
+};
+
+$('confirmSalePaymentBtn').onclick=()=>{
+ if(!pendingSaleDraft) return;
+ const d=pendingSaleDraft;
+ const paid=selectedPayMethod==='debt'?0:Math.max(0,Number($('modalPaidInput').value)||0);
+ const debt=Math.max(0,d.totalAmount-paid);
+ const payMethod=paid===0?'debt':selectedPayMethod;
+
+ commitSaleOperation(d,paid,debt,payMethod);
+ closePaymentModal();
+};
+
+function commitSaleOperation(d,paid,debt,payMethod){
+ const {point,activeRows,n30,n50,r30,r50,totalLiters,totalAmount,user,note,width}=d;
+ const balance=db.pointKegs[point]||{30:0,50:0};
+
+ const neededByProduct={};
+ activeRows.forEach(it=>{neededByProduct[it.product]=(neededByProduct[it.product]||0)+it.liters});
+ for(const [prodName,needLiters] of Object.entries(neededByProduct)){
+  const beer=db.products.find(p=>p.name===prodName);
+  beer.qty-=needLiters;
+ }
+ db.kegs[30]=db.kegs[30]-n30+r30;
+ db.kegs[50]=db.kegs[50]-n50+r50;
+ balance[30]=balance[30]+n30-r30;
+ balance[50]=balance[50]+n50-r50;
+ db.pointKegs[point]=balance;
+
+ if(debt>0){
+  db.pointDebts[point]=getPointDebt(point)+debt;
+ }
+
+ if(activePlanFulfillId){
+  const pl=db.plans.find(x=>x.id===activePlanFulfillId);
+  if(pl){
+   pl.status='done';
+   pl.completedAt=new Date().toISOString();
+  }
+  activePlanFulfillId=null;
+  $('fromPlanBanner').classList.add('hidden');
+ }
+
+ const isPureReturn=(n30+n50===0 && totalLiters===0);
+ let opType='sale';
+ let opDesc='';
+ let opQty='';
+
+ if(isPureReturn){
+  opType='keg_return';
+  opDesc=`${point}: возврат кег (${r30}×30 л, ${r50}×50 л)`;
+  opQty=`Возврат ${r30}×30 + ${r50}×50`;
+ }else{
+  const bits=[];
+  activeRows.forEach(it=>bits.push(`${it.product} ${it.liters} л`));
+  if(n30||n50)bits.push(`отгр. ${n30}×30 + ${n50}×50`);
+  if(r30||r50)bits.push(`возвр. ${r30}×30 + ${r50}×50`);
+  if(debt>0)bits.push(`долг +${fmt(debt)} ₸`);
+  opDesc=`${point}: ${bits.join('; ')}`;
+  opQty=`${totalLiters} л; отгружено ${n30}×30 + ${n50}×50; возврат ${r30}×30 + ${r50}×50`;
+ }
+
+ const op={
+  id:'KC-'+Date.now(),
+  date:new Date().toISOString(),
+  type:opType,
+  desc:opDesc,
+  qty:opQty,
+  user,
+  note,
+  movement:{
+   point,
+   product:activeRows.map(x=>x.product).join(', '),
+   items:activeRows,
+   out30:n30,
+   out50:n50,
+   ret30:r30,
+   ret50:r50,
+   kegBalance30:balance[30],
+   kegBalance50:balance[50],
+   liters:totalLiters,
+   price:activeRows.length===1?activeRows[0].price:0,
+   amount:totalAmount,
+   paid,
+   debt,
+   payMethod:isPureReturn?'':payMethod,
+   width
+  }
+ };
+
+ db.ops.unshift(op);
+
+ saleRows=[{product:'',out30:0,out50:0,price:''}];
+ ['ret30','ret50'].forEach(id=>$(id).value=0);
+ $('saleNote').value='';
+
+ save();
+ const msg=isPureReturn
+  ? 'Возврат пустых кег проведён. Распечатать или сохранить PDF-квитанцию?'
+  : 'Продажа проведена! Распечатать или сохранить PDF-чек?';
+ if(confirm(msg)) printReceipt(op);
+ go('home');
+}
+
+/* ====== ОТОБРАЖЕНИЕ ОПЕРАЦИЙ И ПЕЧАТЬ / PDF ЧЕКА ====== */
+function normalizeItems(m){
+ if(Array.isArray(m.items)) return m.items;
+ if(m.liters>0 || m.product){
+  return [{
+   product:m.product||'Пиво',
+   out30:m.out30||0,
+   out50:m.out50||0,
+   liters:m.liters||0,
+   price:m.price||0,
+   amount:m.amount||0
+  }];
+ }
+ return [];
+}
+
+function isPureReturnMovement(m){
+ const items=normalizeItems(m);
+ return items.length===0 && (Number(m.out30||0)+Number(m.out50||0)===0) && (Number(m.ret30||0)+Number(m.ret50||0)>0);
+}
+
+function sanitizeFilePart(s){
+ return String(s||'')
+  .trim()
+  .replace(/[\\/:*?"<>|]+/g,'_')
+  .replace(/\s+/g,'_')
+  .replace(/_+/g,'_')
+  .replace(/^_+|_+$/g,'');
+}
+
+function buildReceiptFileBaseName(op){
+ const dt=new Date(op.date||Date.now());
+ const ymd=localDateStr(dt);
+ const ptRaw=op.movement?.point || op.point || 'Чек';
+ const ptPart=sanitizeFilePart(ptRaw) || 'Точка';
+ const prefix=op.type==='keg_return'?'Возврат':'Чек';
+ return `${prefix}_${ptPart}_${ymd}`;
+}
+
+function opDetails(op){
+ if((op.type==='sale' || op.type==='keg_return') && op.movement){
+  const m=op.movement;
+  const items=normalizeItems(m);
+  const pureRet=op.type==='keg_return' || isPureReturnMovement(m);
+  const ptObj=getPointObj(m.point);
+  const ptMeta=[ptObj.zone,ptObj.address,ptObj.contact].filter(Boolean).join(' · ');
+
+  const itemsHtml=items.map(it=>`<div class="op-line"><b>${esc(it.product)}:</b> 30 л × <b>${it.out30}</b>, 50 л × <b>${it.out50}</b> (${it.liters} л × ${fmt(it.price)} ₸) = <b>${fmt(it.amount)} ₸</b></div>`).join('');
+  const paid=m.paid!==undefined?m.paid:m.amount;
+  const debt=m.debt!==undefined?m.debt:0;
+  const methodTag=m.payMethod && PAY_METHOD_LABELS[m.payMethod]?` · Способ: <b>${PAY_METHOD_LABELS[m.payMethod]}</b>`:'';
+
+  const payHtml=pureRet
+   ? `<div class="op-line ret-line"><b>Операция возврата пустой тары</b> (без отгрузки пива и оплаты)</div>`
+   : (debt>0
+      ? `<div class="op-line debt-line"><b>Итого: ${fmt(m.amount)} ₸</b> · Оплачено: <b>${fmt(paid)} ₸</b>${methodTag} · <b>В долг: ${fmt(debt)} ₸</b></div>`
+      : `<div class="op-line"><b>Итого: ${fmt(m.amount)} ₸</b> · Оплачено полностью (${fmt(paid)} ₸)${methodTag}</div>`);
+  const balHtml=(m.kegBalance30!==undefined && m.kegBalance50!==undefined)
+   ? `<div class="op-line"><b>Остаток кег на точке:</b> 30 л — <b>${m.kegBalance30}</b> шт., 50 л — <b>${m.kegBalance50}</b> шт. (всего <b>${m.kegBalance30+m.kegBalance50}</b> шт.)</div>`
+   : '';
+  return `<div class="op-lines">
+   ${ptMeta?`<div class="op-line"><b>Точка:</b> ${esc(m.point)} <span class="muted">(${esc(ptMeta)})</span></div>`:''}
+   ${itemsHtml}
+   <div class="op-line"><b>Тара:</b> отгрузка 30 л — <b>${m.out30}</b> шт., 50 л — <b>${m.out50}</b> шт. | возврат 30 л — <b>${m.ret30}</b> шт., 50 л — <b>${m.ret50}</b> шт.</div>
+   ${balHtml}
+   ${payHtml}
+   <div class="muted">Оформил: ${esc(op.user)}${op.editedBy?` · Изменил: ${esc(op.editedBy)}`:''}${op.note?` · Комментарий: ${esc(op.note)}`:''}</div>
+  </div>`;
+ }
+ if(op.type==='brew' && op.brew){
+  const ings=(op.brew.ingredients||[]).map(x=>`${esc(x.name)} (${x.qty} ${esc(x.unit)})`).join(', ');
+  return `<div class="op-lines">
+   <div class="op-line brew-line"><b>Сварено:</b> ${esc(op.brew.beerName)} — <b>+${op.brew.liters} л</b></div>
+   ${ings?`<div class="op-line"><b>Списано сырьё:</b> ${ings}</div>`:''}
+   <div class="muted">Оформил: ${esc(op.user)}${op.note?` · Комментарий: ${esc(op.note)}`:''}</div>
+  </div>`;
+ }
+ if(op.type==='debt_pay'){
+  return `<div class="op-lines"><div class="op-line"><b>Погашение долга:</b> +${fmt(op.amount)} ₸ · Остаток долга точки: <b>${fmt(op.debtAfter)} ₸</b> (${esc(op.user)}${op.note?', '+esc(op.note):''})</div></div>`;
+ }
+ return `<div class="muted">${esc(op.user)} · ${esc(op.qty)} ${op.note?'· '+esc(op.note):''}</div>`;
+}
+
+function renderOperation(op){
+ const canEdit=isOwner();
+ const hasReceipt=(op.type==='sale' || op.type==='keg_return') && op.movement;
+ const printBtn=hasReceipt?`<button class="secondary sm-btn" onclick="printReceiptById('${op.id}')">${op.type==='keg_return'?'Печать / PDF квитанции':'Печать / PDF чека'}</button>`:'';
+ const editBtn=canEdit?`<button class="warn sm-btn" onclick="openEditModal('${op.id}')">✏️ Редактировать</button>`:'';
+ const delBtn=canEdit?`<button class="danger sm-btn" onclick="deleteOperation('${op.id}')">Удалить</button>`:'';
+ const actionsHtml=(printBtn||editBtn||delBtn)?`<div class="op-actions">${printBtn}${editBtn}${delBtn}</div>`:'';
+
+ return `<div class="item">
+  <div class="row"><b>${esc(op.desc)}</b><small class="muted">${new Date(op.date).toLocaleString('ru-RU')}</small></div>
+  ${opDetails(op)}
+  ${actionsHtml}
+ </div>`;
+}
+
+function printReceipt(op){
+ if(!op||!op.movement)return alert('Для этой операции нет сохранённых данных чека.');
+ const m=op.movement, width=m.width||58, date=new Date(op.date).toLocaleString('ru-RU');
+ const ptObj=getPointObj(m.point);
+ const items=normalizeItems(m);
+ const pureRet=op.type==='keg_return' || isPureReturnMovement(m);
+ const paid=m.paid!==undefined?m.paid:m.amount;
+ const debt=m.debt!==undefined?m.debt:Math.max(0,(m.amount||0)-paid);
+ const totalPointDebt=getPointDebt(m.point);
+ const methodLabel=m.payMethod && PAY_METHOD_LABELS[m.payMethod]?PAY_METHOD_LABELS[m.payMethod]:'';
+ const fileBaseName=buildReceiptFileBaseName(op);
+
+ const curPtKegs=db.pointKegs[m.point]||{30:0,50:0};
+ const rem30=m.kegBalance30!==undefined?m.kegBalance30:(curPtKegs[30]||0);
+ const rem50=m.kegBalance50!==undefined?m.kegBalance50:(curPtKegs[50]||0);
+ const remTotal=rem30+rem50;
+
+ const beerLines=items.filter(it=>it.liters>0).map(it=>`
+  <div class="line"><span><b>${esc(it.product)}</b></span><b>${fmt(it.amount)} ₸</b></div>
+  <div class="subline">${it.liters} л × ${fmt(it.price)} ₸ (30л:${it.out30}, 50л:${it.out50})</div>
+ `).join('');
+
+ const area=$('printArea');area.className=width===80?'wide':'';
+ area.innerHTML=`
+  <h2>${pureRet?'КВИТАНЦИЯ ВОЗВРАТА ТАРЫ':'ТОВАРНЫЙ ЧЕК'}</h2>
+  <div class="center mutedPrint">НЕ ЯВЛЯЕТСЯ ФИСКАЛЬНЫМ ЧЕКОМ</div>
+  <div class="rule"></div>
+  <div>№ ${esc(op.id||'—')}</div>
+  <div>${esc(date)}</div>
+  <div><b>Точка:</b> ${esc(m.point)}</div>
+  ${ptObj.address?`<div class="mutedPrint">Адрес: ${esc(ptObj.address)}</div>`:''}
+  ${ptObj.contact?`<div class="mutedPrint">Контакт: ${esc(ptObj.contact)}</div>`:''}
+  ${pureRet?'':`
+   <div class="rule"></div>
+   <b>Позиции</b>
+   ${beerLines}
+   <div class="rule"></div>
+   <div class="line big"><span>ИТОГО</span><b>${fmt(m.amount)} ₸</b></div>
+   ${methodLabel?`<div class="line"><span>Способ оплаты</span><b>${esc(methodLabel)}</b></div>`:''}
+   <div class="line"><span>Оплачено</span><b>${fmt(paid)} ₸</b></div>
+   ${debt>0?`<div class="line"><span><b>Долг по чеку</b></span><b>${fmt(debt)} ₸</b></div>`:''}
+  `}
+  ${totalPointDebt>0?`<div class="line"><span>Общий долг точки</span><b>${fmt(totalPointDebt)} ₸</b></div>`:''}
+  <div class="rule"></div>
+  <b>Движение кег</b>
+  ${pureRet?'':`
+   <div class="line"><span>Отгрузка 30 л</span><b>${m.out30} шт.</b></div>
+   <div class="line"><span>Отгрузка 50 л</span><b>${m.out50} шт.</b></div>
+  `}
+  <div class="line"><span>Возврат 30 л</span><b>${m.ret30} шт.</b></div>
+  <div class="line"><span>Возврат 50 л</span><b>${m.ret50} шт.</b></div>
+  <div class="rule"></div>
+  <b>Остаток кег на точке</b>
+  <div class="line"><span>30-литровые</span><b>${rem30} шт.</b></div>
+  <div class="line"><span>50-литровые</span><b>${rem50} шт.</b></div>
+  <div class="line big"><span>Всего кег у точки</span><b>${remTotal} шт.</b></div>
+  <div class="rule"></div>
+  <div>Ответственный: ${esc(op.user)}</div>
+  <div>Комментарий: ${esc(op.note||'—')}</div>
+  <div class="rule"></div>
+  <div class="center">${pureRet?'Возврат тары подтверждён':'Спасибо за покупку!'}</div>
+ `;
+
+ const prevTitle=document.title;
+ document.title=fileBaseName;
+ window.print();
+ setTimeout(()=>{document.title=prevTitle},1200);
+}
+window.printReceiptById=id=>{let op=db.ops.find(x=>x.id===id);printReceipt(op)};
+
+/* ====== ОТКАТ, УДАЛЕНИЕ И РЕДАКТИРОВАНИЕ ОПЕРАЦИЙ / ТОЧЕК ====== */
+function revertOperationEffects(op){
+ if((op.type==='sale' || op.type==='keg_return') && op.movement){
+  const m=op.movement;
+  const items=normalizeItems(m);
+  items.forEach(it=>{
+   const beer=db.products.find(p=>p.name===it.product);
+   if(beer && it.liters>0) beer.qty+=Number(it.liters||0);
+  });
+  const n30=Number(m.out30||0), n50=Number(m.out50||0), r30=Number(m.ret30||0), r50=Number(m.ret50||0);
+  db.kegs[30]=(db.kegs[30]||0)+n30-r30;
+  db.kegs[50]=(db.kegs[50]||0)+n50-r50;
+  const bal=db.pointKegs[m.point]||{30:0,50:0};
+  bal[30]=Math.max(0,(bal[30]||0)-n30+r30);
+  bal[50]=Math.max(0,(bal[50]||0)-n50+r50);
+  db.pointKegs[m.point]=bal;
+  const debt=Number(m.debt||0);
+  if(debt>0){
+   db.pointDebts[m.point]=Math.max(0, getPointDebt(m.point)-debt);
+  }
+ }else if(op.type==='brew' && op.brew){
+  const beer=db.products.find(p=>p.name===op.brew.beerName);
+  if(beer) beer.qty=Math.max(0, beer.qty-Number(op.brew.liters||0));
+  (op.brew.ingredients||[]).forEach(ing=>{
+   const r=db.raw.find(x=>x.name===ing.name);
+   if(r) r.qty+=Number(ing.qty||0);
+  });
+ }else if(op.type==='debt_pay'){
+  if(op.point && op.amount>0){
+   db.pointDebts[op.point]=getPointDebt(op.point)+Number(op.amount||0);
+  }
+ }else if(op.type==='beer_in' && op.product && op.numQty){
+  const p=db.products.find(x=>x.name===op.product);
+  if(p) p.qty=Math.max(0, p.qty-Number(op.numQty));
+ }else if(op.type==='beer_out' && op.product && op.numQty){
+  const p=db.products.find(x=>x.name===op.product);
+  if(p) p.qty+=Number(op.numQty);
+ }else if(op.type==='raw_in' && op.rawName && op.numQty){
+  const r=db.raw.find(x=>x.name===op.rawName);
+  if(r) r.qty=Math.max(0, r.qty-Number(op.numQty));
+ }else if(op.type==='raw_out' && op.rawName && op.numQty){
+  const r=db.raw.find(x=>x.name===op.rawName);
+  if(r) r.qty+=Number(op.numQty);
+ }
+}
+
+window.deleteOperation=id=>{
+ if(!isOwner()) return alert('Удалять и редактировать операции может только владелец.');
+ const idx=db.ops.findIndex(x=>x.id===id);
+ if(idx===-1) return;
+ if(!confirm('Удалить эту операцию? Все остатки пива, сырья, кег и долги по ней будут автоматически пересчитаны обратно.')) return;
+ const op=db.ops[idx];
+ revertOperationEffects(op);
+ db.ops.splice(idx,1);
+ save();
+};
+
+window.openEditPointModal=idx=>{
+ if(!isOwner()) return alert('Редактировать точки может только владелец.');
+ const pt=db.points[idx];
+ if(!pt) return;
+ $('editModal').classList.remove('hidden');
+ $('editModalTitle').textContent=`Редактирование точки: ${pt.name}`;
+ $('editModalBody').innerHTML=`
+  <label>Название точки</label>
+  <input id="edPtName" value="${esc(pt.name)}">
+  <label>Район / маршрут</label>
+  <input id="edPtZone" value="${esc(pt.zone||'')}" placeholder="Например, Верх города, Центр, Нижняя часть">
+  <label>Адрес</label>
+  <input id="edPtAddr" value="${esc(pt.address||'')}" placeholder="Улица, дом, ориентир">
+  <label>Контакт (телефон / ответственный)</label>
+  <input id="edPtContact" value="${esc(pt.contact||'')}" placeholder="+7 ... / имя">
+  <label>Примечание</label>
+  <input id="edPtNote" value="${esc(pt.note||'')}" placeholder="График работы, особенности">
+  <button type="button" class="primary" onclick="saveEditedPoint(${idx})">Сохранить точку</button>
+ `;
+};
+
+window.saveEditedPoint=idx=>{
+ if(!isOwner()) return;
+ const pt=db.points[idx];
+ if(!pt) return;
+ const newName=$('edPtName').value.trim();
+ if(!newName) return alert('Укажите название точки.');
+ if(newName!==pt.name && getPointNames().includes(newName)) return alert('Точка с таким названием уже существует.');
+
+ const oldName=pt.name;
+ if(oldName!==newName){
+  if(db.pointKegs[oldName]){
+   db.pointKegs[newName]=db.pointKegs[oldName];
+   delete db.pointKegs[oldName];
+  }
+  if(db.pointDebts[oldName]!==undefined){
+   db.pointDebts[newName]=db.pointDebts[oldName];
+   delete db.pointDebts[oldName];
+  }
+  db.ops.forEach(o=>{
+   if(o.point===oldName) o.point=newName;
+   if(o.movement && o.movement.point===oldName) o.movement.point=newName;
+  });
+  db.plans.forEach(pl=>{
+   if(pl.point===oldName) pl.point=newName;
+  });
+ }
+
+ pt.name=newName;
+ pt.zone=$('edPtZone').value.trim();
+ pt.address=$('edPtAddr').value.trim();
+ pt.contact=$('edPtContact').value.trim();
+ pt.note=$('edPtNote').value.trim();
+
+ closeEditModal();
+ save();
+};
+
+let editingOpId=null;
+let editSaleRows=[];
+
+window.openEditModal=id=>{
+ if(!isOwner()) return alert('Редактировать операции может только владелец.');
+ const op=db.ops.find(x=>x.id===id);
+ if(!op) return;
+ editingOpId=id;
+ $('editModal').classList.remove('hidden');
+
+ if((op.type==='sale' || op.type==='keg_return') && op.movement){
+  const m=op.movement;
+  $('editModalTitle').textContent=`Редактирование операции (${m.point})`;
+  const norm=normalizeItems(m);
+  editSaleRows=norm.length
+   ? norm.map(it=>({product:it.product,out30:Number(it.out30||0),out50:Number(it.out50||0),price:Number(it.price||0)}))
+   : [{product:'',out30:0,out50:0,price:0}];
+  const paidVal=m.paid!==undefined?m.paid:m.amount;
+  const ptOpts=getPointNames().map(p=>`<option value="${esc(p)}" ${p===m.point?'selected':''}>${esc(p)}</option>`).join('');
+  const userOpts=db.users.map(u=>`<option value="${esc(u.name)}" ${u.name===op.user?'selected':''}>${esc(u.name)}</option>`).join('');
+
+  $('editModalBody').innerHTML=`
+   <label>Торговая точка</label>
+   <select id="edPoint">${ptOpts}</select>
+   <div class="row" style="margin-top:12px">
+    <h3 style="margin:0">Сорта пива (пусто, если только возврат)</h3>
+    <button type="button" class="secondary sm-btn" onclick="addEditSaleRow()">+ Добавить сорт</button>
+   </div>
+   <div id="edBeerRows" style="margin-top:8px"></div>
+   <div id="edFinancialWrap">
+    <div class="calc">
+     <div class="row"><span>Итого сумма чека:</span><strong id="edTotalAmount">0 ₸</strong></div>
+    </div>
+    <div class="twocol">
+     <div>
+      <label>Способ оплаты</label>
+      <select id="edPayMethod">
+       <option value="cash" ${(m.payMethod||'cash')==='cash'?'selected':''}>Наличные</option>
+       <option value="transfer" ${m.payMethod==='transfer'?'selected':''}>Перевод</option>
+       <option value="debt" ${m.payMethod==='debt'?'selected':''}>В долг</option>
+      </select>
+     </div>
+     <div>
+      <label>Оплачено по чеку, ₸</label>
+      <input id="edPaid" type="number" min="0" step="1" value="${paidVal}">
+     </div>
+    </div>
+    <div class="calc debt-box" style="margin-top:8px">
+     <div class="row"><span>Остаток в долг:</span><strong id="edDebt">0 ₸</strong></div>
+    </div>
+   </div>
+   <h3>Возврат пустых кег</h3>
+   <div class="twocol">
+    <div><label>30-литровые, шт.</label><input id="edRet30" type="number" min="0" step="1" value="${m.ret30||0}"></div>
+    <div><label>50-литровые, шт.</label><input id="edRet50" type="number" min="0" step="1" value="${m.ret50||0}"></div>
+   </div>
+   <label>Кто оформил</label>
+   <select id="edUser">${userOpts}</select>
+   <label>Комментарий</label>
+   <input id="edNote" value="${esc(op.note||'')}">
+   <button type="button" class="primary" onclick="saveEditedSale()">Сохранить изменения</button>
+  `;
+  $('edPaid').oninput=updateEditSaleTotals;
+  renderEditSaleRows();
+ }else if(op.type==='debt_pay'){
+  const userOpts=db.users.map(u=>`<option value="${esc(u.name)}" ${u.name===op.user?'selected':''}>${esc(u.name)}</option>`).join('');
+  $('editModalTitle').textContent=`Редактирование оплаты долга (${op.point})`;
+  $('editModalBody').innerHTML=`
+   <label>Сумма оплаты, ₸</label>
+   <input id="edDebtPayAmt" type="number" min="1" step="1" value="${op.amount}">
+   <label>Кто принял оплату</label>
+   <select id="edUser">${userOpts}</select>
+   <label>Комментарий</label>
+   <input id="edNote" value="${esc(op.note||'')}">
+   <button type="button" class="primary" onclick="saveEditedDebtPay()">Сохранить изменения</button>
+  `;
+ }else{
+  const userOpts=db.users.map(u=>`<option value="${esc(u.name)}" ${u.name===op.user?'selected':''}>${esc(u.name)}</option>`).join('');
+  $('editModalTitle').textContent='Редактирование записи';
+  $('editModalBody').innerHTML=`
+   <label>Описание</label>
+   <input id="edDesc" value="${esc(op.desc)}">
+   <label>Ответственный</label>
+   <select id="edUser">${userOpts}</select>
+   <label>Комментарий</label>
+   <input id="edNote" value="${esc(op.note||'')}">
+   <button type="button" class="primary" onclick="saveEditedGeneric()">Сохранить изменения</button>
+  `;
+ }
+};
+
+window.closeEditModal=()=>{
+ $('editModal').classList.add('hidden');
+ editingOpId=null;
+};
+
+window.addEditSaleRow=()=>{
+ editSaleRows.push({product:'',out30:0,out50:0,price:0});
+ renderEditSaleRows();
+};
+
+window.removeEditSaleRow=idx=>{
+ if(editSaleRows.length<=1) return;
+ editSaleRows.splice(idx,1);
+ renderEditSaleRows();
+};
+
+function renderEditSaleRows(){
+ const cont=$('edBeerRows');
+ const prodOpts=`<option value="">— Без отгрузки пива —</option>`+db.products.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('');
+ cont.innerHTML=editSaleRows.map((r,idx)=>`
+  <div class="beer-row">
+   <div class="beer-row-head">
+    <span class="beer-row-title">Позиция #${idx+1}</span>
+    ${editSaleRows.length>1?`<button type="button" class="remove-row" onclick="removeEditSaleRow(${idx})">Удалить</button>`:''}
+   </div>
+   <select class="ed-sr-prod" data-idx="${idx}">${prodOpts}</select>
+   <div class="threecol" style="margin-top:6px">
+    <div><label>30 л, шт.</label><input type="number" min="0" step="1" class="ed-sr-30" data-idx="${idx}" value="${r.out30}"></div>
+    <div><label>50 л, шт.</label><input type="number" min="0" step="1" class="ed-sr-50" data-idx="${idx}" value="${r.out50}"></div>
+    <div><label>Цена/л, ₸</label><input type="number" min="0" step="1" class="ed-sr-pr" data-idx="${idx}" value="${r.price}"></div>
+   </div>
+  </div>
+ `).join('');
+
+ cont.querySelectorAll('.ed-sr-prod').forEach(s=>{
+  const i=Number(s.dataset.idx);
+  if(editSaleRows[i].product) s.value=editSaleRows[i].product;
+  s.onchange=()=>{
+   editSaleRows[i].product=s.value;
+   const sp=getProductPrice(s.value);
+   if(sp>0) editSaleRows[i].price=sp;
+   renderEditSaleRows();
+  };
+ });
+ cont.querySelectorAll('.ed-sr-30').forEach(inp=>{
+  const i=Number(inp.dataset.idx);
+  inp.oninput=()=>{editSaleRows[i].out30=Math.max(0,Math.floor(Number(inp.value)||0));updateEditSaleTotals()};
+ });
+ cont.querySelectorAll('.ed-sr-50').forEach(inp=>{
+  const i=Number(inp.dataset.idx);
+  inp.oninput=()=>{editSaleRows[i].out50=Math.max(0,Math.floor(Number(inp.value)||0));updateEditSaleTotals()};
+ });
+ cont.querySelectorAll('.ed-sr-pr').forEach(inp=>{
+  const i=Number(inp.dataset.idx);
+  inp.oninput=()=>{editSaleRows[i].price=Math.max(0,Number(inp.value)||0);updateEditSaleTotals()};
+ });
+ updateEditSaleTotals();
+}
+
+function updateEditSaleTotals(){
+ let total=0, totalKegs=0;
+ editSaleRows.forEach(r=>{
+  const k=r.out30+r.out50;
+  totalKegs+=k;
+  total+=(r.out30*30+r.out50*50)*(Number(r.price)||0);
+ });
+ if($('edFinancialWrap')) $('edFinancialWrap').classList.toggle('hidden',totalKegs===0);
+ const paid=Math.max(0,Number($('edPaid')?.value)||0);
+ const debt=Math.max(0,total-paid);
+ if($('edTotalAmount')) $('edTotalAmount').textContent=`${fmt(total)} ₸`;
+ if($('edDebt')) $('edDebt').textContent=`${fmt(debt)} ₸`;
+}
+
+window.saveEditedSale=()=>{
+ if(!isOwner()||!editingOpId) return;
+ const op=db.ops.find(x=>x.id===editingOpId);
+ if(!op) return;
+
+ const point=$('edPoint').value;
+ const r30=Math.max(0,Math.floor(Number($('edRet30').value)||0));
+ const r50=Math.max(0,Math.floor(Number($('edRet50').value)||0));
+ const user=$('edUser').value;
+ const note=$('edNote').value.trim();
+
+ const activeRows=[];
+ let n30=0,n50=0,totalLiters=0,totalAmount=0;
+ for(let i=0;i<editSaleRows.length;i++){
+  const r=editSaleRows[i];
+  const liters=r.out30*30+r.out50*50;
+  const price=Math.max(0,Number(r.price)||0);
+  if(!r.product && liters===0) continue;
+  if(!r.product && liters>0) return alert(`В позиции #${i+1} указаны кеги, но не выбран сорт пива.`);
+  if(r.product && liters===0) return alert(`Для «${r.product}» укажи количество кег 30 л или 50 л.`);
+  if(liters>0 && price<=0) return alert(`Укажи цену за литр для «${r.product}».`);
+  activeRows.push({product:r.product,out30:r.out30,out50:r.out50,liters,price,amount:liters*price});
+  n30+=r.out30; n50+=r.out50; totalLiters+=liters; totalAmount+=liters*price;
+ }
+ if(n30+n50+r30+r50===0) return alert('Укажи отгрузку или возврат кег.');
+
+ const isPureReturn=(n30+n50===0 && totalLiters===0);
+ const paid=isPureReturn?0:Math.max(0,Number($('edPaid').value)||0);
+ const debt=isPureReturn?0:Math.max(0,totalAmount-paid);
+ const payMethod=isPureReturn?'':($('edPayMethod')?.value||'cash');
+
+ const snapshot=JSON.stringify({kegs:db.kegs,products:db.products,pointKegs:db.pointKegs,pointDebts:db.pointDebts});
+ revertOperationEffects(op);
+
+ if(db.kegs[30]<n30 || db.kegs[50]<n50){
+  Object.assign(db,JSON.parse(snapshot));
+  return alert('На складе недостаточно кег для новых значений.');
+ }
+ const bal=db.pointKegs[point]||{30:0,50:0};
+ if(bal[30]<r30 || bal[50]<r50){
+  Object.assign(db,JSON.parse(snapshot));
+  return alert('У точки недостаточно кег для такого возврата.');
+ }
+ const neededByProd={};
+ activeRows.forEach(it=>{neededByProd[it.product]=(neededByProd[it.product]||0)+it.liters});
+ for(const [pName,needL] of Object.entries(neededByProd)){
+  const b=db.products.find(p=>p.name===pName);
+  if(!b || b.qty<needL){
+   Object.assign(db,JSON.parse(snapshot));
+   return alert(`Недостаточно пива «${pName}» на складе для такого изменения.`);
+  }
+ }
+
+ for(const [pName,needL] of Object.entries(neededByProd)){
+  db.products.find(p=>p.name===pName).qty-=needL;
+ }
+ db.kegs[30]=db.kegs[30]-n30+r30;
+ db.kegs[50]=db.kegs[50]-n50+r50;
+ bal[30]=bal[30]+n30-r30;
+ bal[50]=bal[50]+n50-r50;
+ db.pointKegs[point]=bal;
+ if(debt>0) db.pointDebts[point]=getPointDebt(point)+debt;
+
+ if(isPureReturn){
+  op.type='keg_return';
+  op.desc=`${point}: возврат кег (${r30}×30 л, ${r50}×50 л)`;
+  op.qty=`Возврат ${r30}×30 + ${r50}×50`;
+ }else{
+  op.type='sale';
+  const bits=[];
+  activeRows.forEach(it=>bits.push(`${it.product} ${it.liters} л`));
+  if(n30||n50) bits.push(`отгр. ${n30}×30 + ${n50}×50`);
+  if(r30||r50) bits.push(`возвр. ${r30}×30 + ${r50}×50`);
+  if(debt>0) bits.push(`долг +${fmt(debt)} ₸`);
+  op.desc=`${point}: ${bits.join('; ')}`;
+  op.qty=`${totalLiters} л; отгружено ${n30}×30 + ${n50}×50; возврат ${r30}×30 + ${r50}×50`;
+ }
+
+ op.user=user;
+ op.note=note;
+ op.editedBy=currentUser.name;
+ op.movement={
+  ...op.movement,
+  point,
+  product:activeRows.map(x=>x.product).join(', '),
+  items:activeRows,
+  out30:n30,
+  out50:n50,
+  ret30:r30,
+  ret50:r50,
+  kegBalance30:bal[30],
+  kegBalance50:bal[50],
+  liters:totalLiters,
+  price:activeRows.length===1?activeRows[0].price:0,
+  amount:totalAmount,
+  paid,
+  debt,
+  payMethod
+ };
+
+ closeEditModal();
+ save();
+};
+
+window.saveEditedDebtPay=()=>{
+ if(!isOwner()||!editingOpId) return;
+ const op=db.ops.find(x=>x.id===editingOpId);
+ if(!op) return;
+ const newAmt=Math.max(0,Number($('edDebtPayAmt').value)||0);
+ if(newAmt<=0) return alert('Сумма должна быть больше 0.');
+ revertOperationEffects(op);
+ const curDebt=getPointDebt(op.point);
+ if(newAmt>curDebt){
+  db.pointDebts[op.point]=Math.max(0,curDebt-op.amount);
+  return alert(`Новая сумма (${fmt(newAmt)} ₸) больше текущего долга точки (${fmt(curDebt)} ₸).`);
+ }
+ const nextDebt=curDebt-newAmt;
+ db.pointDebts[op.point]=nextDebt;
+ op.amount=newAmt;
+ op.debtAfter=nextDebt;
+ op.user=$('edUser').value;
+ op.note=$('edNote').value.trim();
+ op.desc=`${op.point}: оплата долга ${fmt(newAmt)} ₸`;
+ op.qty=`Погашено ${fmt(newAmt)} ₸ (остаток долга: ${fmt(nextDebt)} ₸)`;
+ closeEditModal();
+ save();
+};
+
+window.saveEditedGeneric=()=>{
+ if(!isOwner()||!editingOpId) return;
+ const op=db.ops.find(x=>x.id===editingOpId);
+ if(!op) return;
+ op.desc=$('edDesc').value.trim()||op.desc;
+ op.user=$('edUser').value;
+ op.note=$('edNote').value.trim();
+ closeEditModal();
+ save();
+};
+
+/* ====== ИСТОРИЯ И АНАЛИТИКА ПО ПЕРИОДАМ ====== */
+let histPeriod='all';
+
+$('periodBtns').onclick=e=>{
+ const btn=e.target.closest('.period-btn');
+ if(!btn) return;
+ histPeriod=btn.dataset.period;
+ document.querySelectorAll('.period-btn').forEach(b=>b.classList.toggle('active',b.dataset.period===histPeriod));
+ $('customPeriodWrap').classList.toggle('hidden',histPeriod!=='custom');
+ renderHistorySection();
+};
+$('histTypeFilter').onchange=renderHistorySection;
+$('histPointFilter').onchange=renderHistorySection;
+$('histDateFrom').onchange=renderHistorySection;
+$('histDateTo').onchange=renderHistorySection;
+
+function getPeriodRange(){
+ const now=new Date();
+ if(histPeriod==='all') return {start:null,end:null};
+ if(histPeriod==='week'){
+  return {start:new Date(now.getTime()-7*24*3600*1000),end:null};
+ }
+ if(histPeriod==='month'){
+  return {start:new Date(now.getTime()-30*24*3600*1000),end:null};
+ }
+ if(histPeriod==='year'){
+  return {start:new Date(now.getTime()-365*24*3600*1000),end:null};
+ }
+ const fVal=$('histDateFrom').value;
+ const tVal=$('histDateTo').value;
+ const start=fVal?new Date(fVal+'T00:00:00'):null;
+ const end=tVal?new Date(tVal+'T23:59:59.999'):null;
+ return {start,end};
+}
+
+function renderHistorySection(){
+ if(!$('historyList')) return;
+ const {start,end}=getPeriodRange();
+ const typeFilter=$('histTypeFilter').value;
+ const pointFilter=$('histPointFilter').value;
+
+ const filtered=db.ops.filter(op=>{
+  const d=new Date(op.date);
+  if(start && d<start) return false;
+  if(end && d>end) return false;
+
+  if(typeFilter==='sales' && !(op.type==='sale' || op.type==='keg_return')) return false;
+  if(typeFilter==='brew' && op.type!=='brew') return false;
+  if(typeFilter==='debt_pay' && op.type!=='debt_pay') return false;
+  if(typeFilter==='stock_other' && !['beer_in','beer_out','raw_in','raw_out'].includes(op.type)) return false;
+
+  if(pointFilter!=='all'){
+   const opPt=op.movement?.point || op.point || '';
+   if(opPt!==pointFilter) return false;
+  }
+  return true;
+ });
+
+ let sumLiters=0, sumAmount=0, sumPaid=0, sumDebt=0, sumOutKegs=0, sumRetKegs=0, sumBrewLiters=0;
+ const byProduct={};
+
+ filtered.forEach(op=>{
+  if((op.type==='sale' || op.type==='keg_return') && op.movement){
+   const m=op.movement;
+   sumOutKegs+=Number(m.out30||0)+Number(m.out50||0);
+   sumRetKegs+=Number(m.ret30||0)+Number(m.ret50||0);
+   sumAmount+=Number(m.amount||0);
+   sumPaid+=Number(m.paid!==undefined?m.paid:m.amount||0);
+   sumDebt+=Number(m.debt||0);
+
+   const items=normalizeItems(m);
+   items.forEach(it=>{
+    const l=Number(it.liters||0);
+    const amt=Number(it.amount||0);
+    const k=Number(it.out30||0)+Number(it.out50||0);
+    sumLiters+=l;
+    if(!byProduct[it.product]) byProduct[it.product]={name:it.product,liters:0,kegs:0,amount:0};
+    byProduct[it.product].liters+=l;
+    byProduct[it.product].kegs+=k;
+    byProduct[it.product].amount+=amt;
+   });
+  }
+  if(op.type==='brew' && op.brew){
+   sumBrewLiters+=Number(op.brew.liters||0);
+  }
+ });
+
+ $('historySummaryStrip').innerHTML=`
+  <div class="sum-box"><small>Продано пива</small><b>${sumLiters.toFixed(1)} л</b></div>
+  <div class="sum-box"><small>Сумма продаж</small><b>${fmt(sumAmount)} ₸</b></div>
+  <div class="sum-box"><small>Оплачено / В долг</small><b>${fmt(sumPaid)} / ${fmt(sumDebt)} ₸</b></div>
+  <div class="sum-box"><small>Кег отгр. / возвр.</small><b>${sumOutKegs} / ${sumRetKegs} шт.</b></div>
+  ${sumBrewLiters>0?`<div class="sum-box"><small>Сварено пива</small><b>${sumBrewLiters.toFixed(1)} л</b></div>`:''}
+ `;
+
+ const prodRows=Object.values(byProduct).sort((a,b)=>b.liters-a.liters);
+ $('historyProductBreakdown').innerHTML=prodRows.length
+  ? `<table class="prod-sales-table">
+     <thead><tr><th>Сорт / товар</th><th>Объём</th><th>Кег</th><th>Сумма</th></tr></thead>
+     <tbody>${prodRows.map(p=>`<tr>
+      <td><b>${esc(p.name)}</b></td>
+      <td>${p.liters.toFixed(1)} л</td>
+      <td>${p.kegs} шт.</td>
+      <td><b>${fmt(p.amount)} ₸</b></td>
+     </tr>`).join('')}</tbody>
+    </table>`
+  : '<div class="muted" style="padding:4px 0">За выбранный период отгрузок пива нет.</div>';
+
+ if(isOwner()){
+  $('historyRoleHint').innerHTML='Режим <b>Владельца</b>: можно редактировать или удалять любую запись — остатки пива, сырья, кег и долгов пересчитаются автоматически.';
+ }else{
+  $('historyRoleHint').innerHTML='Режим <b>Водителя</b>: история доступна для просмотра и печати чеков.';
+ }
+
+ $('historyList').innerHTML=filtered.length?filtered.map(renderOperation).join(''):'<div class="empty">За выбранный период операций нет.</div>';
+}
+
+/* ====== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ ====== */
+function renderUsersList(){
+ if(!$('usersList')) return;
+ $('usersList').innerHTML=db.users.map((u,idx)=>`
+  <div class="item row">
+   <div>
+    <b>${esc(u.name)}</b> <span class="muted">(${esc(u.login)})</span>
+    <div class="muted">Роль: ${u.role==='owner'?'Владелец (полные права)':'Водитель'} · Пароль: <code>${esc(u.pass)}</code></div>
+   </div>
+   ${db.users.length>1 && u.login!==currentUser?.login?`<button type="button" class="danger sm-btn" onclick="deleteUserAcc(${idx})">Удалить</button>`:''}
+  </div>
+ `).join('');
+}
+
+window.deleteUserAcc=idx=>{
+ if(!isOwner()) return;
+ if(!confirm('Удалить этого пользователя?')) return;
+ db.users.splice(idx,1);
+ save();
+};
+
+$('saveAccBtn').onclick=()=>{
+ if(!isOwner()) return alert('Только владелец может управлять пользователями.');
+ const login=$('newAccLogin').value.trim().toLowerCase();
+ const name=$('newAccName').value.trim();
+ const pass=$('newAccPass').value.trim();
+ const role=$('newAccRole').value;
+ if(!login || !name || !pass) return alert('Заполните логин, имя и пароль.');
+ const existing=db.users.find(u=>u.login.toLowerCase()===login);
+ if(existing){
+  existing.name=name;
+  existing.pass=pass;
+  existing.role=role;
+ }else{
+  db.users.push({login,name,pass,role});
+ }
+ $('newAccLogin').value='';
+ $('newAccName').value='';
+ $('newAccPass').value='';
+ save();
+ alert('Пользователь сохранён.');
+};
+
+/* ====== ДОЛГИ ====== */
+function updateDebtPointInfo(){
+ const pt=$('debtPayPoint').value;
+ if(!pt){$('debtPointCurrentInfo').textContent='';return}
+ const d=getPointDebt(pt);
+ $('debtPointCurrentInfo').innerHTML=d>0
+  ? `Текущий долг точки «${esc(pt)}»: <b style="color:var(--red)">${fmt(d)} ₸</b>`
+  : `У точки «${esc(pt)}» сейчас нет долга (0 ₸).`;
+}
+$('debtPayPoint').onchange=updateDebtPointInfo;
+
+$('payAllPointDebtBtn').onclick=()=>{
+ const pt=$('debtPayPoint').value;
+ if(!pt)return alert('Выбери торговую точку.');
+ const d=getPointDebt(pt);
+ if(d<=0)return alert('У этой точки нет долга.');
+ $('debtPayAmount').value=d;
+};
+
+$('saveDebtPayment').onclick=()=>{
+ const pt=$('debtPayPoint').value;
+ const sum=Math.max(0,Number($('debtPayAmount').value)||0);
+ const user=currentUser?currentUser.name:'Система';
+ const note=$('debtPayNote').value.trim();
+ if(!pt)return alert('Выбери торговую точку.');
+ const curDebt=getPointDebt(pt);
+ if(curDebt<=0)return alert('У выбранной точки нет долга.');
+ if(sum<=0)return alert('Укажи сумму оплаты больше 0.');
+ if(sum>curDebt)return alert(`Сумма оплаты (${fmt(sum)} ₸) превышает текущий долг точки (${fmt(curDebt)} ₸).`);
+
+ const nextDebt=curDebt-sum;
+ db.pointDebts[pt]=nextDebt;
+ db.ops.unshift({
+  id:'KC-'+Date.now(),
+  date:new Date().toISOString(),
+  type:'debt_pay',
+  point:pt,
+  amount:sum,
+  debtAfter:nextDebt,
+  desc:`${pt}: оплата долга ${fmt(sum)} ₸`,
+  qty:`Погашено ${fmt(sum)} ₸ (остаток долга: ${fmt(nextDebt)} ₸)`,
+  user,
+  note
+ });
+ $('debtPayAmount').value='';
+ $('debtPayNote').value='';
+ save();
+ alert(`Оплата ${fmt(sum)} ₸ принята. Остаток долга точки «${pt}»: ${fmt(nextDebt)} ₸.`);
+};
+
+window.quickPayPoint=pt=>{
+ go('debts');
+ $('debtPayPoint').value=pt;
+ updateDebtPointInfo();
+ $('debtPayAmount').value=getPointDebt(pt);
+ $('debtPayAmount').focus();
+};
+
+/* ====== ОБЩИЙ РЕНДЕР ====== */
+function render(){
+ if(!currentUser) return;
+ let total=totalKegs(30)+totalKegs(50),wh=db.kegs[30]+db.kegs[50],cl=totalClient(30)+totalClient(50),beer=db.products.reduce((s,p)=>s+p.qty,0);
+ const totalDebt=getTotalDebt();
+
+ const todayStr=localDateStr(new Date());
+ const duePlans=db.plans.filter(p=>p.status!=='done' && p.deliveryDate<=todayStr);
+ const activePlansAll=db.plans.filter(p=>p.status!=='done');
+ $('planBadge').textContent=duePlans.length>0?`(${duePlans.length})`:(activePlansAll.length>0?`(${activePlansAll.length})`:'');
+
+ if(duePlans.length>0){
+  const totalPlanLiters=duePlans.reduce((s,p)=>s+(p.items||[]).reduce((x,i)=>x+(i.liters||0),0),0);
+  $('homePlanBanner').classList.remove('hidden');
+  $('homePlanBanner').innerHTML=`🚚 <b>План доставки на сегодня:</b> ${duePlans.length} заявок (${totalPlanLiters} л) по точкам: <b>${duePlans.map(p=>esc(p.point)).join(', ')}</b>. Нажмите, чтобы открыть маршрутный лист →`;
+ }else{
+  $('homePlanBanner').classList.add('hidden');
+ }
+
+ $('mTotal').textContent=total;
+ $('mWarehouse').textContent=wh;
+ $('mClients').textContent=cl;
+ $('mBeer').textContent=beer.toFixed(1)+' л';
+ $('mDebt').textContent=fmt(totalDebt)+' ₸';
+ $('totalAllDebts').textContent=fmt(totalDebt)+' ₸';
+ $('debtBadge').textContent=totalDebt>0?`(${fmt(totalDebt)} ₸)`:'';
+
+ if(isOwner()){
+  $('roleNotice').innerHTML=`Вы вошли как <b>${esc(currentUser.name)}</b> (Владелец): доступно редактирование и удаление операций в истории, редактирование точек и заявок, а также управление аккаунтами.`;
+ }else{
+  $('roleNotice').innerHTML=`Вы вошли как <b>${esc(currentUser.name)}</b> (Водитель): доступны заявки и маршруты, продажи, возврат кег, варка и приём оплат.`;
+ }
+
+ $('homeKegs').innerHTML=`<div class="item row"><span>30-литровые</span><b><span class="keg-number">${db.kegs[30]}</span> на складе · <span class="keg-number">${totalClient(30)}</span> у клиентов</b></div><div class="item row"><span>50-литровые</span><b><span class="keg-number">${db.kegs[50]}</span> на складе · <span class="keg-number">${totalClient(50)}</span> у клиентов</b></div>`;
+ $('kegStockSummary').innerHTML=`<div class="item row"><span>Всего 30 л</span><b><span class="keg-number">${totalKegs(30)}</span> шт. (<span class="keg-number">${totalClient(30)}</span> у клиентов)</b></div><div class="item row"><span>Всего 50 л</span><b><span class="keg-number">${totalKegs(50)}</span> шт. (<span class="keg-number">${totalClient(50)}</span> у клиентов)</b></div>`;
+ $('stock30').value=db.kegs[30];$('stock50').value=db.kegs[50];
+
+ $('productsList').innerHTML=db.products.map((p,idx)=>`
+  <div class="item row">
+   <div>
+    <b>${esc(p.name)}</b>
+    <div class="muted">Цена: <b>${p.price>0?fmt(p.price)+' ₸/л':'не задана'}</b></div>
+   </div>
+   <div style="display:flex;align-items:center;gap:8px">
+    <b>${p.qty.toFixed(1)} л</b>
+    <button type="button" class="warn sm-btn" onclick="openEditProductModal(${idx})" title="Изменить цену / название">✏️</button>
+   </div>
+  </div>
+ `).join('')||'<div class="empty">Сорта ещё не добавлены</div>';
+
+ $('rawList').innerHTML=db.raw.map(r=>`<div class="item row"><span>${esc(r.name)} <small class="muted">${esc(r.unit)}</small></span><b>${r.qty.toFixed(2)}</b></div>`).join('')||'<div class="empty">Сырьё ещё не добавлено</div>';
+
+ if($('brewBeerDatalist')){
+  $('brewBeerDatalist').innerHTML=db.products.map(p=>`<option value="${esc(p.name)}"></option>`).join('');
+ }
+
+ const zones=getAllZones();
+ if($('zonesDatalist')){
+  $('zonesDatalist').innerHTML=zones.map(z=>`<option value="${esc(z)}"></option>`).join('');
+ }
+ ['planFilterZone','planFilterZoneMain'].forEach(zId=>{
+  const el=$(zId);
+  if(!el) return;
+  const prev=el.value;
+  el.innerHTML=`<option value="all">Все районы</option>`+zones.map(z=>`<option value="${esc(z)}">${esc(z)}</option>`).join('');
+  if(zones.includes(prev) || prev==='all') el.value=prev;
+ });
+
+ $('pointsList').innerHTML=db.points.map((p,idx)=>{
+  let v=db.pointKegs[p.name]||{30:0,50:0};
+  let d=getPointDebt(p.name);
+  return `<div class="item">
+   <div class="row">
+    <div>
+     <b>${esc(p.name)}</b>
+     ${p.zone?` <span class="pill zone">${esc(p.zone)}</span>`:''}
+    </div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+     ${d>0?`<span class="pill debt">Долг: ${fmt(d)} ₸</span>`:''}
+     <span class="pill"><span class="keg-number">${(v[30]||0)+(v[50]||0)}</span> кег</span>
+     ${isOwner()?`<button type="button" class="warn sm-btn" onclick="openEditPointModal(${idx})">✏️</button>`:''}
+    </div>
+   </div>
+   ${p.address?`<div class="muted" style="margin-top:4px">📍 ${esc(p.address)}</div>`:''}
+   ${p.contact?`<div class="muted" style="margin-top:2px">📞 ${esc(p.contact)}</div>`:''}
+   ${p.note?`<div class="muted" style="margin-top:2px">📝 ${esc(p.note)}</div>`:''}
+   <div class="muted keg-line"><span>30 л: <strong class="keg-number">${v[30]||0}</strong> шт.</span><span>50 л: <strong class="keg-number">${v[50]||0}</strong> шт.</span></div>
+  </div>`;
+ }).join('');
+
+ const ptNames=getPointNames();
+ const debtors=ptNames.map(p=>({point:p,debt:getPointDebt(p)})).filter(x=>x.debt>0).sort((a,b)=>b.debt-a.debt);
+ $('debtsByPointList').innerHTML=debtors.length
+  ? debtors.map(x=>`<div class="item row">
+     <div><b>${esc(x.point)}</b><div class="muted">Неоплаченный остаток</div></div>
+     <div style="text-align:right">
+      <div style="color:var(--red);font-weight:800;font-size:16px">${fmt(x.debt)} ₸</div>
+      <button type="button" class="secondary sm-btn" style="margin-top:4px" onclick="quickPayPoint('${esc(x.point)}')">Погасить</button>
+     </div>
+    </div>`).join('')
+  : '<div class="empty">Долгов нет. Все точки рассчитались!</div>';
+
+ const debtOps=db.ops.filter(o=>o.type==='debt_pay'||(o.type==='sale'&&o.movement&&Number(o.movement.debt||0)>0));
+ $('debtHistoryList').innerHTML=debtOps.length?debtOps.map(renderOperation).join(''):'<div class="empty">Записей по долгам пока нет.</div>';
+
+ $('recent').innerHTML=db.ops.slice(0,5).map(renderOperation).join('')||'Операций пока нет.';
+
+ fillSelect('salePoint',ptNames);
+ fillSelect('planPoint',ptNames);
+ fillSelect('debtPayPoint',ptNames);
+ fillSelect('otherProduct',db.products.map(p=>p.name));
+ fillSelect('otherRawSelect',db.raw.map(r=>r.name));
+
+ const prevHistPt=$('histPointFilter')?.value||'all';
+ if($('histPointFilter')){
+  $('histPointFilter').innerHTML=`<option value="all">Все точки</option>`+ptNames.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  if(ptNames.includes(prevHistPt) || prevHistPt==='all') $('histPointFilter').value=prevHistPt;
+ }
+
+ updateDebtPointInfo();
+ renderSaleRows();
+ renderPlanRows();
+ renderPlanSection();
+ renderRecipeRows();
+ renderHistorySection();
+ renderUsersList();
+ renderBiometricsUI();
+ renderDriveStatus();
+}
+
+function num(id){return Math.max(0,Math.floor(Number($(id).value)||0))}
+
+/* ====== ПРОВЕДЕНИЕ ПРОДАЖИ (ЧЕРЕЗ ОКНО ОПЛАТЫ) ИЛИ ЧИСТОГО ВОЗВРАТА КЕГ ====== */
+$('saveSale').onclick=()=>{
+ const point=$('salePoint').value;
+ const r30=num('ret30'),r50=num('ret50');
+ const user=currentUser?currentUser.name:'Система';
+ const note=$('saleNote').value.trim();
+ const width=Number($('receiptWidth').value)||58;
+
+ if(!point)return alert('Выбери торговую точку.');
+
+ const activeRows=[];
+ for(let i=0;i<saleRows.length;i++){
+  const r=saleRows[i];
+  const liters=r.out30*30+r.out50*50;
+  const price=Math.max(0,Number(r.price)||0);
+  if(!r.product && liters===0) continue;
+  if(!r.product && liters>0) return alert(`В позиции #${i+1} указаны кеги к отгрузке, но не выбран сорт пива.`);
+  if(r.product && liters===0) return alert(`В позиции #${i+1} («${r.product}») укажи количество кег 30 л или 50 л.`);
+  if(liters>0 && price<=0) return alert(`Укажи цену за литр для сорта «${r.product}» (или задай её на складе).`);
+  activeRows.push({
+   product:r.product,
+   out30:r.out30,
+   out50:r.out50,
+   liters,
+   price,
+   amount:liters*price
+  });
+ }
+
+ const {total30:n30,total50:n50,totalLiters,totalAmount}=calcSaleSummary();
+ if(n30+n50+r30+r50===0)return alert('Укажи отгрузку пива или возврат пустых кег.');
+
+ const isPureReturn=(n30+n50===0 && totalLiters===0);
+
+ if(db.kegs[30]<n30||db.kegs[50]<n50)return alert(`На складе недостаточно кег нужного объёма (нужно 30 л: ${n30}, 50 л: ${n50}; на складе 30 л: ${db.kegs[30]}, 50 л: ${db.kegs[50]}).`);
+
+ const balance=db.pointKegs[point]||{30:0,50:0};
+ if(balance[30]<r30||balance[50]<r50)return alert(`У точки «${point}» нет столько кег для возврата (числится 30 л: ${balance[30]||0} шт., 50 л: ${balance[50]||0} шт.).`);
+
+ const neededByProduct={};
+ activeRows.forEach(it=>{neededByProduct[it.product]=(neededByProduct[it.product]||0)+it.liters});
+ for(const [prodName,needLiters] of Object.entries(neededByProduct)){
+  const beer=db.products.find(p=>p.name===prodName);
+  if(!beer || beer.qty<needLiters){
+   const avail=beer?beer.qty.toFixed(1):'0.0';
+   return alert(`Недостаточно пива «${prodName}». На складе ${avail} л, нужно ${needLiters} л.`);
+  }
+ }
+
+ const draft={point,activeRows,n30,n50,r30,r50,totalLiters,totalAmount,user,note,width};
+
+ if(isPureReturn){
+  commitSaleOperation(draft,0,0,'');
+ }else{
+  openPaymentModal(draft);
+ }
+};
+
+$('setKegs').onclick=()=>{let a=Number($('stock30').value),b=Number($('stock50').value);if(!Number.isInteger(a)||a<0||!Number.isInteger(b)||b<0)return alert('Введи целые неотрицательные количества.');if(db.ops.length)return alert('Начальный остаток нельзя менять после операций.');db.kegs[30]=a;db.kegs[50]=b;save();alert('Начальные остатки сохранены.')};
+$('addPoint').onclick=()=>{
+ let n=$('newPoint').value.trim();
+ if(!n)return alert('Введите название точки.');
+ if(getPointNames().includes(n))return alert('Такая точка уже существует.');
+ db.points.push({
+  name:n,
+  zone:$('newPointZone').value.trim(),
+  address:$('newPointAddr').value.trim(),
+  contact:$('newPointContact').value.trim(),
+  note:$('newPointNote').value.trim()
+ });
+ $('newPoint').value='';
+ $('newPointZone').value='';
+ $('newPointAddr').value='';
+ $('newPointContact').value='';
+ $('newPointNote').value='';
+ save();
+};
+$('addProduct').onclick=()=>{
+ let n=$('newProduct').value.trim(),
+     q=Number($('newProductQty').value||0),
+     pr=Math.max(0,Number($('newProductPrice').value||0));
+ if(!n||!Number.isFinite(q)||q<0)return alert('Заполни название и остаток.');
+ if(db.products.some(p=>p.name.toLowerCase()===n.toLowerCase()))return alert('Такой сорт уже есть. Нажмите ✏️ напротив сорта, чтобы изменить его цену.');
+ db.products.push({name:n,qty:q,price:pr});
+ $('newProduct').value='';
+ $('newProductQty').value='';
+ $('newProductPrice').value='';
+ save();
+};
+$('addRaw').onclick=()=>{let n=$('newRaw').value.trim(),q=Number($('newRawQty').value);if(!n||!Number.isFinite(q)||q<0)return alert('Заполни название и остаток.');db.raw.push({name:n,qty:q,unit:$('rawUnit').value});$('newRaw').value=$('newRawQty').value='';save()};
+$('otherType').onchange=()=>{let t=$('otherType').value,beer=t.startsWith('beer');$('otherBeer').classList.toggle('hidden',!beer);$('otherRaw').classList.toggle('hidden',beer)};
+$('saveOther').onclick=()=>{
+ let t=$('otherType').value,user=currentUser?currentUser.name:'Система';
+ if(t.startsWith('beer')){
+  let p=db.products.find(x=>x.name===$('otherProduct').value),q=Number($('otherBeerQty').value);
+  if(!p||!Number.isFinite(q)||q<=0)return alert('Выбери сорт и укажи литры.');
+  if(t==='beer_out'&&p.qty<q)return alert('Недостаточно пива на складе.');
+  p.qty+=t==='beer_in'?q:-q;
+  addOp(t,`${t==='beer_in'?'Приход':'Списание'} пива: ${p.name}`,q+' л',user,'',{product:p.name,numQty:q});
+ }else{
+  let r=db.raw.find(x=>x.name===$('otherRawSelect').value),q=Number($('otherRawQty').value);
+  if(!r||!Number.isFinite(q)||q<=0)return alert('Выбери сырьё и количество.');
+  if(t==='raw_out'&&r.qty<q)return alert('Недостаточно сырья.');
+  r.qty+=t==='raw_in'?q:-q;
+  addOp(t,`${t==='raw_in'?'Приход':'Расход'} сырья: ${r.name}`,q+' '+r.unit,user,'',{rawName:r.name,numQty:q});
+ }
+ save();alert('Операция сохранена.');
+};
+
+function download(name,data,type){let a=document.createElement('a'),u=URL.createObjectURL(new Blob([data],{type}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+$('backup').onclick=()=>download('kegcontrol-backup.json',JSON.stringify(db,null,2),'application/json');
+$('restoreBtn').onclick=()=>$('restoreFile').click();
+$('restoreFile').onchange=async e=>{try{let x=JSON.parse(await e.target.files[0].text());if(!x.kegs||!x.points||!x.products)throw 0;x.points=normalizePointsList(x.points);x.products=normalizeProductsList(x.products);if(!x.pointDebts)x.pointDebts={};if(!Array.isArray(x.plans))x.plans=[];if(!Array.isArray(x.users)||!x.users.length)x.users=JSON.parse(JSON.stringify(DEFAULT_USERS));db=x;save();alert('Резервная копия восстановлена.')}catch{alert('Файл резервной копии не распознан.')}};
+$('exportCsv').onclick=()=>{
+ let rows=[['Дата','Операция','Количество','Сотрудник','Комментарий','Сумма чека','Способ оплаты','Оплачено','В долг'],
+  ...db.ops.map(o=>[
+   new Date(o.date).toLocaleString('ru-RU'),
+   o.desc,
+   o.qty,
+   o.user,
+   o.note||'',
+   o.movement?.amount??(o.type==='debt_pay'?o.amount:''),
+   o.movement?.payMethod?(PAY_METHOD_LABELS[o.movement.payMethod]||o.movement.payMethod):'',
+   o.movement?.paid??(o.type==='debt_pay'?o.amount:''),
+   o.movement?.debt??''
+  ])
+ ];
+ download('kegcontrol-history.csv','\ufeff'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\n'),'text/csv;charset=utf-8');
+};
+$('reset').onclick=()=>{
+ if(!isOwner()) return alert('Очистить базу может только владелец.');
+ if(confirm('Удалить все локальные данные? Сначала скачай резервную копию.')){
+  db=createEmptyDb();
+  saleRows=[{product:'',out30:0,out50:0,price:''}];
+  planRows=[{product:'',out30:0,out50:0,liters:0,price:''}];
+  recipeRows=[{rawName:'',qty:''}];
+  save(false);
+  go('home');
+ }
+};
+
+applyAuthUI();
+</script></body></html>
