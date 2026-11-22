@@ -352,9 +352,9 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 <div id="homePlanBanner" class="notice alert-banner hidden" onclick="go('plan')"></div>
 
 <div class="grid">
-<div class="metric m-kegs"><small>Всего кег</small><strong id="mTotal">0</strong></div>
+<div class="metric m-kegs"><small>Всего кег</small><strong id="mTotal">0</strong><div class="metric-sub" id="mTotalSplit">30л: <b>0</b> · 50л: <b>0</b></div></div>
 <div class="metric m-wh"><small>На складе</small><strong id="mWarehouse">0</strong><div class="metric-sub" id="mWarehouseSplit">30л: <b>0</b> · 50л: <b>0</b></div></div>
-<div class="metric m-cl" style="cursor:pointer" id="clientsKegsCard" title="Нажмите, чтобы посмотреть кеги по точкам"><small>У клиентов</small><strong id="mClients">0</strong></div>
+<div class="metric m-cl" style="cursor:pointer" id="clientsKegsCard" title="Нажмите, чтобы посмотреть кеги по точкам"><small>У клиентов</small><strong id="mClients">0</strong><div class="metric-sub" id="mClientsSplit">30л: <b>0</b> · 50л: <b>0</b></div></div>
 <div class="metric m-beer" style="cursor:pointer" id="beerStockCard" title="Нажмите, чтобы посмотреть остатки по сортам"><small>Пиво на складе</small><strong id="mBeer">0 л</strong></div>
 </div>
 <div class="metric debt-metric" style="margin-top:10px;cursor:pointer" onclick="go('debts')">
@@ -2798,13 +2798,10 @@ function buildReceiptPdfLines(op){
  return rows;
 }
 
-/* Генератор корректного векторного PDF с поддержкой кириллицы (через Canvas/SVG-вектор или Type0/TrueType) */
 function createReceiptPdfBlob(op){
  const rows=buildReceiptPdfLines(op);
- // Рендерим страницу в высоком разрешении на canvas и упаковываем в валидный PDF с JPEG/PNG-потоком,
- // чтобы любой просмотрщик PDF и WhatsApp гарантированно отображали кириллицу без квадратов.
  const isWide=op.width==='80';
- const pdfWidthPt=isWide?226.77:164.41; // 80mm / 58mm in points
+ const pdfWidthPt=isWide?226.77:164.41;
  const pxScale=3;
  const pageWidthPx=Math.round((isWide?302:220)*pxScale);
  const marginX=14*pxScale;
@@ -4072,7 +4069,7 @@ function renderOpCard(o,allowManage){
  const manageBtns=allowManage?`
   <div class="op-actions">
    ${o.type==='sale_return'?`<button type="button" class="secondary sm-btn" onclick="reprintOp(${o.id})">🖨️ Чек</button><button type="button" class="wa-btn sm-btn" onclick="shareOpWhatsApp(${o.id})" title="Отправить PDF-чек в WhatsApp">${WHATSAPP_LOGO_SVG}<span>WhatsApp</span></button>`:''}
-   ${hasAction('edit_ops')?`<button type="button" class="warn sm-btn" onclick="openEditOp(${o.id})">✏️ Изменить</button>`:''}
+   ${hasAction('edit_ops')?`<button type="button" class="warn sm-btn" onclick="openEditOp(${o.id})" title="Изменить операцию">✏️</button>`:''}
    ${hasAction('edit_ops')?`<button type="button" class="danger sm-btn" onclick="deleteOp(${o.id})" title="Удалить операцию">🗑️</button>`:''}
   </div>
  `:'';
@@ -4173,14 +4170,18 @@ function render(){
  const c50=Object.values(kmap).reduce((s,x)=>s+Math.max(0,Number(x.k50||0)),0);
  const wh30=Number(db.kegs30||0);
  const wh50=Number(db.kegs50||0);
+ const all30=wh30+c30;
+ const all50=wh50+c50;
  const whKegs=wh30+wh50;
  const clKegs=c30+c50;
  const totalDebtAll=Object.values(dmap).reduce((s,x)=>s+Number(x.debt||0),0);
 
  $('mTotal').textContent=whKegs+clKegs;
+ $('mTotalSplit').innerHTML=`30л: <b>${all30}</b> · 50л: <b>${all50}</b>`;
  $('mWarehouse').textContent=whKegs;
  $('mWarehouseSplit').innerHTML=`30л: <b>${wh30}</b> · 50л: <b>${wh50}</b>`;
  $('mClients').textContent=clKegs;
+ $('mClientsSplit').innerHTML=`30л: <b>${c30}</b> · 50л: <b>${c50}</b>`;
  $('mBeer').textContent=fmt(db.products.reduce((s,p)=>s+Number(p.qty||0),0))+' л';
  $('mDebt').textContent=money(totalDebtAll);
  $('debtBadge').textContent=totalDebtAll>0?`(${fmt(totalDebtAll)} ₸)`:'';
