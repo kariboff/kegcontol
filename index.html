@@ -93,6 +93,15 @@ button:active{transform:scale(0.985)}
 .sort-option:hover{background:#1d3228}
 .sort-option.active{background:var(--green-soft);color:#6be0a9}
 
+.point-menu-wrap{position:relative;display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+.point-name-btn{background:transparent;color:var(--ink);padding:2px 4px;margin:-2px -4px;border-radius:7px;font-weight:750;font-size:15px;display:inline-flex;align-items:center;gap:4px;text-align:left}
+.point-name-btn:hover{background:#1b2e25;color:#78ebb5}
+.point-popover{position:absolute;left:0;top:calc(100% + 4px);min-width:168px;background:#15241d;border:1px solid #2e4b3d;border-radius:11px;padding:5px;box-shadow:0 12px 28px rgba(0,0,0,0.6);z-index:16}
+.point-menu-item{width:100%;text-align:left;background:transparent;color:var(--ink);padding:8px 10px;border-radius:8px;font-size:13px;font-weight:650;display:flex;align-items:center;gap:7px}
+.point-menu-item:hover{background:#1e342a}
+.point-menu-item.del{color:var(--red)}
+.point-menu-item.del:hover{background:var(--red-soft)}
+
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .metric{background:#101c17;border:1px solid var(--line);border-radius:13px;padding:11px 12px;position:relative;overflow:hidden}
 .metric.m-kegs{background:#0f1c29;border-color:#203a54;border-left:4px solid var(--blue)}
@@ -890,6 +899,7 @@ let statPeriod='day';
 let planFilter='today';
 let pendingSaleDraft=null;
 let pointsSortBy='name';
+let openPointMenuId=null;
 
 const $=id=>document.getElementById(id);
 const fmt=n=>(Math.round(Number(n||0)*100)/100).toLocaleString('ru-RU');
@@ -1570,6 +1580,7 @@ const POINTS_SORT_TITLES={
 
 $('pointsSortBtn').onclick=e=>{
  e.stopPropagation();
+ openPointMenuId=null;
  $('pointsSortMenu').classList.toggle('hidden');
 };
 
@@ -1591,7 +1602,30 @@ document.addEventListener('click',e=>{
  if(wrap&&menu&&!wrap.contains(e.target)){
   menu.classList.add('hidden');
  }
+ if(!e.target.closest('.point-menu-wrap')&&openPointMenuId!==null){
+  openPointMenuId=null;
+  document.querySelectorAll('.point-popover').forEach(el=>el.classList.add('hidden'));
+ }
 });
+
+window.togglePointMenu=(id,ev)=>{
+ if(ev) ev.stopPropagation();
+ $('pointsSortMenu')?.classList.add('hidden');
+ openPointMenuId=(openPointMenuId===id?null:id);
+ document.querySelectorAll('.point-popover').forEach(el=>{
+  el.classList.toggle('hidden',Number(el.dataset.pointMenu)!==openPointMenuId);
+ });
+};
+
+window.deletePoint=id=>{
+ openPointMenuId=null;
+ if(!hasAction('edit_points_plans')) return alert('У вашей роли нет прав на удаление точек.');
+ const pt=db.points.find(x=>x.id===id);
+ if(!pt) return;
+ if(!confirm(`Удалить торговую точку «${pt.name}»?`)) return;
+ db.points=db.points.filter(x=>x.id!==id);
+ save();
+};
 
 function renderPointsList(kmap=kegsByPoint(),dmap=debtsByPoint(),smap=salesByPoint()){
  const canEditPts=hasAction('edit_points_plans');
@@ -1622,18 +1656,25 @@ function renderPointsList(kmap=kegsByPoint(),dmap=debtsByPoint(),smap=salesByPoi
   const k=kmap[p.id]||{k30:0,k50:0};
   const d=dmap[p.id]?dmap[p.id].debt:0;
   const sl=Number(smap[p.id]||0);
+  const menuHidden=openPointMenuId===p.id?'':'hidden';
   return `
    <div class="item">
     <div class="row">
      <div>
-      <b>${esc(p.name)}</b> ${p.zone?`<span class="pill zone">${esc(p.zone)}</span>`:''}
+      <div class="point-menu-wrap">
+       <button type="button" class="point-name-btn" onclick="togglePointMenu(${p.id},event)">${esc(p.name)}</button>
+       ${p.zone?`<span class="pill zone">${esc(p.zone)}</span>`:''}
+       <div class="point-popover ${menuHidden}" data-point-menu="${p.id}">
+        <button type="button" class="point-menu-item" onclick="editPointModal(${p.id})">✏️ Редактировать</button>
+        <button type="button" class="point-menu-item del" onclick="deletePoint(${p.id})">🗑️ Удалить</button>
+       </div>
+      </div>
       ${p.addr||p.phone?`<div class="muted">${p.addr?'📍 '+esc(p.addr)+' ':''}${p.phone?'📞 '+esc(p.phone):''}</div>`:''}
       <div class="muted">Продано: <b>${fmt(sl)} л</b></div>
      </div>
      <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
       ${d>0?`<span class="pill debt">Долг: ${money(d)}</span>`:''}
       <span class="pill">30л: ${Math.max(0,Number(k.k30||0))} · 50л: ${Math.max(0,Number(k.k50||0))}</span>
-      ${canEditPts?`<button type="button" class="secondary sm-btn" onclick="editPointModal(${p.id})">✏️</button>`:''}
      </div>
     </div>
    </div>
@@ -2639,6 +2680,7 @@ $('addPoint').onclick=()=>{
 };
 
 window.editPointModal=id=>{
+ openPointMenuId=null;
  if(!hasAction('edit_points_plans')) return alert('У вашей роли нет прав на редактирование точек.');
  const pt=db.points.find(x=>x.id===id);
  if(!pt) return;
