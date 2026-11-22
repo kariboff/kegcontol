@@ -337,7 +337,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
  </div>
 
  <div class="row" style="margin-top:12px">
-  <h3 style="margin:0">Что заказала точка</h3>
+  <h3 style="margin:0">Что заказала точка (литраж по кегам считается сам)</h3>
   <button type="button" class="secondary sm-btn" id="addPlanRowBtn">+ Добавить сорт</button>
  </div>
  <div id="planRowsContainer" style="margin-top:8px"></div>
@@ -391,7 +391,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 <label>Торговая точка</label><select id="salePoint"></select>
 
 <div class="row" style="margin-top:12px">
-<h3 style="margin:0">Отгрузка пива (необязательно, если только возврат)</h3>
+<h3 style="margin:0">Отгрузка пива по кегам (литраж считается автоматически)</h3>
 <button type="button" class="secondary sm-btn" id="addBeerRowBtn">+ Добавить сорт</button>
 </div>
 <div id="beerRowsContainer" style="margin-top:8px"></div>
@@ -843,6 +843,7 @@ let pendingSaleDraft=null;
 const $=id=>document.getElementById(id);
 const fmt=n=>(Math.round(Number(n||0)*100)/100).toLocaleString('ru-RU');
 const money=n=>fmt(Math.round(Number(n||0)))+' ₸';
+const calcKegLiters=(k30,k50)=>Number(k30||0)*30+Number(k50||0)*50;
 const todayIso=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
 const addDaysIso=(days)=>{const d=new Date();d.setDate(d.getDate()+days);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
 const nextWeekdayIso=(targetDay)=>{
@@ -1422,8 +1423,8 @@ function debtsByPoint(){
  return map;
 }
 
-/* ==================== СТРОКИ В ПРОДАЖЕ ==================== */
-function createBeerRow(defaultProdId='',defaultLiters='',defaultK30=0,defaultK50=0,defaultPrice=''){
+/* ==================== СТРОКИ В ПРОДАЖЕ (ЛИТРАЖ СЧИТАЕТСЯ ПО КЕГАМ) ==================== */
+function createBeerRow(defaultProdId='',defaultK30=0,defaultK50=0,defaultPrice=''){
  const row=document.createElement('div');
  row.className='beer-row';
  const opts=db.products.map(p=>`<option value="${p.id}" ${Number(p.id)===Number(defaultProdId)?'selected':''}>${esc(p.name)} (ост. ${fmt(p.qty)} л · ${fmt(p.price||0)} ₸/л)</option>`).join('');
@@ -1437,17 +1438,14 @@ function createBeerRow(defaultProdId='',defaultLiters='',defaultK30=0,defaultK50
   </div>
   <label>Сорт пива</label>
   <select class="row-prod">${opts}</select>
-  <div class="twocol">
-   <div><label>Объём пива, л</label><input class="row-liters" type="number" min="0" step="0.1" value="${defaultLiters}" placeholder="Например, 30"></div>
+  <div class="threecol">
+   <div><label>Кег 30 л, шт.</label><input class="row-k30" type="number" min="0" step="1" value="${defaultK30}" placeholder="0"></div>
+   <div><label>Кег 50 л, шт.</label><input class="row-k50" type="number" min="0" step="1" value="${defaultK50}" placeholder="0"></div>
    <div><label>Цена за 1 л, ₸</label><input class="row-price price-input" type="number" min="0" step="1" value="${initPrice}"></div>
   </div>
-  <div class="twocol">
-   <div><label>Кег 30 л, шт.</label><input class="row-k30" type="number" min="0" step="1" value="${defaultK30}"></div>
-   <div><label>Кег 50 л, шт.</label><input class="row-k50" type="number" min="0" step="1" value="${defaultK50}"></div>
-  </div>
   <div class="row-subtotal">
-   <span>Сумма по позиции:</span>
-   <b class="row-sum-text">0 ₸</b>
+   <span>Объём: <b class="row-liters-text">0 л</b></span>
+   <span>Сумма: <b class="row-sum-text">0 ₸</b></span>
   </div>
  `;
 
@@ -1469,7 +1467,7 @@ function createBeerRow(defaultProdId='',defaultLiters='',defaultK30=0,defaultK50
 function ensureAtLeastOneBeerRow(){
  const box=$('beerRowsContainer');
  if(!box.children.length&&db.products.length){
-  box.appendChild(createBeerRow(db.products[0].id,'',0,0));
+  box.appendChild(createBeerRow(db.products[0].id,0,0));
  }
  updateSaleSummary();
 }
@@ -1479,13 +1477,14 @@ function getBeerRowsData(){
  document.querySelectorAll('#beerRowsContainer .beer-row').forEach(r=>{
   const prodId=Number(r.querySelector('.row-prod').value);
   const p=db.products.find(x=>x.id===prodId);
-  const liters=Number(r.querySelector('.row-liters').value||0);
-  const price=Number(r.querySelector('.row-price').value||0);
-  const k30=Number(r.querySelector('.row-k30').value||0);
-  const k50=Number(r.querySelector('.row-k50').value||0);
+  const k30=Math.max(0,Number(r.querySelector('.row-k30').value||0));
+  const k50=Math.max(0,Number(r.querySelector('.row-k50').value||0));
+  const price=Math.max(0,Number(r.querySelector('.row-price').value||0));
+  const liters=calcKegLiters(k30,k50);
   const subtotal=Math.round(liters*price);
+  r.querySelector('.row-liters-text').textContent=`${fmt(liters)} л`;
   r.querySelector('.row-sum-text').textContent=money(subtotal);
-  if(p&&(liters>0||k30>0||k50>0)){
+  if(p&&(k30>0||k50>0)){
    rows.push({productId:p.id,productName:p.name,liters,price,k30,k50,subtotal});
   }
  });
@@ -1510,7 +1509,7 @@ $('addBeerRowBtn').onclick=()=>{
 };
 
 /* ==================== ПЛАНИРОВКА И ЗАЯВКИ НА ДОСТАВКУ ==================== */
-function createPlanRow(defaultProdId='',defaultLiters='',defaultK30=0,defaultK50=0){
+function createPlanRow(defaultProdId='',defaultK30=0,defaultK50=0){
  const row=document.createElement('div');
  row.className='beer-row';
  const opts=db.products.map(p=>`<option value="${p.id}" ${Number(p.id)===Number(defaultProdId)?'selected':''}>${esc(p.name)} (ост. ${fmt(p.qty)} л · ${fmt(p.price||0)} ₸/л)</option>`).join('');
@@ -1521,20 +1520,30 @@ function createPlanRow(defaultProdId='',defaultLiters='',defaultK30=0,defaultK50
   </div>
   <label>Сорт пива</label>
   <select class="p-row-prod">${opts}</select>
-  <div class="threecol">
-   <div><label>Литров</label><input class="p-row-liters" type="number" min="0" step="0.1" value="${defaultLiters}" placeholder="30"></div>
-   <div><label>Кег 30 л</label><input class="p-row-k30" type="number" min="0" step="1" value="${defaultK30}"></div>
-   <div><label>Кег 50 л</label><input class="p-row-k50" type="number" min="0" step="1" value="${defaultK50}"></div>
+  <div class="twocol">
+   <div><label>Кег 30 л, шт.</label><input class="p-row-k30" type="number" min="0" step="1" value="${defaultK30}" placeholder="0"></div>
+   <div><label>Кег 50 л, шт.</label><input class="p-row-k50" type="number" min="0" step="1" value="${defaultK50}" placeholder="0"></div>
+  </div>
+  <div class="row-subtotal">
+   <span>Объём по позиции:</span>
+   <b class="p-row-liters-text">0 л</b>
   </div>
  `;
+ const upd=()=>{
+  const k30=Math.max(0,Number(row.querySelector('.p-row-k30').value||0));
+  const k50=Math.max(0,Number(row.querySelector('.p-row-k50').value||0));
+  row.querySelector('.p-row-liters-text').textContent=`${fmt(calcKegLiters(k30,k50))} л`;
+ };
+ row.querySelectorAll('input').forEach(inp=>inp.oninput=upd);
  row.querySelector('.remove-row').onclick=()=>row.remove();
+ upd();
  return row;
 }
 
 function ensurePlanRow(){
  const box=$('planRowsContainer');
  if(!box.children.length&&db.products.length){
-  box.appendChild(createPlanRow(db.products[0].id,'',0,0));
+  box.appendChild(createPlanRow(db.products[0].id,0,0));
  }
 }
 
@@ -1570,16 +1579,16 @@ $('savePlanBtn').onclick=()=>{
  const items=[];
  document.querySelectorAll('#planRowsContainer .beer-row').forEach(r=>{
   const p=db.products.find(x=>x.id===Number(r.querySelector('.p-row-prod').value));
-  const liters=Number(r.querySelector('.p-row-liters').value||0);
-  const k30=Number(r.querySelector('.p-row-k30').value||0);
-  const k50=Number(r.querySelector('.p-row-k50').value||0);
-  if(p&&(liters>0||k30>0||k50>0)){
+  const k30=Math.max(0,Number(r.querySelector('.p-row-k30').value||0));
+  const k50=Math.max(0,Number(r.querySelector('.p-row-k50').value||0));
+  const liters=calcKegLiters(k30,k50);
+  if(p&&(k30>0||k50>0)){
    items.push({productId:p.id,productName:p.name,liters,k30,k50,price:p.price||0});
   }
  });
 
  if(!items.length&&ret30===0&&ret50===0){
-  return alert('Добавьте хотя бы один сорт пива или количество пустых кег на возврат.');
+  return alert('Укажите количество кег (30 л или 50 л) хотя бы по одному сорту или возврат пустых кег.');
  }
 
  db.plans.unshift({
@@ -1635,7 +1644,9 @@ function loadPlanIntoSale(planId){
   pl.items.forEach(it=>{
    const prod=db.products.find(p=>p.id===it.productId)||db.products.find(p=>p.name===it.productName);
    const pid=prod?prod.id:(db.products[0]?db.products[0].id:'');
-   box.appendChild(createBeerRow(pid,it.liters,it.k30,it.k50,prod?prod.price:(it.price||0)));
+   const k30=it.k30||0;
+   const k50=it.k50||0;
+   box.appendChild(createBeerRow(pid,k30,k50,prod?prod.price:(it.price||0)));
   });
  }else{
   ensureAtLeastOneBeerRow();
@@ -1732,10 +1743,13 @@ function renderPlans(){
  const prodTotals={};
  filtered.forEach(pl=>{
   (pl.items||[]).forEach(it=>{
-   sumLiters+=Number(it.liters||0);
-   sumK30+=Number(it.k30||0);
-   sumK50+=Number(it.k50||0);
-   prodTotals[it.productName]=(prodTotals[it.productName]||0)+Number(it.liters||0);
+   const k30=Number(it.k30||0);
+   const k50=Number(it.k50||0);
+   const lit=calcKegLiters(k30,k50);
+   sumLiters+=lit;
+   sumK30+=k30;
+   sumK50+=k50;
+   prodTotals[it.productName]=(prodTotals[it.productName]||0)+lit;
   });
   sumRet30+=Number(pl.ret30||0);
   sumRet50+=Number(pl.ret50||0);
@@ -1774,9 +1788,12 @@ function renderPlans(){
     :(isToday?`<span class="pill plan-due">🔥 Сегодня ${pl.time?esc(pl.time):''}</span>`
     :`<span class="pill ret">📅 ${fmtDateRu(pl.date)} ${pl.time?esc(pl.time):''}</span>`));
 
-   const itemsHtml=(pl.items||[]).map(it=>`
-    <div class="op-line">🍺 <b>${esc(it.productName)}</b> — <b>${fmt(it.liters)} л</b> (30л: ${it.k30||0} шт., 50л: ${it.k50||0} шт.)</div>
-   `).join('');
+   const itemsHtml=(pl.items||[]).map(it=>{
+    const k30=it.k30||0;
+    const k50=it.k50||0;
+    const lit=calcKegLiters(k30,k50);
+    return `<div class="op-line">🍺 <b>${esc(it.productName)}</b> — <b>${fmt(lit)} л</b> (30л: ${k30} шт., 50л: ${k50} шт.)</div>`;
+   }).join('');
    const retHtml=(Number(pl.ret30||0)>0||Number(pl.ret50||0)>0)
     ?`<div class="op-line ret-line">↩️ Забрать пустых: <b>30л — ${pl.ret30||0} шт., 50л — ${pl.ret50||0} шт.</b></div>`:'';
 
@@ -1824,7 +1841,7 @@ function openSalePayModal(draft){
  $('payAmountWrap').classList.remove('hidden');
  $('modalPaidAmount').value=draft.totalAmount;
 
- const linesSummary=draft.items.map(i=>`<div>• ${esc(i.productName)}: <b>${fmt(i.liters)} л</b> × ${fmt(i.price)} ₸ = <b>${money(i.subtotal)}</b></div>`).join('');
+ const linesSummary=draft.items.map(i=>`<div>• ${esc(i.productName)}: <b>${i.k30+i.k50} кег (${fmt(i.liters)} л)</b> × ${fmt(i.price)} ₸ = <b>${money(i.subtotal)}</b></div>`).join('');
  $('payModalSummary').innerHTML=`
   <div class="row"><span>Точка:</span><b>${esc(draft.pointName)}</b></div>
   <div style="margin-top:6px;font-size:13px">${linesSummary}</div>
@@ -1975,7 +1992,7 @@ $('saveSale').onclick=()=>{
 
  if(!pt) return alert('Выберите торговую точку');
  if(!items.length&&ret30===0&&ret50===0){
-  return alert('Укажите хотя бы одну позицию отгрузки пива или возврат пустых кег.');
+  return alert('Укажите кеги (30 л или 50 л) хотя бы по одному сорту или возврат пустых кег.');
  }
 
  const litersByProd={};
@@ -1985,7 +2002,7 @@ $('saveSale').onclick=()=>{
  for(const [pid,needLiters] of Object.entries(litersByProd)){
   const prod=db.products.find(p=>p.id===Number(pid));
   if(!prod||needLiters>Number(prod.qty||0)){
-   return alert(`Не хватает пива «${prod?prod.name:''}» на складе (доступно ${fmt(prod?prod.qty:0)} л).`);
+   return alert(`Не хватает пива «${prod?prod.name:''}» на складе (нужно ${fmt(needLiters)} л, доступно ${fmt(prod?prod.qty:0)} л).`);
   }
  }
 
@@ -2353,13 +2370,10 @@ window.openEditOp=id=>{
   const itemsFields=(op.items||[]).map((it,idx)=>`
    <div class="beer-row" data-idx="${idx}">
     <div class="beer-row-title">${esc(it.productName)}</div>
-    <div class="twocol">
-     <div><label>Литров</label><input class="ed-liters" type="number" min="0" step="0.1" value="${it.liters}"></div>
-     <div><label>Цена/л, ₸</label><input class="ed-price" type="number" min="0" step="1" value="${it.price}"></div>
-    </div>
-    <div class="twocol">
+    <div class="threecol">
      <div><label>Кег 30 л</label><input class="ed-k30" type="number" min="0" step="1" value="${it.k30}"></div>
      <div><label>Кег 50 л</label><input class="ed-k50" type="number" min="0" step="1" value="${it.k50}"></div>
+     <div><label>Цена/л, ₸</label><input class="ed-price" type="number" min="0" step="1" value="${it.price}"></div>
     </div>
    </div>
   `).join('');
@@ -2398,10 +2412,10 @@ window.openEditOp=id=>{
    itemDivs.forEach(div=>{
     const i=Number(div.dataset.idx);
     const it=op.items[i];
-    it.liters=Math.max(0,Number(div.querySelector('.ed-liters').value||0));
-    it.price=Math.max(0,Number(div.querySelector('.ed-price').value||0));
     it.k30=Math.max(0,Number(div.querySelector('.ed-k30').value||0));
     it.k50=Math.max(0,Number(div.querySelector('.ed-k50').value||0));
+    it.liters=calcKegLiters(it.k30,it.k50);
+    it.price=Math.max(0,Number(div.querySelector('.ed-price').value||0));
     it.subtotal=Math.round(it.liters*it.price);
    });
 
@@ -2838,8 +2852,8 @@ function renderOpCard(o,allowManage){
  if(o.type==='sale_return'){
   const lines=(o.items||[]).map(i=>`
    <div class="op-line">
-    🍺 <b>${esc(i.productName)}</b> — <b>${fmt(i.liters)} л</b> × ${fmt(i.price)} ₸ = <b>${money(i.subtotal)}</b>
-    <span class="muted">(кег 30 л: ${i.k30} шт., 50 л: ${i.k50} шт.)</span>
+    🍺 <b>${esc(i.productName)}</b> — <b>${i.k30+i.k50} кег (${fmt(i.liters)} л)</b> × ${fmt(i.price)} ₸ = <b>${money(i.subtotal)}</b>
+    <span class="muted">(30л: ${i.k30} шт., 50л: ${i.k50} шт.)</span>
    </div>
   `).join('');
   const retLine=(o.ret30>0||o.ret50>0)
