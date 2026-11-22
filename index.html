@@ -63,7 +63,7 @@ header{background:linear-gradient(90deg,#09120e 0%,#10241b 100%);color:var(--ink
 .sync-pill.err{background:var(--red-soft);color:#ffa8a8;border-color:#61282d}
 .sync-pill.busy{background:var(--amber-soft);color:#ffd280;border-color:#664819}
 
-main{max-width:780px;margin:auto;padding:10px 12px 92px}
+main{max-width:780px;margin:auto;padding:10px 12px 92px;touch-action:pan-y}
 .tabs{display:flex;gap:6px;overflow:auto;padding:8px 0;position:sticky;top:48px;background:var(--bg);z-index:2;scrollbar-width:none;border-bottom:1px solid var(--line)}
 .tabs::-webkit-scrollbar{display:none}
 button{border:0;border-radius:11px;padding:10px 12px;font:inherit;cursor:pointer;transition:transform .08s ease,opacity .15s ease,background-color .15s ease}
@@ -104,6 +104,7 @@ button:active{transform:scale(0.985)}
 .point-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;width:100%}
 .point-row-left{flex:1 1 auto;min-width:0}
 .point-row-right{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;text-align:right}
+.keg-cnt-num{font-weight:900;font-size:12px;font-variant-numeric:tabular-nums}
 
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .metric{background:#101c17;border:1px solid var(--line);border-radius:13px;padding:11px 12px;position:relative;overflow:hidden}
@@ -113,6 +114,8 @@ button:active{transform:scale(0.985)}
 .metric.m-beer{background:#0e2121;border-color:#1c4240;border-left:4px solid var(--teal)}
 .metric small{color:var(--muted);font-weight:600;font-size:12px}
 .metric strong{display:block;font-size:24px;margin-top:3px;color:var(--ink)}
+.metric-sub{margin-top:5px;font-size:12px;color:#b8d6c7;font-variant-numeric:tabular-nums}
+.metric-sub b{font-weight:800;color:var(--ink)}
 .metric.debt-metric{background:var(--red-soft);border:1px solid #572529;border-left:4px solid var(--red)}
 .metric.debt-metric strong{color:var(--red)}
 
@@ -309,7 +312,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
   <button type="button" class="danger sm-btn" style="padding:4px 7px;font-size:11px;line-height:1" id="logoutBtn" title="Выйти">Выход</button>
  </div>
 </header>
-<main>
+<main id="mainSwipeArea">
 <nav class="tabs" id="tabs">
 <button class="tab active" data-page="home">Обзор</button>
 <button class="tab" data-page="plan">Планировка <span id="planBadge"></span></button>
@@ -327,14 +330,13 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#0c1511eb;backdrop-filt
 
 <div class="grid">
 <div class="metric m-kegs"><small>Всего кег</small><strong id="mTotal">0</strong></div>
-<div class="metric m-wh"><small>На складе</small><strong id="mWarehouse">0</strong></div>
+<div class="metric m-wh"><small>На складе</small><strong id="mWarehouse">0</strong><div class="metric-sub" id="mWarehouseSplit">30л: <b>0</b> · 50л: <b>0</b></div></div>
 <div class="metric m-cl" style="cursor:pointer" id="clientsKegsCard" title="Нажмите, чтобы посмотреть кеги по точкам"><small>У клиентов</small><strong id="mClients">0</strong></div>
-<div class="metric m-beer"><small>Пиво на складе</small><strong id="mBeer">0 л</strong></div>
+<div class="metric m-beer" style="cursor:pointer" id="beerStockCard" title="Нажмите, чтобы посмотреть остатки по сортам"><small>Пиво на складе</small><strong id="mBeer">0 л</strong></div>
 </div>
 <div class="metric debt-metric" style="margin-top:10px;cursor:pointer" onclick="go('debts')">
 <div class="row"><div><small>Общий долг точек</small><strong id="mDebt">0 ₸</strong></div><span class="pill debt">Открыть долги →</span></div>
 </div>
-<div class="card accent-blue" data-card-id="home_kegs"><h2>Тара на складе</h2><div id="homeKegs"></div></div>
 <div class="card accent-teal" data-card-id="home_recent"><h2>Последние операции</h2><div id="recent" class="empty">Операций пока нет.</div></div>
 <div class="notice" id="roleNotice"></div>
 </section>
@@ -1515,14 +1517,23 @@ $('syncStatusPill').onclick=()=>{
  else connectGoogleDrive();
 };
 
-/* ==================== НАВИГАЦИЯ ==================== */
+/* ==================== НАВИГАЦИЯ И СВАЙПЫ МЕЖДУ ВКЛАДКАМИ ==================== */
+function getCurrentActivePage(){
+ const activeBtn=document.querySelector('#tabs .tab.active');
+ return activeBtn?activeBtn.dataset.page:'home';
+}
+
 function go(page){
  if(!hasTabAccess(page)){
   const fallback=ALL_TABS.find(t=>hasTabAccess(t.id));
   if(fallback) page=fallback.id;
   else return;
  }
- document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.page===page));
+ document.querySelectorAll('.tab').forEach(t=>{
+  const isAct=t.dataset.page===page;
+  t.classList.toggle('active',isAct);
+  if(isAct) t.scrollIntoView({behavior:'smooth',inline:'nearest',block:'nearest'});
+ });
  document.querySelectorAll('main section').forEach(s=>s.classList.toggle('hidden',s.id!==page));
  if(page==='settings'){
   applySettingsVisibilityForUser();
@@ -1535,6 +1546,52 @@ $('tabs').onclick=e=>{
  const btn=e.target.closest('.tab');
  if(btn) go(btn.dataset.page);
 };
+
+(()=>{
+ const swipeEl=$('mainSwipeArea');
+ if(!swipeEl) return;
+ let startX=0,startY=0,tracking=false,blockedByHorizontalScroll=false;
+
+ swipeEl.addEventListener('touchstart',e=>{
+  if(!currentUser) return;
+  if(e.touches.length!==1) return;
+  if(!$('planModal').classList.contains('hidden')||!$('payModal').classList.contains('hidden')||!$('editModal').classList.contains('hidden')) return;
+  const touch=e.touches[0];
+  startX=touch.clientX;
+  startY=touch.clientY;
+  tracking=true;
+  blockedByHorizontalScroll=!!e.target.closest('.tabs,.period-btns,table');
+ },{passive:true});
+
+ swipeEl.addEventListener('touchmove',e=>{
+  if(!tracking||blockedByHorizontalScroll||e.touches.length!==1) return;
+  const dx=e.touches[0].clientX-startX;
+  const dy=e.touches[0].clientY-startY;
+  if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>18){
+   tracking=false;
+  }
+ },{passive:true});
+
+ swipeEl.addEventListener('touchend',e=>{
+  if(!tracking||blockedByHorizontalScroll||!e.changedTouches.length) return;
+  tracking=false;
+  const endTouch=e.changedTouches[0];
+  const dx=endTouch.clientX-startX;
+  const dy=endTouch.clientY-startY;
+  if(Math.abs(dx)<65||Math.abs(dx)<Math.abs(dy)*1.35) return;
+
+  const visiblePages=Array.from(document.querySelectorAll('#tabs .tab:not(.hidden)')).map(b=>b.dataset.page);
+  if(visiblePages.length<2) return;
+  const curIdx=visiblePages.indexOf(getCurrentActivePage());
+  if(curIdx===-1) return;
+
+  if(dx<0&&curIdx<visiblePages.length-1){
+   go(visiblePages[curIdx+1]);
+  }else if(dx>0&&curIdx>0){
+   go(visiblePages[curIdx-1]);
+  }
+ },{passive:true});
+})();
 
 /* ==================== РАСЧЁТ КЕГ И ДОЛГОВ ==================== */
 function getOpKegs30(op){
@@ -1640,12 +1697,43 @@ $('clientsKegsCard').onclick=()=>{
       ${x.zone?`<span class="pill zone" style="margin-left:6px">${esc(x.zone)}</span>`:''}
      </div>
      <div class="point-row-right">
-      <span class="pill keg-active">Всего: ${x.k30+x.k50} шт.</span>
-      <span class="muted">30л: <b>${x.k30}</b> · 50л: <b>${x.k50}</b></span>
+      <span class="pill keg-active">Всего: <span class="keg-cnt-num">${x.k30+x.k50}</span> шт.</span>
+      <span class="muted">30л: <b class="keg-cnt-num">${x.k30}</b> · 50л: <b class="keg-cnt-num">${x.k50}</b></span>
      </div>
     </div>
    </div>
   `).join(''):'<div class="empty">Сейчас ни у одной точки нет кег на руках.</div>'}
+ `;
+ $('editModal').classList.remove('hidden');
+};
+
+/* ==================== МОДАЛЬНОЕ ОКНО «ПИВО НА СКЛАДЕ» ==================== */
+$('beerStockCard').onclick=()=>{
+ const totalLiters=db.products.reduce((s,p)=>s+Number(p.qty||0),0);
+ const sortedProds=[...db.products].sort((a,b)=>Number(b.qty||0)-Number(a.qty||0));
+
+ $('editModalTitle').textContent='🍺 Пиво на складе по сортам';
+ $('editModalBody').innerHTML=`
+  <div class="calc" style="margin-top:0;margin-bottom:10px">
+   <div class="row"><span>Всего пива на складе:</span><strong>${fmt(totalLiters)} л</strong></div>
+   <div class="row" style="margin-top:4px"><span class="muted">Сортов в списке:</span><b>${sortedProds.length} шт.</b></div>
+  </div>
+  ${sortedProds.length?sortedProds.map(p=>{
+   const qty=Number(p.qty||0);
+   return `
+    <div class="item">
+     <div class="point-row">
+      <div class="point-row-left">
+       <b>${esc(p.name)}</b>
+       <div class="muted">Цена: <b>${fmt(p.price||0)} ₸/л</b></div>
+      </div>
+      <div class="point-row-right">
+       <span class="pill ${qty>0?'keg-active':'keg-zero'}"><span class="keg-cnt-num">${fmt(qty)}</span> л</span>
+      </div>
+     </div>
+    </div>
+   `;
+  }).join(''):'<div class="empty">Сортов пива пока нет.</div>'}
  `;
  $('editModal').classList.remove('hidden');
 };
@@ -1757,7 +1845,7 @@ function renderPointsList(kmap=kegsByPoint(),dmap=debtsByPoint(),smap=salesByPoi
      </div>
      <div class="point-row-right">
       ${d>0?`<span class="pill debt">Долг: ${money(d)}</span>`:''}
-      <span class="pill ${hasKegs?'keg-active':'keg-zero'}">30л: ${k30Val} · 50л: ${k50Val}</span>
+      <span class="pill ${hasKegs?'keg-active':'keg-zero'}">30л: <span class="keg-cnt-num">${k30Val}</span> · 50л: <span class="keg-cnt-num">${k50Val}</span></span>
      </div>
     </div>
    </div>
@@ -3527,12 +3615,15 @@ function render(){
  const smap=salesByPoint();
  const c30=Object.values(kmap).reduce((s,x)=>s+Math.max(0,Number(x.k30||0)),0);
  const c50=Object.values(kmap).reduce((s,x)=>s+Math.max(0,Number(x.k50||0)),0);
- const whKegs=Number(db.kegs30||0)+Number(db.kegs50||0);
+ const wh30=Number(db.kegs30||0);
+ const wh50=Number(db.kegs50||0);
+ const whKegs=wh30+wh50;
  const clKegs=c30+c50;
  const totalDebtAll=Object.values(dmap).reduce((s,x)=>s+Number(x.debt||0),0);
 
  $('mTotal').textContent=whKegs+clKegs;
  $('mWarehouse').textContent=whKegs;
+ $('mWarehouseSplit').innerHTML=`30л: <b>${wh30}</b> · 50л: <b>${wh50}</b>`;
  $('mClients').textContent=clKegs;
  $('mBeer').textContent=fmt(db.products.reduce((s,p)=>s+Number(p.qty||0),0))+' л';
  $('mDebt').textContent=money(totalDebtAll);
@@ -3549,10 +3640,6 @@ function render(){
   banner.classList.add('hidden');
  }
 
- $('homeKegs').innerHTML=`
-  <div class="item keg-line"><span>Кеги 30 л на складе</span><span class="keg-number">${db.kegs30} шт.</span></div>
-  <div class="item keg-line"><span>Кеги 50 л на складе</span><span class="keg-number">${db.kegs50} шт.</span></div>
- `;
  $('stock30').value=db.kegs30;
  $('stock50').value=db.kegs50;
  $('kegStockSummary').innerHTML=`
