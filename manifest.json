@@ -1,1 +1,9 @@
-
+{
+  "name": "KegControl Cloud",
+  "short_name": "KegControl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b130e",
+  "theme_color": "#16a34a"
+}
