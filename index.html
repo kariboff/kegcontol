@@ -1146,7 +1146,7 @@ function requestGoogleToken({silent=false,afterCallback=null,showAlerts=true}={}
    if(typeof afterCallback==='function') afterCallback();
   }
  });
- tokenClient.requestAccessToken({prompt:silent?'none':(driveWasConnected?'':'consent')});
+ tokenClient.requestAccessToken({prompt:silent?'none':''});
 }
 
 function connectGoogleDrive(afterCallback){
