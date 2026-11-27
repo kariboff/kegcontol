@@ -63,7 +63,7 @@ header{background:linear-gradient(90deg,#09120e 0%,#10241b 100%);color:var(--ink
 .sync-pill.err{background:var(--red-soft);color:#ffa8a8;border-color:#61282d}
 .sync-pill.busy{background:var(--amber-soft);color:#ffd280;border-color:#664819}
 
-main{max-width:780px;margin:auto;padding:10px 12px 112px;touch-action:pan-y;overflow-x:clip}
+main{max-width:780px;margin:auto;padding:10px 12px 118px;touch-action:pan-y;overflow-x:clip}
 main section{will-change:transform,opacity}
 main section.anim-from-right{animation:tabSlideFromRight .26s cubic-bezier(0.22,1,0.36,1) both}
 main section.anim-from-left{animation:tabSlideFromLeft .26s cubic-bezier(0.22,1,0.36,1) both}
@@ -76,16 +76,18 @@ main section.anim-from-left{animation:tabSlideFromLeft .26s cubic-bezier(0.22,1,
  to{opacity:1;transform:translateX(0)}
 }
 
- .tabs{display:flex;gap:5px;overflow-x:auto;overflow-y:hidden;padding:7px 8px calc(7px + env(safe-area-inset-bottom));position:fixed;left:0;right:0;bottom:0;top:auto;background:rgba(10,19,14,.97);backdrop-filter:blur(12px);z-index:10;scrollbar-width:none;border-top:1px solid var(--line);border-bottom:0;justify-content:flex-start}
-.tabs .tab{flex:0 0 auto;min-width:74px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:7px 10px;font-size:11px;border-radius:12px;white-space:nowrap}
-.tabs .tab.active{box-shadow:0 2px 12px rgba(34,153,99,.22)}
-@media(min-width:900px){.tabs{justify-content:center}.tabs .tab{min-width:90px;font-size:12px}}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(10,19,15,0.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid #233a30;z-index:12;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -6px 24px rgba(0,0,0,0.48)}
+.tabs{display:flex;align-items:stretch;justify-content:space-around;gap:3px;max-width:780px;margin:0 auto;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 button{border:0;border-radius:11px;padding:10px 12px;font:inherit;cursor:pointer;transition:transform .08s ease,opacity .15s ease,background-color .15s ease}
 button:active{transform:scale(0.985)}
-.tab{background:#14211b;color:var(--muted);white-space:nowrap;padding:8px 12px;font-size:14px;font-weight:600;border:1px solid var(--line)}
-.tab:hover{color:var(--ink);border-color:#325042}
-.tab.active{background:var(--green);color:#f3fbf7;border-color:#2db375;box-shadow:0 2px 10px rgba(34,153,99,0.28)}
+.tab{flex:1 1 0;min-width:56px;background:transparent;color:var(--muted);padding:6px 4px;border-radius:12px;border:1px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative;line-height:1.1}
+.tab:hover{color:var(--ink);background:#15251e}
+.tab.active{background:var(--green-soft);color:#75efb5;border-color:#266b4b;box-shadow:0 2px 10px rgba(34,153,99,0.22)}
+.tab-ico{font-size:18px;line-height:1.1;display:block}
+.tab-lbl{font-size:10.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:72px}
+.tab-badge{position:absolute;top:3px;right:4px;background:var(--red);color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:99px;line-height:1.2}
+.tab-badge:empty{display:none}
 
 .card{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--green);border-radius:16px;padding:14px;margin:12px 0;box-shadow:0 4px 16px rgba(0,0,0,0.28);position:relative}
 .card.accent-blue{border-top-color:var(--blue)}
@@ -188,26 +190,6 @@ a{color:var(--blue)}
 .notice{background:var(--amber-soft);border:1px solid #5c4116;border-left:4px solid var(--amber);border-radius:11px;padding:10px 12px;font-size:12px;color:#ffd896;margin:10px 0}
 .notice.info{background:var(--blue-soft);border-color:#214369;border-left-color:var(--blue);color:#b7d9ff}
 .notice.alert-banner{background:#3b290e;border:1px solid #755017;border-left:4px solid var(--amber);color:#ffe0a3;cursor:pointer}
-.plan-reminder{display:block;width:100%;text-align:left;background:#15251d;border:1px solid #286344;border-left:5px solid var(--green);border-radius:16px;padding:13px 14px;margin:4px 0 14px;color:var(--ink);box-shadow:0 5px 18px rgba(0,0,0,.22)}
-.plan-reminder.has-overdue{background:#2b1719;border-color:#71333a;border-left-color:var(--red)}
-.plan-reminder-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:800;margin-bottom:8px}
-.plan-reminder-list{display:grid;gap:6px}
-.plan-reminder-row{display:flex;justify-content:space-between;gap:10px;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.16);font-size:12px}
-.plan-reminder-row b{color:var(--ink)}
-.stat-date-nav{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 0 8px}
-.stat-date-nav button{background:#172820;border:1px solid #315342;color:var(--ink);border-radius:10px;padding:8px 11px;font-weight:750}
-.stat-date-current{min-width:150px;text-align:center;font-weight:800;font-size:14px;background:#101c16;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
-.stat-period-menu{position:relative}
-.stat-period-pop{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);z-index:15;min-width:190px;padding:5px;background:#15241d;border:1px solid #2e4b3d;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.55)}
-.stat-period-pop button{display:block;width:100%;text-align:left;background:transparent;border:0;padding:9px 10px;font-size:13px}
-.stat-period-pop button.active{background:var(--green-soft);color:#6be0a9}
-.op-line.sale-line{background:#33280f;border-left-color:#f2c14e;color:#ffe3a0}
-.op-line.sale-line b{color:#fff0bd}
-.history-op-card{background:#111e17;border:1px solid #294235;border-radius:13px;padding:11px;margin:9px 0}
-.history-op-card .op-lines{gap:7px}
-.point-history-block{border:1px solid var(--line);border-radius:11px;padding:10px;margin:10px 0;background:#0f1b16}
-.point-history-block h3{margin:0 0 8px}
-
 
 .twocol{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .threecol{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
@@ -220,7 +202,7 @@ a{color:var(--blue)}
 .calc.debt-box strong{color:var(--red)}
 .calc.paid-box{background:#10241b;border:1px solid #224d39;border-left:4px solid var(--green)}
 
-footer{display:none}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:14px 12px 6px;margin-top:8px}
 
 .route-group{border:1px solid #263d32;border-left:4px solid var(--purple);border-radius:14px;padding:11px 12px;margin:12px 0;background:#0f1a15}
 .route-group-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-bottom:8px;margin-bottom:9px;border-bottom:1px solid var(--line)}
@@ -316,6 +298,64 @@ footer{display:none}
  #printArea.report .rep-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}
  #printArea.report .rep-box{border:1px solid #666;border-radius:4px;padding:6px 8px}
 }
+
+/* Карточка напоминаний планировки на Главной */
+.home-plan-card{border-radius:16px;padding:13px 14px;margin:4px 0 12px;cursor:pointer;transition:transform .12s ease,box-shadow .15s ease;position:relative}
+.home-plan-card:active{transform:scale(0.992)}
+.home-plan-card.plan-green{background:linear-gradient(135deg,#0f261c 0%,#143325 100%);border:1.5px solid #278759;border-left:5px solid var(--green);box-shadow:0 4px 16px rgba(34,153,99,0.16)}
+.home-plan-card.plan-red{background:linear-gradient(135deg,#2a1215 0%,#36171b 100%);border:1.5px solid #a83842;border-left:5px solid var(--red);box-shadow:0 4px 18px rgba(255,107,107,0.2)}
+.home-plan-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.home-plan-title{font-size:15px;font-weight:800;display:flex;align-items:center;gap:6px}
+.home-plan-card.plan-green .home-plan-title{color:#7af0b8}
+.home-plan-card.plan-red .home-plan-title{color:#ff9494}
+.home-plan-list{display:grid;gap:6px}
+.home-plan-row{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(9,17,13,0.48);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:7px 9px;font-size:12.5px}
+.home-plan-row.is-urgent{background:rgba(74,22,27,0.55);border-color:rgba(255,107,107,0.35)}
+.home-plan-day{font-weight:800;white-space:nowrap;font-size:11.5px;padding:2px 7px;border-radius:7px;background:rgba(255,255,255,0.07)}
+.home-plan-row.is-urgent .home-plan-day{background:rgba(255,107,107,0.22);color:#ffb3b3}
+.home-plan-btn{width:100%;margin-top:10px;padding:12px 14px;border-radius:13px;background:linear-gradient(135deg,#17334f 0%,#1d4366 100%);color:#bfe0ff;border:1px solid #2e6496;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(24,78,128,0.28)}
+.home-plan-btn:hover{background:linear-gradient(135deg,#1c3e61 0%,#23507a 100%);color:#e3f1ff}
+
+/* Кликабельный долг и карточка точки */
+.pill.debt-link{cursor:pointer;transition:transform .1s ease,background-color .15s ease,box-shadow .15s ease;display:inline-flex;align-items:center;gap:4px}
+.pill.debt-link:hover{background:#4d2025;box-shadow:0 0 0 2px rgba(255,107,107,0.35)}
+.pill.debt-link:active{transform:scale(0.96)}
+.point-item-clickable{cursor:pointer;border-radius:12px;padding:11px 10px;margin:0 -10px;transition:background-color .14s ease}
+.point-item-clickable:hover{background:#16261f}
+
+/* Навигатор даты в статистике продаж */
+.date-nav-wrap{position:relative;margin:6px 0 10px}
+.date-nav-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#0e1914;border:1px solid #284236;border-radius:13px;padding:6px}
+.date-nav-arrow{flex:0 0 40px;height:38px;padding:0;border-radius:10px;background:#172921;color:var(--ink);border:1px solid #2b473a;font-size:16px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}
+.date-nav-arrow:hover{background:#1f382d;color:#78ebb5}
+.date-nav-arrow:disabled{opacity:0.35;pointer-events:none}
+.date-nav-center{flex:1 1 auto;background:transparent;color:var(--ink);padding:6px 10px;border-radius:10px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.date-nav-center:hover{background:#16261f}
+.date-nav-mode{font-size:10.5px;font-weight:700;color:#6be0a9;text-transform:uppercase;letter-spacing:0.04em}
+.date-nav-label{font-size:14px;font-weight:800;color:var(--ink)}
+.date-mode-popover{position:absolute;left:50%;transform:translateX(-50%);top:calc(100% + 6px);width:min(270px,92vw);background:#15241d;border:1px solid #2f4f40;border-radius:14px;padding:6px;box-shadow:0 14px 34px rgba(0,0,0,0.65);z-index:18}
+.date-mode-opt{width:100%;text-align:left;background:transparent;color:var(--ink);padding:9px 12px;border-radius:9px;font-size:13.5px;font-weight:650;display:flex;align-items:center;justify-content:space-between}
+.date-mode-opt:hover{background:#1e342a}
+.date-mode-opt.active{background:var(--green-soft);color:#75efb5}
+
+/* Читабельные карточки операций в истории */
+.op-card-box{background:#101c16;border:1px solid #243b30;border-radius:14px;padding:12px;margin:9px 0;box-shadow:0 2px 10px rgba(0,0,0,0.22)}
+.op-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid #1e3228}
+.op-card-point{font-size:15.5px;font-weight:850;color:var(--ink);line-height:1.2}
+.op-card-date{font-size:11.5px;color:var(--muted);margin-top:2px}
+.op-beer-box{background:linear-gradient(135deg,#2b220d 0%,#362a10 100%);border:1px solid #6b5219;border-left:4px solid #f5b942;border-radius:11px;padding:8px 10px;margin-bottom:7px;color:#fff3d1}
+.op-beer-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px dashed rgba(245,185,66,0.24)}
+.op-beer-row:last-child{border-bottom:0;padding-bottom:0}
+.op-beer-row:first-child{padding-top:0}
+.op-beer-name{font-weight:800;font-size:13.5px;color:#ffe08a}
+.op-beer-meta{font-size:12px;color:#e8d39b}
+.op-beer-sum{font-weight:850;font-size:13.5px;color:#ffd257;white-space:nowrap}
+.op-keg-return-box{background:#102338;border:1px solid #244a73;border-left:4px solid var(--blue);border-radius:10px;padding:7px 10px;margin-bottom:7px;font-size:13px;color:#bfe0ff;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.op-pay-box{border-radius:10px;padding:7px 10px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.op-pay-box.is-paid{background:#10261c;border:1px solid #22543d;border-left:4px solid var(--green);color:#9bf2c6}
+.op-pay-box.is-debt{background:#2d1317;border:1px solid #692930;border-left:4px solid var(--red);color:#ffb0b0}
+.op-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:8px;padding-top:7px;border-top:1px dashed #22382d}
+
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -363,19 +403,16 @@ footer{display:none}
  </div>
 </header>
 <main id="mainSwipeArea">
-<nav class="tabs" id="tabs">
-<button class="tab active" data-page="home">⌂ Главное</button>
-<button class="tab" data-page="sale">＋ Продажа</button>
-<button class="tab" data-page="debts">₸ Долги <span id="debtBadge"></span></button>
-<button class="tab" data-page="stock">▣ Склад</button>
-<button class="tab" data-page="points">⌖ Точки</button>
-<button class="tab" data-page="history">◷ История</button>
-<button class="tab" data-page="settings">⚙ Ещё</button>
-</nav>
 
-<!-- ОБЗОР -->
+<!-- ГЛАВНАЯ -->
 <section id="home">
-<button type="button" id="homePlanBanner" class="plan-reminder hidden" onclick="go('plan')" aria-label="Открыть планировку"></button>
+<div id="homePlanCard" class="home-plan-card plan-green" onclick="go('plan')" title="Нажмите, чтобы открыть планировку и заявки">
+ <div class="home-plan-head">
+  <span class="home-plan-title" id="homePlanCardTitle">📅 Напоминания на 7 дней</span>
+  <span class="pill" id="homePlanCardBadge">0 заявок</span>
+ </div>
+ <div id="homePlanCardBody" class="home-plan-list"></div>
+</div>
 
 <div class="grid">
 <div class="metric m-kegs"><small>Всего кег</small><strong id="mTotal">0</strong><div class="metric-sub" id="mTotalSplit">30л: <b>0</b> · 50л: <b>0</b></div></div>
@@ -386,6 +423,7 @@ footer{display:none}
 <div class="metric debt-metric" style="margin-top:10px;cursor:pointer" onclick="go('debts')">
 <div class="row"><div><small>Общий долг точек</small><strong id="mDebt">0 ₸</strong></div><span class="pill debt">Открыть долги →</span></div>
 </div>
+<button type="button" id="homeOpenPlanBtn" class="home-plan-btn" onclick="go('plan')">🚚 Планировка и заявки <span id="homePlanBtnBadge"></span></button>
 <div class="card accent-teal" data-card-id="home_recent"><h2>Последние операции</h2><div id="recent" class="empty">Операций пока нет.</div></div>
 </section>
 
@@ -393,10 +431,13 @@ footer{display:none}
 <section id="plan" class="hidden">
 <div class="card accent-blue" data-card-id="plan_main">
  <div class="row card-hdr-bar" style="flex-wrap:wrap">
-  <h2 style="margin:0">🚚 Маршрутный лист и заявки</h2>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+   <button type="button" class="secondary sm-btn" onclick="go('home')">← Главная</button>
+   <h2 style="margin:0">🚚 Маршрутный лист</h2>
+  </div>
   <div style="display:flex;gap:6px;flex-wrap:wrap">
    <button type="button" class="primary sm-btn" style="margin-top:0;width:auto" id="openNewPlanModalBtn">➕ Новая заявка</button>
-   <button type="button" class="blue-btn sm-btn" id="enableNotifBtn" title="Включить системные уведомления браузера">🔔 Напоминания</button>
+   <button type="button" class="blue-btn sm-btn" id="enableNotifBtn" title="Включить системные уведомления браузера">🔔</button>
   </div>
  </div>
 
@@ -619,25 +660,30 @@ footer{display:none}
   <h2 style="margin:0">📊 Статистика продаж</h2>
   <button type="button" class="blue-btn sm-btn" id="downloadReportPdfBtn">📄 Скачать PDF</button>
  </div>
-   <div class="stat-date-nav">
-   <button type="button" id="statPrevBtn" aria-label="Предыдущий период">‹</button>
-   <div class="stat-period-menu">
-    <button type="button" class="stat-date-current" id="statDateLabel">Сегодня</button>
-    <div class="stat-period-pop hidden" id="statPeriodMenu">
-     <button type="button" data-period="day" class="active">Сегодня</button>
-     <button type="button" data-period="week">Эта неделя</button>
-     <button type="button" data-period="month">Этот месяц</button>
-     <button type="button" data-period="year">Этот год</button>
-     <button type="button" data-period="all">За всё время</button>
-     <button type="button" data-period="custom">За период…</button>
-    </div>
-   </div>
-   <button type="button" id="statNextBtn" aria-label="Следующий период">›</button>
+
+ <div class="date-nav-wrap" id="statDateNavWrap">
+  <div class="date-nav-bar">
+   <button type="button" class="date-nav-arrow" id="statPrevPeriodBtn" title="Предыдущий период">◀</button>
+   <button type="button" class="date-nav-center" id="statDateCenterBtn" title="Нажмите, чтобы выбрать режим периода">
+    <span class="date-nav-mode" id="statPeriodModeLabel">Сегодня ▾</span>
+    <span class="date-nav-label" id="statPeriodRangeLabel">—</span>
+   </button>
+   <button type="button" class="date-nav-arrow" id="statNextPeriodBtn" title="Следующий период">▶</button>
   </div>
-  <div id="statCustomDates" class="twocol hidden" style="margin-top:6px">
-   <div><label style="margin-top:4px">С даты</label><input type="date" id="statDateFrom"></div>
-   <div><label style="margin-top:4px">По дату</label><input type="date" id="statDateTo"></div>
+  <div class="date-mode-popover hidden" id="statDateModeMenu">
+   <button type="button" class="date-mode-opt active" data-period="day">Сегодня</button>
+   <button type="button" class="date-mode-opt" data-period="week">Эта неделя</button>
+   <button type="button" class="date-mode-opt" data-period="month">Этот месяц</button>
+   <button type="button" class="date-mode-opt" data-period="year">Этот год</button>
+   <button type="button" class="date-mode-opt" data-period="all">За всё время</button>
+   <button type="button" class="date-mode-opt" data-period="custom">За период</button>
   </div>
+ </div>
+
+ <div id="statCustomDates" class="twocol hidden" style="margin-top:6px">
+  <div><label style="margin-top:4px">С даты</label><input type="date" id="statDateFrom"></div>
+  <div><label style="margin-top:4px">По дату</label><input type="date" id="statDateTo"></div>
+ </div>
  <div style="margin-top:6px">
   <label style="margin-top:4px">Фильтр по торговой точке</label>
   <select id="statPointFilter"><option value="all">Все торговые точки</option></select>
@@ -774,8 +820,19 @@ footer{display:none}
  <button type="button" class="danger" id="resetAllBtn" style="width:100%;margin-top:12px">Очистить операции и сбросить остатки</button>
 </div>
 </section>
-</main>
 <footer>KegControl 1.4 Cloud · <span id="footerUserInfo">Авторизован</span></footer>
+</main>
+<nav class="bottom-nav" aria-label="Навигация">
+ <div class="tabs" id="tabs">
+  <button class="tab active" data-page="home"><span class="tab-ico">🏠</span><span class="tab-lbl">Главная</span></button>
+  <button class="tab" data-page="sale"><span class="tab-ico">🍺</span><span class="tab-lbl">Продажа</span></button>
+  <button class="tab" data-page="debts"><span class="tab-ico">📒</span><span class="tab-lbl">Долги</span><span class="tab-badge" id="debtBadge"></span></button>
+  <button class="tab" data-page="stock"><span class="tab-ico">📦</span><span class="tab-lbl">Склад</span></button>
+  <button class="tab" data-page="points"><span class="tab-ico">📍</span><span class="tab-lbl">Точки</span></button>
+  <button class="tab" data-page="history"><span class="tab-ico">📊</span><span class="tab-lbl">История</span></button>
+  <button class="tab" data-page="settings"><span class="tab-ico">⚙️</span><span class="tab-lbl">Настройки</span></button>
+ </div>
+</nav>
 </div>
 
 <!-- МОДАЛКА НОВОЙ ЗАЯВКИ (ПЛАНИРОВКА) -->
@@ -887,7 +944,7 @@ const DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file https://www.google
 const WHATSAPP_LOGO_SVG=`<svg class="wa-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.52 3.48A11.82 11.82 0 0 0 12.07 0C5.5 0 .16 5.34.16 11.91c0 2.1.55 4.15 1.59 5.96L0 24l6.29-1.65a11.88 11.88 0 0 0 5.77 1.47h.01c6.57 0 11.91-5.34 11.91-11.91 0-3.18-1.24-6.17-3.46-8.43zM12.07 21.8h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.73.98 1-3.64-.23-.37a9.84 9.84 0 0 1-1.51-5.23c0-5.45 4.44-9.89 9.9-9.89 2.64 0 5.12 1.03 6.99 2.9a9.83 9.83 0 0 1 2.9 7c0 5.45-4.44 9.88-9.88 9.88zm5.42-7.4c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.06 2.88 1.21 3.08c.15.2 2.09 3.19 5.06 4.47.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.3.17-1.42-.07-.12-.27-.2-.57-.35z"/></svg>`;
 
 const ALL_TABS=[
- {id:'home',label:'Главное'},
+ {id:'home',label:'Главная'},
  {id:'plan',label:'Планировка'},
  {id:'sale',label:'Продажа / Возврат'},
  {id:'debts',label:'Долги'},
@@ -1014,7 +1071,6 @@ let driveWasConnected=!!loadDriveMeta().wasConnected;
 let isSyncing=false;
 let activeSalePlanId=null;
 let statPeriod='day';
-let statAnchorDate=todayIso();
 let planFilter='today';
 let pendingSaleDraft=null;
 let pointsSortBy='name';
@@ -1639,7 +1695,7 @@ function go(page,swipeDir=0){
  }
 
  document.querySelectorAll('.tab').forEach(t=>{
-  const isAct=t.dataset.page===(page==='plan'?'home':page);
+  const isAct=t.dataset.page===page;
   t.classList.toggle('active',isAct);
   if(isAct) t.scrollIntoView({behavior:'smooth',inline:'nearest',block:'nearest'});
  });
@@ -1968,6 +2024,11 @@ document.addEventListener('click',e=>{
  if(wrap&&menu&&!wrap.contains(e.target)){
   menu.classList.add('hidden');
  }
+ const dateWrap=$('statDateNavWrap');
+ const dateMenu=$('statDateModeMenu');
+ if(dateWrap&&dateMenu&&!dateWrap.contains(e.target)){
+  dateMenu.classList.add('hidden');
+ }
  if(!e.target.closest('.point-menu-wrap')&&openPointMenuId!==null){
   openPointMenuId=null;
   document.querySelectorAll('.point-popover').forEach(el=>el.classList.add('hidden'));
@@ -2007,15 +2068,34 @@ window.setProspectRating=(id,rating)=>{
  save();
 };
 
-window.openDebtPaymentForPoint=(id,ev)=>{
- if(ev){ev.preventDefault();ev.stopPropagation();}
+window.jumpToDebtPayment=(pointId,ev)=>{
+ if(ev) ev.stopPropagation();
+ if(!hasTabAccess('debts')) return alert('У вашей роли нет доступа к разделу «Долги».');
  go('debts');
- $('debtPayPoint').value=String(id);
- updateDebtPointInfo();
- $('debtPayAmount').value='';
- const target=document.querySelector('[data-card-id="debts_pay"]');
- if(target) target.scrollIntoView({behavior:'smooth',block:'start'});
- setTimeout(()=>$('debtPayAmount')?.focus({preventScroll:true}),250);
+ const sel=$('debtPayPoint');
+ if(sel&&Array.from(sel.options).some(o=>Number(o.value)===Number(pointId))){
+  sel.value=String(pointId);
+  updateDebtPointInfo();
+ }
+ const payCard=document.querySelector('[data-card-id="debts_pay"]');
+ if(payCard){
+  if(payCard.classList.contains('collapsed')){
+   payCard.querySelector('.card-collapse-btn')?.click();
+  }
+  payCard.scrollIntoView({behavior:'smooth',block:'start'});
+ }
+ setTimeout(()=>{
+  const amtInp=$('debtPayAmount');
+  if(amtInp){
+   amtInp.value='';
+   amtInp.focus();
+  }
+ },260);
+};
+
+window.handlePointRowClick=(id,ev)=>{
+ if(ev.target.closest('button,a,.point-popover,.prospect-stars,.debt-link')) return;
+ openPointDetailsModal(id);
 };
 
 function renderPointsList(kmap=kegsByPoint(),dmap=debtsByPoint(),smap=salesByPoint()){
@@ -2027,8 +2107,9 @@ function renderPointsList(kmap=kegsByPoint(),dmap=debtsByPoint(),smap=salesByPoi
   const phone=p.phone?`<a href="tel:${esc(p.phone).replace(/[^+0-9]/g,'')}" style="color:var(--blue);text-decoration:none;white-space:nowrap">☎ ${esc(p.phone)}</a>`:'';
   const mapLink=p.mapUrl&&/^https?:\/\//i.test(p.mapUrl)?`<div class="muted" style="margin-top:3px"><a href="${esc(p.mapUrl)}" target="_blank" rel="noopener noreferrer">🗺️ Открыть в 2ГИС</a></div>`:'';
   const stars=isProspect?`<div class="prospect-stars" role="group" aria-label="Оценка вероятности договорённости: ${Number(p.rating)||0} из 5">${[1,2,3,4,5].map(n=>`<button type="button" class="prospect-star ${n<=Number(p.rating||0)?'selected':''}" onclick="setProspectRating(${p.id},${n})" aria-label="Оценить в ${n} из 5" title="${n} из 5">★</button>`).join('')}</div>`:'';
-  return `<div class="item"><div class="point-row"><div class="point-row-left">
-   <div class="point-menu-wrap"><button type="button" class="point-name-btn" onclick="openPointDetailsModal(${p.id})" title="Открыть сведения о точке">${esc(p.name)}</button><button type="button" class="secondary sm-btn" style="padding:3px 7px;min-height:26px" onclick="togglePointMenu(${p.id},event)" aria-label="Действия с точкой">⋮</button>${p.zone?`<span class="pill zone">${esc(p.zone)}</span>`:''}
+  const debtPill=d>0?`<button type="button" class="pill debt debt-link" onclick="jumpToDebtPayment(${p.id},event)" title="Нажмите, чтобы внести оплату долга для этой точки">Долг: ${money(d)} 💳</button>`:'';
+  return `<div class="item point-item-clickable" onclick="handlePointRowClick(${p.id},event)" title="Нажмите на карточку точки, чтобы открыть историю покупок пива, кег и оплат"><div class="point-row"><div class="point-row-left">
+   <div class="point-menu-wrap"><button type="button" class="point-name-btn" onclick="openPointDetailsModal(${p.id})" title="Открыть сведения и историю точки">${esc(p.name)}</button><button type="button" class="secondary sm-btn" style="padding:3px 7px;min-height:26px" onclick="togglePointMenu(${p.id},event)" aria-label="Действия с точкой">⋮</button>${p.zone?`<span class="pill zone">${esc(p.zone)}</span>`:''}
     <div class="point-popover ${menuHidden}" data-point-menu="${p.id}">
      <button type="button" class="point-menu-item" onclick="editPointModal(${p.id})">✏️ Редактировать</button>
      ${isProspect?`<button type="button" class="point-menu-item" onclick="activatePoint(${p.id})">✅ Активировать точку</button>`:''}
@@ -2037,8 +2118,8 @@ function renderPointsList(kmap=kegsByPoint(),dmap=debtsByPoint(),smap=salesByPoi
    ${p.addr?`<div class="muted">📍 ${esc(p.addr)}</div>`:''}
    ${mapLink}
    ${(p.contactName||p.phone)?`<div class="muted" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">${p.contactName?`<span>👤 ${esc(p.contactName)}</span>`:''}${phone}</div>`:''}
-   <div class="muted">Продано: <b>${fmt(sl)} л</b></div>
-  </div><div class="point-row-right">${isProspect?stars:`${d>0?`<button type="button" class="pill debt" style="cursor:pointer" onclick="openDebtPaymentForPoint(${p.id},event)" title="Перейти к погашению долга">Долг: ${money(d)} ↗</button>`:''}<span class="pill ${hasKegs?'keg-active':'keg-zero'}">30л: <span class="keg-cnt-num">${k30Val}</span> · 50л: <span class="keg-cnt-num">${k50Val}</span></span>`}</div></div></div>`;
+   <div class="muted">Продано: <b>${fmt(sl)} л</b> · <span style="color:#78ebb5">Нажмите для истории →</span></div>
+  </div><div class="point-row-right">${isProspect?stars:`${debtPill}<span class="pill ${hasKegs?'keg-active':'keg-zero'}">30л: <span class="keg-cnt-num">${k30Val}</span> · 50л: <span class="keg-cnt-num">${k50Val}</span></span>`}</div></div></div>`;
  }).join('');
  const active=db.points.filter(p=>p.status!=='prospect'),prospects=db.points.filter(p=>p.status==='prospect');
  const prospectSort=$('prospectSortBy')?.value||'name';
@@ -2762,6 +2843,12 @@ function getPointKegBalanceAfterOp(op){
  return {rem30,rem50};
 }
 
+function formatReceiptPayMethod(pm){
+ if(!pm) return 'Не указан';
+ if(pm==='В долг') return 'Постоплата (отсрочка)';
+ return pm;
+}
+
 function buildReceiptText(op){
  const lines=[];
  lines.push(`НАКЛАДНАЯ / КВИТАНЦИЯ`);
@@ -2776,17 +2863,17 @@ function buildReceiptText(op){
  }
  if(op.totalAmount>0){
   lines.push(`---`);
-  lines.push(`Итого по чеку: ${money(op.totalAmount)}`);
-  lines.push(`Способ оплаты: ${op.payMethod||'Не указан'}`);
-  lines.push(`Оплачено: ${money(op.paidAmount)}`);
+  lines.push(`Итого по накладной: ${money(op.totalAmount)}`);
+  lines.push(`Условия расчёта: ${formatReceiptPayMethod(op.payMethod)}`);
+  lines.push(`Внесено при отгрузке: ${money(op.paidAmount)}`);
   if(Number(op.debtAdded||0)>0){
-   lines.push(`Остаток к оплате: ${money(op.debtAdded)}`);
+   lines.push(`Постоплата (остаток по накладной): ${money(op.debtAdded)}`);
   }
  }
  const {prevDebt,totalDebt}=getPointDebtBreakdownForOp(op);
  if(prevDebt>0||totalDebt>0){
-  if(prevDebt>0) lines.push(`Прошлый долг: ${money(prevDebt)}`);
-  if(totalDebt>0) lines.push(`Общий долг точки: ${money(totalDebt)}`);
+  if(prevDebt>0) lines.push(`Предыдущий баланс расчётов: ${money(prevDebt)}`);
+  if(totalDebt>0) lines.push(`Общий баланс к оплате: ${money(totalDebt)}`);
  }
  if(Number(op.ret30||0)>0||Number(op.ret50||0)>0){
   lines.push(`---`);
@@ -2822,17 +2909,17 @@ function buildReceiptPdfLines(op){
   rows.push({rule:true});
   if(op.totalAmount>0){
    rows.push({left:'ИТОГО:',right:money(op.totalAmount),bold:true,size:12});
-   rows.push({left:'Способ оплаты:',right:op.payMethod||'Не указан',bold:true,size:9.5});
-   rows.push({left:'Оплачено:',right:money(op.paidAmount),bold:false,size:9.5});
+   rows.push({left:'Условия расчёта:',right:formatReceiptPayMethod(op.payMethod),bold:true,size:9.5});
+   rows.push({left:'Внесено при отгрузке:',right:money(op.paidAmount),bold:false,size:9.5});
    if(Number(op.debtAdded||0)>0){
-    rows.push({left:'ОСТАТОК К ОПЛАТЕ:',right:money(op.debtAdded),bold:true,size:10});
+    rows.push({left:'ПОСТОПЛАТА (ОСТАТОК):',right:money(op.debtAdded),bold:true,size:10});
    }
   }
   if(prevDebt>0){
-   rows.push({left:'Прошлый долг:',right:money(prevDebt),bold:true,size:9.5});
+   rows.push({left:'Предыдущий остаток:',right:money(prevDebt),bold:true,size:9.5});
   }
   if(totalDebt>0){
-   rows.push({left:'ОБЩИЙ ДОЛГ:',right:money(totalDebt),bold:true,size:11.5});
+   rows.push({left:'ОБЩИЙ БАЛАНС К ОПЛАТЕ:',right:money(totalDebt),bold:true,size:11});
   }
  }
 
@@ -3051,17 +3138,17 @@ function printReceipt(op){
 
  const {prevDebt,totalDebt}=getPointDebtBreakdownForOp(op);
  const debtSummaryLines=[
-  prevDebt>0?`<div class="line"><span>Прошлый долг:</span><span><b>${money(prevDebt)}</b></span></div>`:'',
-  totalDebt>0?`<div class="line big"><span>ОБЩИЙ ДОЛГ:</span><span>${money(totalDebt)}</span></div>`:''
+  prevDebt>0?`<div class="line"><span>Предыдущий остаток:</span><span><b>${money(prevDebt)}</b></span></div>`:'',
+  totalDebt>0?`<div class="line big"><span>ОБЩИЙ БАЛАНС К ОПЛАТЕ:</span><span>${money(totalDebt)}</span></div>`:''
  ].filter(Boolean).join('');
 
  const payBlock=(op.totalAmount>0||debtSummaryLines)?`
   <div class="rule"></div>
   ${op.totalAmount>0?`
    <div class="line big"><span>ИТОГО:</span><span>${money(op.totalAmount)}</span></div>
-   <div class="line"><span>Способ оплаты:</span><span><b>${esc(op.payMethod||'Не указан')}</b></span></div>
-   <div class="line"><span>Оплачено:</span><span>${money(op.paidAmount)}</span></div>
-   ${op.debtAdded>0?`<div class="line"><span><b>ОСТАТОК К ОПЛАТЕ:</b></span><span><b>${money(op.debtAdded)}</b></span></div>`:''}
+   <div class="line"><span>Условия расчёта:</span><span><b>${esc(formatReceiptPayMethod(op.payMethod))}</b></span></div>
+   <div class="line"><span>Внесено при отгрузке:</span><span>${money(op.paidAmount)}</span></div>
+   ${op.debtAdded>0?`<div class="line"><span><b>ПОСТОПЛАТА (ОСТАТОК):</b></span><span><b>${money(op.debtAdded)}</b></span></div>`:''}
   `:''}
   ${debtSummaryLines}
  `:'';
@@ -3135,28 +3222,10 @@ function downloadPriceListPdf(){
 $('downloadPricePdfBtn').onclick=downloadPriceListPdf;
 
 function getFilteredSalesStatsData(){
- const t=todayIso();
- let fromDate='0000-01-01';
- let toDate='9999-12-31';
- let periodLabel='За всё время';
-
- const anchor=new Date((statAnchorDate||t)+'T12:00:00');
- const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
- if(statPeriod==='day'){
-  fromDate=statAnchorDate||t; toDate=fromDate; periodLabel=`За день (${fmtDateRu(fromDate)})`;
- }else if(statPeriod==='week'){
-  const start=new Date(anchor); start.setDate(start.getDate()-((start.getDay()+6)%7));
-  const end=new Date(start); end.setDate(end.getDate()+6); fromDate=iso(start); toDate=iso(end);
-  periodLabel=`Эта неделя (${fmtDateRu(fromDate)} – ${fmtDateRu(toDate)})`;
- }else if(statPeriod==='month'){
-  const start=new Date(anchor.getFullYear(),anchor.getMonth(),1); const end=new Date(anchor.getFullYear(),anchor.getMonth()+1,0);
-  fromDate=iso(start); toDate=iso(end); periodLabel=`За месяц (${fmtDateRu(fromDate)} – ${fmtDateRu(toDate)})`;
- }else if(statPeriod==='year'){
-  fromDate=`${anchor.getFullYear()}-01-01`; toDate=`${anchor.getFullYear()}-12-31`; periodLabel=`За год (${anchor.getFullYear()})`;
- }else if(statPeriod==='custom'){
-  fromDate=$('statDateFrom').value||t; toDate=$('statDateTo').value||t;
-  periodLabel=`За период (${fmtDateRu(fromDate)} – ${fmtDateRu(toDate)})`;
- }
+ const bounds=getPeriodBounds();
+ const fromDate=bounds.fromDate;
+ const toDate=bounds.toDate;
+ const periodLabel=`${bounds.modeTitle} (${bounds.rangeLabel})`;
 
  const ptFilter=$('statPointFilter').value||'all';
  const ptObj=ptFilter!=='all'?db.points.find(p=>String(p.id)===String(ptFilter)):null;
@@ -3585,40 +3654,106 @@ window.openPointDetailsModal=id=>{
  const map=pt.mapUrl&&/^https?:\/\//i.test(pt.mapUrl)?`<a href="${esc(pt.mapUrl)}" target="_blank" rel="noopener noreferrer">🗺️ Открыть в 2ГИС</a>`:'<span class="muted">Ссылка на 2ГИС не добавлена</span>';
  const phone=pt.phone?`<a href="tel:${esc(pt.phone).replace(/[^+0-9]/g,'')}">${esc(pt.phone)}</a>`:'<span class="muted">Не указан</span>';
  const stars=pt.status==='prospect'?`<div class="prospect-stars">${[1,2,3,4,5].map(n=>`<span class="prospect-star ${n<=Number(pt.rating||0)?'selected':''}">★</span>`).join('')} <span class="muted">${Number(pt.rating)||0}/5</span></div>`:'';
- const pointOps=db.ops.filter(o=>Number(o.pointId)===Number(id)).sort((a,b)=>Number(b.id||0)-Number(a.id||0));
- const pointDebt=Number(debtsByPoint()[id]?.debt||0);
- const pointKegs=kegsByPoint()[id]||{k30:0,k50:0};
- const pointHistory=pointOps.length?pointOps.map(o=>{
+
+ const kmap=kegsByPoint();
+ const dmap=debtsByPoint();
+ const kCur=kmap[pt.id]||{k30:0,k50:0};
+ const cur30=Math.max(0,Number(kCur.k30||0));
+ const cur50=Math.max(0,Number(kCur.k50||0));
+ const curDebt=Math.max(0,Number(dmap[pt.id]?.debt||0));
+
+ const ptOps=db.ops.filter(o=>o.pointId===pt.id||(!o.pointId&&o.pointName===pt.name));
+ let sumLiters=0,sumBought=0,sumPaid=0;
+ ptOps.forEach(o=>{
   if(o.type==='sale_return'){
-   const products=(o.items||[]).map(it=>`${esc(it.productName)} — ${fmt(it.liters)} л (${Number(it.k30||0)+Number(it.k50||0)} кег), ${money(it.subtotal)}`).join('<br>')||'Без отгрузки пива';
-   return `<div class="op-line sale-line"><b>🍺 Покупка · ${esc(o.date)}</b><br>${products}<br><span class="muted">Оплачено: ${money(o.paidAmount)} · Остаток к оплате: ${money(o.debtAdded)}</span>${o.ret30||o.ret50?`<br><span>Возврат кег: 30 л — ${o.ret30||0}, 50 л — ${o.ret50||0}</span>`:''}</div>`;
+   sumLiters+=Number(o.totalLiters||0);
+   sumBought+=Number(o.totalAmount||0);
+   sumPaid+=Number(o.paidAmount||0);
+  }else if(o.type==='debt_pay'){
+   sumPaid+=Number(o.amount||0);
   }
-  if(o.type==='debt_pay') return `<div class="op-line brew-line"><b>💵 Оплата · ${esc(o.date)}</b><br>Погашено: ${money(o.amount)}${o.note?` · ${esc(o.note)}`:''}</div>`;
+ });
+
+ const historyRowsHtml=ptOps.length?ptOps.map(o=>{
+  if(o.type==='sale_return'){
+   const itemsList=(o.items||[]).map(it=>`
+    <div class="op-beer-row">
+     <div>
+      <div class="op-beer-name">🍺 ${esc(it.productName)}</div>
+      <div class="op-beer-meta">${fmt(it.liters)} л × ${fmt(it.price)} ₸ (30л: ${it.k30||0}, 50л: ${it.k50||0})</div>
+     </div>
+     <div class="op-beer-sum">${money(it.subtotal)}</div>
+    </div>
+   `).join('');
+   const hasRet=Number(o.ret30||0)>0||Number(o.ret50||0)>0;
+   const hasDebt=Number(o.debtAdded||0)>0;
+   return `
+    <div class="op-card-box" style="margin:8px 0">
+     <div class="op-card-head">
+      <div>
+       <div class="op-card-date">📅 ${esc(o.date)}</div>
+      </div>
+      <span class="pill ${hasDebt?'debt':'pay-method'}">${esc(o.payMethod||'Отгрузка')}</span>
+     </div>
+     ${itemsList?`<div class="op-beer-box">${itemsList}</div>`:''}
+     ${hasRet?`<div class="op-keg-return-box"><span>↩️ Возврат кег</span><b>30л: ${o.ret30||0} шт. · 50л: ${o.ret50||0} шт.</b></div>`:''}
+     ${Number(o.totalAmount||0)>0?`
+      <div class="op-pay-box ${hasDebt?'is-debt':'is-paid'}">
+       <span>Итого: <b>${money(o.totalAmount)}</b> · Оплачено: <b>${money(o.paidAmount)}</b></span>
+       ${hasDebt?`<b>Остаток: +${money(o.debtAdded)}</b>`:'<b>Оплачено</b>'}
+      </div>
+     `:''}
+     ${o.note?`<div class="muted" style="margin-top:5px">💬 ${esc(o.note)}</div>`:''}
+    </div>
+   `;
+  }
+  if(o.type==='debt_pay'){
+   return `
+    <div class="op-card-box" style="margin:8px 0">
+     <div class="op-card-head">
+      <div class="op-card-date">📅 ${esc(o.date)}</div>
+      <span class="pill">Погашение долга</span>
+     </div>
+     <div class="op-pay-box is-paid">
+      <span>💵 Внесена оплата долга</span>
+      <b>+${money(o.amount)}</b>
+     </div>
+     ${o.note?`<div class="muted" style="margin-top:5px">💬 ${esc(o.note)}</div>`:''}
+    </div>
+   `;
+  }
   return '';
- }).filter(Boolean).join(''):'<div class="empty">Покупок и оплат пока нет.</div>';
- $('editModalTitle').textContent='📍 История торговой точки';
+ }).filter(Boolean).join(''):'<div class="empty">По этой точке пока нет истории покупок, кег и оплат.</div>';
+
+ $('editModalTitle').textContent=`📍 ${pt.name||'Точка'}`;
  $('editModalBody').innerHTML=`
-  <div class="item" style="margin-bottom:12px">
-   <div style="font-size:17px;font-weight:800">${esc(pt.name||'')}</div>
-   ${pt.zone?`<div class="muted">Район: ${esc(pt.zone)}</div>`:''}
-   <div style="margin-top:8px">📍 ${pt.addr?esc(pt.addr):'<span class="muted">Адрес не указан</span>'}</div>
-   <div style="margin-top:8px">${map}</div>
-   <div style="margin-top:8px">👤 ${pt.contactName?esc(pt.contactName):'<span class="muted">Контактное лицо не указано</span>'}</div>
-   <div style="margin-top:5px">☎ ${phone}</div>
-   ${stars?`<div style="margin-top:8px">${stars}</div>`:''}
+  <div class="item" style="margin-bottom:10px">
+   <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+    <div style="font-size:17px;font-weight:800">${esc(pt.name||'')}</div>
+    ${pt.zone?`<span class="pill zone">${esc(pt.zone)}</span>`:''}
+   </div>
+   <div style="margin-top:6px">📍 ${pt.addr?esc(pt.addr):'<span class="muted">Адрес не указан</span>'}</div>
+   <div style="margin-top:5px">${map}</div>
+   <div style="margin-top:5px">👤 ${pt.contactName?esc(pt.contactName):'<span class="muted">Контакт не указан</span>'} · ☎ ${phone}</div>
+   ${stars?`<div style="margin-top:6px">${stars}</div>`:''}
   </div>
-  <div class="point-history-block">
-   <h3>Текущий баланс</h3>
-   <div class="row"><span>Кеги на точке</span><b>30 л: ${Number(pointKegs.k30||0)} · 50 л: ${Number(pointKegs.k50||0)}</b></div>
-   <div class="row" style="margin-top:5px"><span>Остаток к оплате</span><b style="color:${pointDebt>0?'var(--red)':'#6be0a9'}">${money(pointDebt)}</b></div>
-   ${pointDebt>0?`<button type="button" class="primary" style="margin-top:9px" onclick="document.getElementById('editModal').classList.add('hidden');openDebtPaymentForPoint(${id})">Внести оплату долга</button>`:''}
+
+  <div class="summary-strip" style="margin:8px 0 12px">
+   <div class="sum-box"><small>Куплено пива</small><b>${fmt(sumLiters)} л</b><span class="muted">На сумму: ${money(sumBought)}</span></div>
+   <div class="sum-box"><small>Кег на точке</small><b>${cur30+cur50} шт.</b><span class="muted">30л: ${cur30} · 50л: ${cur50}</span></div>
+   <div class="sum-box" style="${curDebt>0?'border-top-color:var(--red)':''}"><small>Оплачено / Долг</small><b style="color:#6be0a9">${money(sumPaid)}</b><span class="muted">Долг: <b style="color:${curDebt>0?'var(--red)':'var(--ink)'}">${money(curDebt)}</b></span></div>
   </div>
-  <div class="point-history-block"><h3>История покупок, кег и оплат</h3><div class="op-lines">${pointHistory}</div></div>
+
+  <h3 style="margin:10px 0 6px">🍺 История покупок пива, кег и оплат (${ptOps.length})</h3>
+  <div style="max-height:310px;overflow-y:auto;padding-right:2px;margin-bottom:12px">
+   ${historyRowsHtml}
+  </div>
+
   <label>Комментарий к точке</label>
-  <textarea id="pointDetailsComment" rows="4" placeholder="Например: кто принимает решение, когда перезвонить, условия, что обсудили...">${esc(pt.comment||'')}</textarea>
+  <textarea id="pointDetailsComment" rows="2" placeholder="Заметки по точке...">${esc(pt.comment||'')}</textarea>
   <div class="row" style="gap:8px;margin-top:10px;flex-wrap:wrap">
-   <button type="button" class="primary" id="savePointCommentBtn">Сохранить комментарий</button>
-   <button type="button" class="secondary" id="editPointFromDetailsBtn">✏️ Редактировать точку</button>
+   <button type="button" class="primary" style="margin-top:0;flex:1" id="savePointCommentBtn">Сохранить комментарий</button>
+   <button type="button" class="secondary" id="editPointFromDetailsBtn">✏️ Редактировать</button>
   </div>`;
  $('editModal').classList.remove('hidden');
  $('savePointCommentBtn').onclick=()=>{
@@ -3852,51 +3987,97 @@ function parseOpIsoDate(op){
  return todayIso();
 }
 
-function updateStatDateNav(){
- const d=new Date((statAnchorDate||todayIso())+'T12:00:00');
- const fmtRange=(a,b)=>`${fmtDateRu(a)} – ${fmtDateRu(b)}`;
- let label='';
- if(statPeriod==='day') label=statAnchorDate===todayIso()?'Сегодня':fmtDateRu(statAnchorDate);
- else if(statPeriod==='week'){const a=new Date(d);a.setDate(a.getDate()-((a.getDay()+6)%7));const b=new Date(a);b.setDate(b.getDate()+6);label=fmtRange(`${a.getFullYear()}-${String(a.getMonth()+1).padStart(2,'0')}-${String(a.getDate()).padStart(2,'0')}`,`${b.getFullYear()}-${String(b.getMonth()+1).padStart(2,'0')}-${String(b.getDate()).padStart(2,'0')}`);}
- else if(statPeriod==='month') label=d.toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
- else if(statPeriod==='year') label=String(d.getFullYear());
- else if(statPeriod==='all') label='За всё время';
- else if(statPeriod==='custom') label=`${fmtDateRu($('statDateFrom').value||todayIso())} – ${fmtDateRu($('statDateTo').value||todayIso())}`;
- else label='Выбранный период';
- $('statDateLabel').textContent=label;
- $('statPrevBtn').disabled=statPeriod==='all'||statPeriod==='custom';
- $('statNextBtn').disabled=statPeriod==='all'||statPeriod==='custom';
- $('statPrevBtn').style.opacity=$('statPrevBtn').disabled?'.35':'1';
- $('statNextBtn').style.opacity=$('statNextBtn').disabled?'.35':'1';
- document.querySelectorAll('#statPeriodMenu button').forEach(b=>b.classList.toggle('active',b.dataset.period===statPeriod));
- $('statCustomDates').classList.toggle('hidden',statPeriod!=='custom');
-}
-$('statDateLabel').onclick=()=> $('statPeriodMenu').classList.toggle('hidden');
-$('statPeriodMenu').onclick=e=>{
- const btn=e.target.closest('button[data-period]'); if(!btn)return;
- statPeriod=btn.dataset.period; statAnchorDate=todayIso(); $('statPeriodMenu').classList.add('hidden');
- if(statPeriod==='custom'){ $('statDateFrom').value=statAnchorDate; $('statDateTo').value=statAnchorDate; }
- updateStatDateNav(); renderSalesStats();
+let statOffset=0;
+
+const STAT_MODE_NAMES={
+ day:'Сегодня',
+ week:'Эта неделя',
+ month:'Этот месяц',
+ year:'Этот год',
+ all:'За всё время',
+ custom:'За период'
 };
-function shiftStatPeriod(delta){
- if(statPeriod==='all'||statPeriod==='custom')return;
- const d=new Date((statAnchorDate||todayIso())+'T12:00:00');
- if(statPeriod==='day')d.setDate(d.getDate()+delta);
- else if(statPeriod==='week')d.setDate(d.getDate()+7*delta);
- else if(statPeriod==='month')d.setMonth(d.getMonth()+delta,1);
- else if(statPeriod==='year')d.setFullYear(d.getFullYear()+delta);
- statAnchorDate=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
- updateStatDateNav(); renderSalesStats();
+
+function getPeriodBounds(){
+ const now=new Date();
+ const toIso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+ const t=todayIso();
+
+ if(statPeriod==='day'){
+  const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+statOffset);
+  const iso=toIso(d);
+  const modeTitle=statOffset===0?'Сегодня':(statOffset===-1?'Вчера':(statOffset===1?'Завтра':'День'));
+  return {fromDate:iso,toDate:iso,modeTitle,rangeLabel:fmtDateRu(iso),canStep:true};
+ }
+ if(statPeriod==='week'){
+  const dow=(now.getDay()+6)%7; // 0 = Пн, 6 = Вс
+  const mon=new Date(now.getFullYear(),now.getMonth(),now.getDate()-dow+statOffset*7);
+  const sun=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+6);
+  const f=toIso(mon),to=toIso(sun);
+  const modeTitle=statOffset===0?'Эта неделя':(statOffset===-1?'Прошлая неделя':'Неделя');
+  return {fromDate:f,toDate:to,modeTitle,rangeLabel:`${fmtDateRu(f)} – ${fmtDateRu(to)}`,canStep:true};
+ }
+ if(statPeriod==='month'){
+  const first=new Date(now.getFullYear(),now.getMonth()+statOffset,1);
+  const last=new Date(first.getFullYear(),first.getMonth()+1,0);
+  const f=toIso(first),to=toIso(last);
+  const monthNames=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+  const mLabel=`${monthNames[first.getMonth()]} ${first.getFullYear()}`;
+  const modeTitle=statOffset===0?'Этот месяц':'Месяц';
+  return {fromDate:f,toDate:to,modeTitle,rangeLabel:mLabel,canStep:true};
+ }
+ if(statPeriod==='year'){
+  const yr=now.getFullYear()+statOffset;
+  const f=`${yr}-01-01`,to=`${yr}-12-31`;
+  const modeTitle=statOffset===0?'Этот год':'Год';
+  return {fromDate:f,toDate:to,modeTitle,rangeLabel:`${yr} год`,canStep:true};
+ }
+ if(statPeriod==='custom'){
+  const f=$('statDateFrom').value||t;
+  const to=$('statDateTo').value||t;
+  return {fromDate:f,toDate:to,modeTitle:'За период',rangeLabel:`${fmtDateRu(f)} – ${fmtDateRu(to)}`,canStep:false};
+ }
+ return {fromDate:'0000-01-01',toDate:'9999-12-31',modeTitle:'За всё время',rangeLabel:'Вся история продаж',canStep:false};
 }
-$('statPrevBtn').onclick=()=>shiftStatPeriod(-1);
-$('statNextBtn').onclick=()=>shiftStatPeriod(1);
-$('statDateFrom').onchange=()=>{updateStatDateNav();renderSalesStats();};
-$('statDateTo').onchange=()=>{updateStatDateNav();renderSalesStats();};
+
+$('statDateCenterBtn').onclick=e=>{
+ e.stopPropagation();
+ $('statDateModeMenu').classList.toggle('hidden');
+};
+
+$('statDateModeMenu').onclick=e=>{
+ const opt=e.target.closest('.date-mode-opt');
+ if(!opt) return;
+ statPeriod=opt.dataset.period||'day';
+ statOffset=0;
+ document.querySelectorAll('#statDateModeMenu .date-mode-opt').forEach(b=>{
+  b.classList.toggle('active',b.dataset.period===statPeriod);
+ });
+ $('statDateModeMenu').classList.add('hidden');
+ $('statCustomDates').classList.toggle('hidden',statPeriod!=='custom');
+ renderSalesStats();
+};
+
+$('statPrevPeriodBtn').onclick=()=>{
+ statOffset-=1;
+ renderSalesStats();
+};
+$('statNextPeriodBtn').onclick=()=>{
+ statOffset+=1;
+ renderSalesStats();
+};
+
+$('statDateFrom').onchange=renderSalesStats;
+$('statDateTo').onchange=renderSalesStats;
 $('statPointFilter').onchange=renderSalesStats;
 $('histTypeFilter').onchange=renderHistoryList;
 
 function renderSalesStats(){
- updateStatDateNav();
+ const bounds=getPeriodBounds();
+ $('statPeriodModeLabel').textContent=`${bounds.modeTitle} ▾`;
+ $('statPeriodRangeLabel').textContent=bounds.rangeLabel;
+ $('statPrevPeriodBtn').disabled=!bounds.canStep;
+ $('statNextPeriodBtn').disabled=!bounds.canStep;
  const st=getFilteredSalesStatsData();
 
  $('statSummaryStrip').innerHTML=`
@@ -4218,31 +4399,46 @@ function renderOpCard(o,allowManage){
  `:'';
 
  if(o.type==='sale_return'){
-  const lines=(o.items||[]).map(i=>`
-   <div class="op-line sale-line">
-    🍺 <b>${esc(i.productName)}</b> — <b>${Number(i.k30||0)+Number(i.k50||0)} кег (${fmt(i.liters)} л)</b> × ${fmt(i.price)} ₸ = <b>${money(i.subtotal)}</b>
-    <span class="muted">(30л: ${i.k30||0} шт., 50л: ${i.k50||0} шт.)</span>
-   </div>
-  `).join('');
-  const retLine=(o.ret30>0||o.ret50>0)
-   ?`<div class="op-line ret-line">↩️ Возврат пустых кег: <b>30 л — ${o.ret30} шт., 50 л — ${o.ret50} шт.</b></div>`
+  const beerRows=(o.items||[]).map(i=>{
+   const kegsCnt=Number(i.k30||0)+Number(i.k50||0);
+   const kegParts=[];
+   if(Number(i.k30||0)>0) kegParts.push(`30л: ${i.k30} шт.`);
+   if(Number(i.k50||0)>0) kegParts.push(`50л: ${i.k50} шт.`);
+   return `
+    <div class="op-beer-row">
+     <div>
+      <div class="op-beer-name">🍺 ${esc(i.productName)} — ${fmt(i.liters)} л (${kegsCnt} кег)</div>
+      <div class="op-beer-meta">${kegParts.join(' · ')} · по ${fmt(i.price)} ₸/л</div>
+     </div>
+     <div class="op-beer-sum">${money(i.subtotal)}</div>
+    </div>
+   `;
+  }).join('');
+
+  const beerBox=beerRows?`<div class="op-beer-box">${beerRows}</div>`:'';
+  const retBox=(o.ret30>0||o.ret50>0)
+   ?`<div class="op-keg-return-box"><span>↩️ Возврат пустых кег</span><b>30л: ${o.ret30||0} шт. · 50л: ${o.ret50||0} шт.</b></div>`
    :'';
-  const debtLine=o.debtAdded>0
-   ?`<div class="op-line debt-line">⏳ Остаток к оплате: <b>${money(o.debtAdded)}</b> (оплачено ${money(o.paidAmount)} из ${money(o.totalAmount)})</div>`
-   :(o.totalAmount>0?`<div class="op-line">✅ Оплачено полностью: <b>${money(o.paidAmount)}</b></div>`:'');
+  const payBox=o.debtAdded>0
+   ?`<div class="op-pay-box is-debt"><span>⚠️ В долг: <b>${money(o.debtAdded)}</b></span><span>Оплачено: <b>${money(o.paidAmount)}</b> из ${money(o.totalAmount)}</span></div>`
+   :(o.totalAmount>0?`<div class="op-pay-box is-paid"><span>✅ Оплачено полностью</span><b>${money(o.paidAmount)}</b></div>`:'');
 
   return `
-   <div class="item history-op-card">
-    <div class="row">
-     <div><b>${esc(o.pointName)}</b> <span class="muted">· ${esc(o.date)}</span></div>
-     <div style="display:flex;gap:4px;flex-wrap:wrap">
+   <div class="op-card-box">
+    <div class="op-card-head">
+     <div>
+      <div class="op-card-point">${esc(o.pointName)}</div>
+      <div class="op-card-date">${esc(o.date)}${o.author?` · ${esc(o.author)}`:''}</div>
+     </div>
+     <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">
       ${o.payMethod&&o.totalAmount>0?`<span class="pill pay-method">${esc(o.payMethod)}</span>`:''}
-      ${o.debtAdded>0?`<span class="pill debt">К оплате: ${money(o.debtAdded)}</span>`:`<span class="pill">Отгрузка / возврат</span>`}
+      ${o.debtAdded>0?`<span class="pill debt">Долг +${money(o.debtAdded)}</span>`:`<span class="pill">Отгрузка</span>`}
      </div>
     </div>
-    <div class="op-lines">${lines}${retLine}${debtLine}</div>
-    ${o.note?`<div class="muted" style="margin-top:5px">Комментарий: ${esc(o.note)}</div>`:''}
-    ${o.author?`<div class="muted" style="margin-top:2px">Оформил: ${esc(o.author)}</div>`:''}
+    ${beerBox}
+    ${retBox}
+    ${payBox}
+    ${o.note?`<div class="muted" style="margin-top:6px">💬 ${esc(o.note)}</div>`:''}
     ${manageBtns}
    </div>
   `;
@@ -4330,26 +4526,65 @@ function render(){
  $('debtBadge').textContent=totalDebtAll>0?`(${fmt(totalDebtAll)} ₸)`:'';
 
  const t=todayIso();
- const horizon=addDaysIso(7);
- const reminderPlans=db.plans.filter(p=>p.status!=='done'&&p.date<=horizon).sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||''));
- const overduePlans=reminderPlans.filter(p=>p.date<t);
- const banner=$('homePlanBanner');
- if(reminderPlans.length){
-  banner.classList.remove('hidden');
-  banner.classList.toggle('has-overdue',overduePlans.length>0);
-  const rows=reminderPlans.slice(0,12).map(pl=>{
-   const pt=db.points.find(x=>Number(x.id)===Number(pl.pointId));
-   const title=pl.pointName||pt?.name||'Торговая точка';
-   const when=pl.date<t?'Просрочено':pl.date===t?'Сегодня':pl.date===addDaysIso(1)?'Завтра':fmtDateRu(pl.date);
-   const time=pl.time?` · ${esc(pl.time)}`:'';
-   const volume=(pl.items||[]).reduce((sum,it)=>sum+calcKegLiters(it.k30,it.k50),0);
-   return `<div class="plan-reminder-row"><span><b>${esc(when)}${time}</b> · ${esc(title)}</span><span>${volume?fmt(volume)+' л':'Заявка'}</span></div>`;
-  }).join('');
-  banner.innerHTML=`<div class="plan-reminder-head"><span>📅 Планировка на 7 дней</span><span>${reminderPlans.length} заяв.</span></div><div class="plan-reminder-list">${rows}</div>${reminderPlans.length>12?`<div class="muted" style="margin-top:6px">И ещё ${reminderPlans.length-12} заявок</div>`:''}<div style="margin-top:9px;font-weight:750;color:#78ebb5">Открыть планировку →</div>`;
- }else{
-  banner.classList.add('hidden');
-  banner.classList.remove('has-overdue');
-  banner.innerHTML='';
+ const max7Iso=addDaysIso(6);
+ const weekPlans=db.plans
+  .filter(p=>p.status!=='done'&&p.date<=max7Iso)
+  .sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||''));
+ const urgentPlans=weekPlans.filter(p=>p.date<=t);
+
+ const homeCard=$('homePlanCard');
+ const homeCardTitle=$('homePlanCardTitle');
+ const homeCardBadge=$('homePlanCardBadge');
+ const homeCardBody=$('homePlanCardBody');
+ const homeBtnBadge=$('homePlanBtnBadge');
+
+ if(homeBtnBadge){
+  homeBtnBadge.textContent=weekPlans.length?`(${weekPlans.length})`:'';
+ }
+ if(homeCard&&homeCardBody){
+  const isRed=urgentPlans.length>0;
+  homeCard.classList.toggle('plan-red',isRed);
+  homeCard.classList.toggle('plan-green',!isRed);
+  homeCardBadge.className='pill'+(isRed?' debt':'');
+  homeCardBadge.textContent=weekPlans.length?`${weekPlans.length} шт.`:'Нет заявок';
+  homeCardTitle.textContent=isRed
+   ?`🔔 Напоминания на 7 дней (срочных: ${urgentPlans.length})`
+   :'📅 Напоминания на 7 дней вперёд';
+
+  if(!weekPlans.length){
+   homeCardBody.innerHTML='<div class="muted" style="padding:4px 2px">На ближайшие 7 дней запланированных отгрузок нет. Нажмите, чтобы открыть планировку →</div>';
+  }else{
+   const dayNames=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+   const tom=addDaysIso(1);
+   homeCardBody.innerHTML=weekPlans.slice(0,7).map(pl=>{
+    const isUrg=pl.date<=t;
+    let dayLabel=fmtDateRu(pl.date);
+    if(pl.date<t) dayLabel=`⚠️ Просрочено (${fmtDateRu(pl.date)})`;
+    else if(pl.date===t) dayLabel=`🔥 Сегодня${pl.time?' '+pl.time:''}`;
+    else if(pl.date===tom) dayLabel=`Завтра${pl.time?' '+pl.time:''}`;
+    else{
+     const [yy,mm,dd]=pl.date.split('-').map(Number);
+     const dtObj=new Date(yy,(mm||1)-1,dd||1);
+     dayLabel=`${dayNames[dtObj.getDay()]}, ${fmtDateRu(pl.date)}`;
+    }
+    const itemsBrief=(pl.items||[]).map(it=>{
+     const kCnt=Number(it.k30||0)+Number(it.k50||0);
+     return `${esc(it.productName)} (${kCnt} кег)`;
+    }).join(', ');
+    const retBrief=(Number(pl.ret30||0)>0||Number(pl.ret50||0)>0)
+     ?`возврат ${Number(pl.ret30||0)+Number(pl.ret50||0)} кег`:'';
+    const desc=[itemsBrief,retBrief].filter(Boolean).join(' · ')||'Заявка';
+    return `
+     <div class="home-plan-row ${isUrg?'is-urgent':''}">
+      <div style="min-width:0;flex:1">
+       <div style="font-weight:750;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(pl.pointName)}${pl.zone?` <span class="muted">[${esc(pl.zone)}]</span>`:''}</div>
+       <div class="muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${desc}</div>
+      </div>
+      <span class="home-plan-day">${esc(dayLabel)}</span>
+     </div>
+    `;
+   }).join('')+(weekPlans.length>7?`<div class="muted" style="text-align:center;margin-top:2px">+ ещё ${weekPlans.length-7} заявок →</div>`:'');
+  }
  }
 
  $('stock30').value=db.kegs30;
@@ -4447,8 +4682,6 @@ $('planDate').value=todayIso();
 $('planFilterDate').value=todayIso();
 $('statDateFrom').value=addDaysIso(-6);
 $('statDateTo').value=todayIso();
-statAnchorDate=todayIso();
-updateStatDateNav();
 
 const savedLogin=localStorage.getItem(SESSION_KEY);
 if(savedLogin){
