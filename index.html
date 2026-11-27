@@ -31,28 +31,30 @@
 </script>
 <style>
 :root{
- --bg:#0b130f;
- --card:#13201a;
- --ink:#eaf3ed;
- --muted:#93aba0;
- --green:#229963;
- --green-soft:#143626;
- --line:#23382e;
- --red:#ff6b6b;
- --red-soft:#38181b;
- --amber:#ffb03b;
- --amber-soft:#382810;
- --blue:#58a6ff;
- --blue-soft:#132942;
- --purple:#b48eff;
- --purple-soft:#261a3d;
- --teal:#38d1c9;
- --teal-soft:#113231;
+ --bg:#070c0a;
+ --card:#0f1814;
+ --card-elevated:#15221c;
+ --ink:#f0f6f3;
+ --muted:#8ba398;
+ --green:#10b981;
+ --green-soft:rgba(16,185,129,0.14);
+ --line:rgba(255,255,255,0.08);
+ --line-strong:rgba(255,255,255,0.14);
+ --red:#f87171;
+ --red-soft:rgba(248,113,113,0.14);
+ --amber:#fbbf24;
+ --amber-soft:rgba(251,191,36,0.14);
+ --blue:#60a5fa;
+ --blue-soft:rgba(96,165,250,0.14);
+ --purple:#a78bfa;
+ --purple-soft:rgba(167,139,250,0.14);
+ --teal:#2dd4bf;
+ --teal-soft:rgba(45,212,191,0.14);
 }
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.38;overflow-x:hidden}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:radial-gradient(circle at 50% 0%,#102119 0%,var(--bg) 52%);color:var(--ink);font:15px/1.42 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 
-header{background:linear-gradient(90deg,#09120e 0%,#10241b 100%);color:var(--ink);padding:8px 12px;position:sticky;top:0;z-index:3;display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:48px;border-bottom:1px solid var(--line)}
+header{background:rgba(7,12,10,0.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:var(--ink);padding:9px 14px;position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:50px;border-bottom:1px solid var(--line)}
 .hdr-brand{display:flex;align-items:center;gap:7px;min-width:0}
 .hdr-title{font-size:16px;font-weight:800;white-space:nowrap;line-height:1.1;letter-spacing:-0.01em;color:var(--ink)}
 .user-chip{display:flex;align-items:center;gap:6px;background:#162820;padding:4px 8px;border-radius:10px;border:1px solid #284437;flex-shrink:0}
@@ -76,20 +78,20 @@ main section.anim-from-left{animation:tabSlideFromLeft .26s cubic-bezier(0.22,1,
  to{opacity:1;transform:translateX(0)}
 }
 
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(10,19,15,0.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid #233a30;z-index:12;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -6px 24px rgba(0,0,0,0.48)}
-.tabs{display:flex;align-items:stretch;justify-content:space-around;gap:3px;max-width:780px;margin:0 auto;overflow-x:auto;scrollbar-width:none}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(7,12,10,0.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--line);z-index:12;padding:7px 8px calc(7px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,0.55)}
+.tabs{display:flex;align-items:stretch;justify-content:space-around;gap:4px;max-width:780px;margin:0 auto;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
-button{border:0;border-radius:11px;padding:10px 12px;font:inherit;cursor:pointer;transition:transform .08s ease,opacity .15s ease,background-color .15s ease}
-button:active{transform:scale(0.985)}
-.tab{flex:1 1 0;min-width:56px;background:transparent;color:var(--muted);padding:6px 4px;border-radius:12px;border:1px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative;line-height:1.1}
-.tab:hover{color:var(--ink);background:#15251e}
-.tab.active{background:var(--green-soft);color:#75efb5;border-color:#266b4b;box-shadow:0 2px 10px rgba(34,153,99,0.22)}
+button{border:0;border-radius:12px;padding:10px 13px;font:inherit;cursor:pointer;transition:transform .1s ease,opacity .15s ease,background-color .15s ease,box-shadow .15s ease}
+button:active{transform:scale(0.98)}
+.tab{flex:1 1 0;min-width:56px;background:transparent;color:var(--muted);padding:7px 4px;border-radius:14px;border:1px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative;line-height:1.1}
+.tab:hover{color:var(--ink);background:rgba(255,255,255,0.04)}
+.tab.active{background:var(--green-soft);color:#34d399;border-color:rgba(16,185,129,0.34);box-shadow:0 4px 14px rgba(16,185,129,0.18)}
 .tab-ico{font-size:18px;line-height:1.1;display:block}
 .tab-lbl{font-size:10.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:72px}
 .tab-badge{position:absolute;top:3px;right:4px;background:var(--red);color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:99px;line-height:1.2}
 .tab-badge:empty{display:none}
 
-.card{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--green);border-radius:16px;padding:14px;margin:12px 0;box-shadow:0 4px 16px rgba(0,0,0,0.28);position:relative}
+.card{background:linear-gradient(180deg,rgba(21,33,27,0.92) 0%,rgba(13,21,17,0.96) 100%);border:1px solid var(--line);border-top:2px solid var(--green);border-radius:20px;padding:16px;margin:13px 0;box-shadow:0 10px 28px rgba(0,0,0,0.36),inset 0 1px 0 rgba(255,255,255,0.04);position:relative}
 .card.accent-blue{border-top-color:var(--blue)}
 .card.accent-amber{border-top-color:var(--amber)}
 .card.accent-teal{border-top-color:var(--teal)}
@@ -128,32 +130,33 @@ button:active{transform:scale(0.985)}
 .keg-cnt-num{font-weight:900;font-size:12px;font-variant-numeric:tabular-nums}
 
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.metric{background:#101c17;border:1px solid var(--line);border-radius:13px;padding:11px 12px;position:relative;overflow:hidden}
-.metric.m-kegs{background:#0f1c29;border-color:#203a54;border-left:4px solid var(--blue)}
-.metric.m-wh{background:#0f2119;border-color:#1e4231;border-left:4px solid var(--green)}
-.metric.m-cl{background:#1a1428;border-color:#352754;border-left:4px solid var(--purple)}
-.metric.m-beer{background:#0e2121;border-color:#1c4240;border-left:4px solid var(--teal)}
+.metric{background:linear-gradient(160deg,rgba(22,35,29,0.92) 0%,rgba(12,20,16,0.96) 100%);border:1px solid var(--line);border-radius:18px;padding:13px 14px;position:relative;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,0.26);transition:transform .12s ease,border-color .15s ease}
+.metric:active{transform:scale(0.985)}
+.metric.m-kegs{background:linear-gradient(160deg,rgba(20,38,56,0.88) 0%,rgba(12,22,33,0.95) 100%);border-color:rgba(96,165,250,0.24);border-left:3px solid var(--blue)}
+.metric.m-wh{background:linear-gradient(160deg,rgba(16,42,31,0.88) 0%,rgba(11,24,18,0.95) 100%);border-color:rgba(16,185,129,0.24);border-left:3px solid var(--green)}
+.metric.m-cl{background:linear-gradient(160deg,rgba(34,25,54,0.88) 0%,rgba(19,14,31,0.95) 100%);border-color:rgba(167,139,250,0.24);border-left:3px solid var(--purple)}
+.metric.m-beer{background:linear-gradient(160deg,rgba(16,42,41,0.88) 0%,rgba(11,24,24,0.95) 100%);border-color:rgba(45,212,191,0.24);border-left:3px solid var(--teal)}
 .metric small{color:var(--muted);font-weight:600;font-size:12px}
-.metric strong{display:block;font-size:24px;margin-top:3px;color:var(--ink)}
-.metric-sub{margin-top:5px;font-size:12px;color:#b8d6c7;font-variant-numeric:tabular-nums}
+.metric strong{display:block;font-size:25px;font-weight:800;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;margin-top:4px;color:var(--ink)}
+.metric-sub{margin-top:6px;font-size:12px;color:#b8d6c7;font-variant-numeric:tabular-nums}
 .metric-sub b{font-weight:800;color:var(--ink)}
-.metric.debt-metric{background:var(--red-soft);border:1px solid #572529;border-left:4px solid var(--red)}
+.metric.debt-metric{background:linear-gradient(160deg,rgba(56,22,26,0.9) 0%,rgba(32,13,16,0.96) 100%);border:1px solid rgba(248,113,113,0.28);border-left:3px solid var(--red)}
 .metric.debt-metric strong{color:var(--red)}
 
 h2{font-size:18px;margin:2px 0 12px;color:var(--ink);letter-spacing:-0.01em}
 h3{font-size:15px;margin:14px 0 7px;color:#cfe0d7}
 label{display:block;color:var(--muted);font-size:12px;margin:10px 0 5px;font-weight:600}
-input,select,textarea{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:#0e1914;color:var(--ink);font:inherit}
+input,select,textarea{width:100%;padding:11px 13px;border:1px solid var(--line-strong);border-radius:12px;background:rgba(7,12,10,0.78);color:var(--ink);font:inherit;transition:border-color .15s ease,box-shadow .15s ease,background-color .15s ease}
 input::placeholder,textarea::placeholder{color:#667d72}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);background:#101e18;box-shadow:0 0 0 3px rgba(34,153,99,0.2)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);background:#0c1712;box-shadow:0 0 0 3px rgba(16,185,129,0.18)}
 
 .stepper-box{display:flex;align-items:stretch;gap:5px}
 .stepper-box input{flex:1 1 auto;min-width:0;text-align:center;font-weight:750;font-variant-numeric:tabular-nums;padding:9px 6px}
-.step-btn{flex:0 0 36px;padding:0;border-radius:10px;background:#182921;color:var(--ink);border:1px solid #2b4539;font-size:17px;font-weight:800;line-height:1;display:inline-flex;align-items:center;justify-content:center}
-.step-btn:hover{background:#213a2e;border-color:#3a5e4e;color:#78ebb5}
+.step-btn{flex:0 0 38px;padding:0;border-radius:11px;background:#15241d;color:var(--ink);border:1px solid var(--line-strong);font-size:17px;font-weight:800;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.step-btn:hover{background:#1d3228;border-color:rgba(16,185,129,0.4);color:#34d399}
 
-.primary{background:var(--green);color:#f3fbf7;width:100%;margin-top:13px;font-weight:700;box-shadow:0 4px 12px rgba(34,153,99,0.25);border:1px solid #2db375}
-.primary:hover{background:#27ab6f}
+.primary{background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:#ffffff;width:100%;margin-top:14px;padding:12px 15px;border-radius:14px;font-weight:700;letter-spacing:0.01em;box-shadow:0 6px 18px rgba(16,185,129,0.28);border:1px solid rgba(255,255,255,0.14)}
+.primary:hover{background:linear-gradient(135deg,#14c98d 0%,#06a372 100%)}
 .secondary{background:#182921;color:#d6e8de;font-weight:600;border:1px solid #2b4539}
 .secondary:hover{background:#1e3329}
 .wa-btn{background:#123827;color:#6ef0b2;font-weight:700;border:1px solid #22734e;display:inline-flex;align-items:center;gap:5px}
@@ -420,7 +423,7 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:14px 12px 6px
 <div class="metric m-cl" style="cursor:pointer" id="clientsKegsCard" title="Нажмите, чтобы посмотреть кеги по точкам"><small>У клиентов</small><strong id="mClients">0</strong><div class="metric-sub" id="mClientsSplit">30л: <b>0</b> · 50л: <b>0</b></div></div>
 <div class="metric m-beer" style="cursor:pointer" id="beerStockCard" title="Нажмите, чтобы посмотреть остатки по сортам"><small>Пиво на складе</small><strong id="mBeer">0 л</strong></div>
 </div>
-<div class="metric debt-metric" style="margin-top:10px;cursor:pointer" onclick="openDebtModal()">
+<div class="metric debt-metric" style="margin-top:10px;cursor:pointer" onclick="go('debts')">
 <div class="row"><div><small>Общий долг точек</small><strong id="mDebt">0 ₸</strong></div><span class="pill debt">Долги и оплата →</span></div>
 </div>
 <button type="button" id="homeOpenPlanBtn" class="home-plan-btn" onclick="go('plan')">🚚 Планировка и заявки <span id="homePlanBtnBadge"></span></button>
@@ -432,7 +435,7 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:14px 12px 6px
 <div class="card accent-blue" data-card-id="plan_main">
  <div class="row card-hdr-bar" style="flex-wrap:wrap">
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-   <button type="button" class="secondary sm-btn" onclick="go('home')">← Главная</button>
+   <button type="button" class="secondary sm-btn" onclick="goBackToHome()">← Главная</button>
    <h2 style="margin:0">🚚 Маршрутный лист</h2>
   </div>
   <div style="display:flex;gap:6px;flex-wrap:wrap">
@@ -514,7 +517,12 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:14px 12px 6px
 <!-- ДОЛГИ -->
 <section id="debts" class="hidden">
 <div class="card accent-red" data-card-id="debts_list">
-<h2>Долги торговых точек</h2>
+<div class="row card-hdr-bar" style="flex-wrap:wrap">
+ <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+  <button type="button" class="secondary sm-btn" onclick="goBackToHome()">← Главная</button>
+  <h2 style="margin:0">📒 Долги торговых точек</h2>
+ </div>
+</div>
 <div class="metric debt-metric" style="margin-bottom:12px">
 <small>Итого задолженность по всем точкам</small>
 <strong id="totalAllDebts">0 ₸</strong>
@@ -979,7 +987,8 @@ const ALL_TABS=[
  {id:'points',label:'Точки'},
  {id:'history',label:'История'},
  {id:'settings',label:'Настройки'},
- {id:'plan',label:'Планировка'}
+ {id:'plan',label:'Планировка'},
+ {id:'debts',label:'Долги'}
 ];
 
 const ALL_ACTIONS=[
@@ -993,13 +1002,13 @@ const DEFAULT_ROLES={
  owner:{
   id:'owner',
   title:'Владелец',
-  tabs:['stock','sale','home','points','history','settings','plan'],
+  tabs:['stock','sale','home','points','history','settings','plan','debts'],
   actions:['edit_ops','edit_points_plans','manage_users_roles','manage_system']
  },
  driver:{
   id:'driver',
   title:'Водитель',
-  tabs:['home','plan','sale','points','settings'],
+  tabs:['home','plan','sale','debts','points','settings'],
   actions:[]
  }
 };
@@ -1050,13 +1059,16 @@ function normalizeDb(rawObj){
  }
  if(!merged.roles.owner){
   merged.roles.owner=JSON.parse(JSON.stringify(DEFAULT_ROLES.owner));
+ }else if(Array.isArray(merged.roles.owner.tabs)&&!merged.roles.owner.tabs.includes('debts')){
+  merged.roles.owner.tabs.push('debts');
  }
  if(!merged.roles.driver){
   merged.roles.driver=JSON.parse(JSON.stringify(DEFAULT_ROLES.driver));
  }else if(!Array.isArray(merged.roles.driver.tabs)){
   merged.roles.driver.tabs=['home','plan','sale','debts','points','settings'];
- }else if(!merged.roles.driver.tabs.includes('settings')){
-  merged.roles.driver.tabs.push('settings');
+ }else{
+  if(!merged.roles.driver.tabs.includes('settings')) merged.roles.driver.tabs.push('settings');
+  if(!merged.roles.driver.tabs.includes('debts')) merged.roles.driver.tabs.push('debts');
  }
  merged.users=merged.users.map(u=>({
   username:String(u.username||'').trim(),
@@ -1673,8 +1685,14 @@ function applyAuth(user){
  updateBioUi();
  refreshDriveStatusUi();
  trySilentGoogleReconnect();
- const firstAllowed=ALL_TABS.find(t=>hasTabAccess(t.id,user));
- go(firstAllowed?firstAllowed.id:'home');
+ const startTab=hasTabAccess('stock',user)
+  ?'stock'
+  :(hasTabAccess('home',user)?'home':(ALL_TABS.find(t=>hasTabAccess(t.id,user))?.id||'home'));
+ navStack=[startTab];
+ try{
+  history.replaceState({kcNav:{kind:'page',page:startTab}},'');
+ }catch(e){}
+ go(startTab,0,true);
  checkDuePlansNotification();
 }
 
@@ -1706,8 +1724,24 @@ function getCurrentActivePage(){
  return activeBtn?activeBtn.dataset.page:'home';
 }
 
-let navStack=['home'];
+let navStack=['stock'];
 let isPoppingHistory=false;
+
+function goBackToHome(){
+ const cur=getCurrentActivePage();
+ if(cur==='home') return;
+ if(navStack.length>1&&navStack[navStack.length-1]===cur){
+  navStack.pop();
+ }
+ if(navStack[navStack.length-1]!=='home'){
+  navStack.push('home');
+ }
+ go('home',-1,true);
+ try{
+  history.replaceState({kcNav:{kind:'page',page:'home'}},'');
+ }catch(e){}
+}
+window.goBackToHome=goBackToHome;
 
 function getOpenModalIds(){
  return ['planModal','payModal','debtModal','editModal'].filter(id=>{
@@ -1809,6 +1843,13 @@ function go(page,swipeDir=0,_fromPop=false){
   }
 
   const curPage=getCurrentActivePage();
+  if(curPage==='plan'||curPage==='debts'){
+   navStack=navStack.filter(p=>p!==curPage);
+   if(!navStack.length) navStack=['home'];
+   go('home',-1,true);
+   setTimeout(()=>{isPoppingHistory=false;},60);
+   return;
+  }
   if(navStack.length>1&&navStack[navStack.length-1]===curPage){
    navStack.pop();
   }
@@ -2271,7 +2312,13 @@ $('closeDebtModal').onclick=()=>closeModalById('debtModal',true);
 
 window.jumpToDebtPayment=(pointId,ev)=>{
  if(ev) ev.stopPropagation();
- openDebtModal(pointId);
+ go('debts');
+ const sel=$('debtPayPoint');
+ if(sel&&Array.from(sel.options).some(o=>Number(o.value)===Number(pointId))){
+  sel.value=String(pointId);
+  updateDebtPointInfo();
+  setTimeout(()=>$('debtPayAmount')?.focus(),180);
+ }
 };
 
 window.handlePointRowClick=(id,ev)=>{
@@ -3023,10 +3070,15 @@ function getPointKegBalanceAfterOp(op){
  return {rem30,rem50};
 }
 
-function formatReceiptPayMethod(pm){
- if(!pm) return 'Не указан';
- if(pm==='Отсрочка'||pm==='Отсрочка') return 'Отсрочка платежа';
- return pm;
+function formatReceiptPayMethod(op){
+ const pm=op.payMethod||'';
+ const total=Number(op.totalAmount||0);
+ const paid=Number(op.paidAmount||0);
+ const rem=Number(op.debtAdded||0);
+ if(total<=0) return 'Без оплаты';
+ if(rem===0&&paid>=total) return `${pm||'Оплата'} — оплачено`;
+ if(paid>0&&rem>0) return `${pm||'Оплата'} — частичная оплата`;
+ return 'Отсрочка платежа';
 }
 
 function buildReceiptText(op){
@@ -3037,24 +3089,25 @@ function buildReceiptText(op){
  if(op.items&&op.items.length){
   lines.push(`---`);
   op.items.forEach(i=>{
-   lines.push(`${i.productName}: ${Number(i.k30||0)+Number(i.k50||0)} кег (${fmt(i.liters)} л) x ${fmt(i.price)} Т = ${money(i.subtotal)}`);
+   lines.push(`${i.productName}: ${Number(i.k30||0)+Number(i.k50||0)} кег (${fmt(i.liters)} л) x ${fmt(i.price)} ₸ = ${money(i.subtotal)}`);
    lines.push(`  30л: ${i.k30||0} шт., 50л: ${i.k50||0} шт.`);
   });
  }
- if(op.totalAmount>0){
-  lines.push(`---`);
-  lines.push(`Итого к оплате: ${money(op.totalAmount)}`);
-  lines.push(`Условия расчёта: ${formatReceiptPayMethod(op.payMethod)}`);
-  lines.push(`Оплачено: ${money(op.paidAmount)}`);
-  if(Number(op.debtAdded||0)>0){
-   lines.push(`Отсрочка платежа: ${money(op.debtAdded)}`);
-   lines.push(`Остаток к оплате: ${money(op.debtAdded)}`);
-  }
- }
  const {prevDebt,totalDebt}=getPointDebtBreakdownForOp(op);
- if(prevDebt>0||totalDebt>0){
-  if(prevDebt>0) lines.push(`Предыдущий остаток к оплате: ${money(prevDebt)}`);
-  if(totalDebt>0) lines.push(`Итого к оплате по точке: ${money(totalDebt)}`);
+ if(op.totalAmount>0||prevDebt>0||totalDebt>0){
+  lines.push(`---`);
+  if(op.totalAmount>0){
+   lines.push(`Сумма отгрузки: ${money(op.totalAmount)}`);
+   lines.push(`Форма оплаты: ${formatReceiptPayMethod(op)}`);
+   lines.push(`Оплачено по отгрузке: ${money(op.paidAmount)}`);
+   if(Number(op.debtAdded||0)>0){
+    lines.push(`Остаток по отгрузке: ${money(op.debtAdded)}`);
+   }
+  }
+  if(prevDebt>0){
+   lines.push(`Прошлый остаток: ${money(prevDebt)}`);
+  }
+  lines.push(`Итого к оплате: ${money(totalDebt)}`);
  }
  if(Number(op.ret30||0)>0||Number(op.ret50||0)>0){
   lines.push(`---`);
@@ -3078,7 +3131,7 @@ function buildReceiptPdfLines(op){
  if(op.items&&op.items.length){
   op.items.forEach(i=>{
    rows.push({left:i.productName||'',right:money(i.subtotal),bold:true,size:10});
-   rows.push({text:`${fmt(i.liters)} л x ${fmt(i.price)} Т | 30л: ${i.k30||0} шт, 50л: ${i.k50||0} шт`,bold:false,size:8.5,indent:4});
+   rows.push({text:`${fmt(i.liters)} л x ${fmt(i.price)} ₸ | 30л: ${i.k30||0} шт, 50л: ${i.k50||0} шт`,bold:false,size:8.5,indent:4});
   });
   rows.push({left:'Всего кег отгружено:',right:`${getOpKegs30(op)+getOpKegs50(op)} шт. (30л:${getOpKegs30(op)}, 50л:${getOpKegs50(op)})`,bold:true,size:9.5});
  }else{
@@ -3089,20 +3142,17 @@ function buildReceiptPdfLines(op){
  if(op.totalAmount>0||prevDebt>0||totalDebt>0){
   rows.push({rule:true});
   if(op.totalAmount>0){
-   rows.push({left:'ИТОГО К ОПЛАТЕ:',right:money(op.totalAmount),bold:true,size:12});
-   rows.push({left:'Условия расчёта:',right:formatReceiptPayMethod(op.payMethod),bold:true,size:9.5});
-   rows.push({left:'Оплачено:',right:money(op.paidAmount),bold:false,size:9.5});
+   rows.push({left:'Сумма отгрузки:',right:money(op.totalAmount),bold:true,size:10.5});
+   rows.push({left:'Форма оплаты:',right:formatReceiptPayMethod(op),bold:true,size:9.5});
+   rows.push({left:'Оплачено по отгрузке:',right:money(op.paidAmount),bold:false,size:9.5});
    if(Number(op.debtAdded||0)>0){
-    rows.push({left:'ОТСРОЧКА ПЛАТЕЖА:',right:money(op.debtAdded),bold:true,size:10});
-    rows.push({left:'ОСТАТОК К ОПЛАТЕ:',right:money(op.debtAdded),bold:true,size:10});
+    rows.push({left:'Остаток по отгрузке:',right:money(op.debtAdded),bold:true,size:9.5});
    }
   }
   if(prevDebt>0){
-   rows.push({left:'Предыдущий остаток:',right:money(prevDebt),bold:true,size:9.5});
+   rows.push({left:'Прошлый остаток:',right:money(prevDebt),bold:true,size:9.5});
   }
-  if(totalDebt>0){
-   rows.push({left:'ИТОГО К ОПЛАТЕ:',right:money(totalDebt),bold:true,size:11});
-  }
+  rows.push({left:'ИТОГО К ОПЛАТЕ:',right:money(totalDebt),bold:true,size:12});
  }
 
  rows.push({rule:true});
@@ -3319,20 +3369,16 @@ function printReceipt(op){
   :'<div class="line"><span>Отгрузка пива:</span><span>нет</span></div>';
 
  const {prevDebt,totalDebt}=getPointDebtBreakdownForOp(op);
- const debtSummaryLines=[
-  prevDebt>0?`<div class="line"><span>Предыдущий остаток:</span><span><b>${money(prevDebt)}</b></span></div>`:'',
-  totalDebt>0?`<div class="line big"><span>ИТОГО К ОПЛАТЕ:</span><span>${money(totalDebt)}</span></div>`:''
- ].filter(Boolean).join('');
-
- const payBlock=(op.totalAmount>0||debtSummaryLines)?`
+ const payBlock=(op.totalAmount>0||prevDebt>0||totalDebt>0)?`
   <div class="rule"></div>
   ${op.totalAmount>0?`
-   <div class="line big"><span>ИТОГО К ОПЛАТЕ:</span><span>${money(op.totalAmount)}</span></div>
-   <div class="line"><span>Условия расчёта:</span><span><b>${esc(formatReceiptPayMethod(op.payMethod))}</b></span></div>
-   <div class="line"><span>Оплачено:</span><span>${money(op.paidAmount)}</span></div>
-   ${op.debtAdded>0?`<div class="line"><span><b>ОТСРОЧКА ПЛАТЕЖА:</b></span><span><b>${money(op.debtAdded)}</b></span></div><div class="line"><span><b>ОСТАТОК К ОПЛАТЕ:</b></span><span><b>${money(op.debtAdded)}</b></span></div>`:''}
+   <div class="line"><span><b>Сумма отгрузки:</b></span><span><b>${money(op.totalAmount)}</b></span></div>
+   <div class="line"><span>Форма оплаты:</span><span><b>${esc(formatReceiptPayMethod(op))}</b></span></div>
+   <div class="line"><span>Оплачено по отгрузке:</span><span>${money(op.paidAmount)}</span></div>
+   ${op.debtAdded>0?`<div class="line"><span><b>Остаток по отгрузке:</b></span><span><b>${money(op.debtAdded)}</b></span></div>`:''}
   `:''}
-  ${debtSummaryLines}
+  ${prevDebt>0?`<div class="line"><span>Прошлый остаток:</span><span><b>${money(prevDebt)}</b></span></div>`:''}
+  <div class="line big"><span>ИТОГО К ОПЛАТЕ:</span><span>${money(totalDebt)}</span></div>
  `:'';
 
  const {rem30,rem50}=getPointKegBalanceAfterOp(op);
